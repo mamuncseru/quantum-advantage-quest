@@ -92,3 +92,11 @@ nav:
   - Frontier:
       - Problem-Shape Catalog: frontier/problem-shapes.md
       - Literature sweep 2026 H1: frontier/lit-sweep-2026H1.md
+  - Hunt:
+      - Protocol & candidates: hunt/README.md
+      - Verification log: hunt/00-verification-log.md
+      - Kill/keep ledger: hunt/ledger.md
+      - "A1 · Beyond Hamming": hunt/A1-beyond-hamming.md
+      - "A2 · Objective→code reductions": hunt/A2-objective-code-reductions.md
+      - "C1 · Fields and mixers": hunt/C1-fields-and-mixers.md
+      - "A∩C · HDQI boundary": hunt/AC-hdqi-boundary.md
