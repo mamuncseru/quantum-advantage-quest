@@ -1,0 +1,105 @@
+/* ---------- landing page ---------- */
+
+.qq-hero {
+  text-align: center;
+  margin: 2.2rem auto 2.6rem;
+  max-width: 46rem;
+}
+
+.qq-hero h1 {
+  font-size: 2.7rem;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 0.4rem;
+  background: linear-gradient(92deg, #6a3de8 0%, #9d6bff 55%, #e8a13d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+[data-md-color-scheme="slate"] .qq-hero h1 {
+  background: linear-gradient(92deg, #a586ff 0%, #c9b3ff 55%, #ffc46b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.qq-tag {
+  font-size: 1.06rem;
+  color: var(--md-default-fg-color--light);
+  margin-bottom: 1.2rem;
+}
+
+.qq-quote {
+  font-size: 1.18rem;
+  font-style: italic;
+  line-height: 1.55;
+  border: none;
+  color: var(--md-default-fg-color);
+  margin: 1.4rem auto;
+}
+
+.qq-quote .attrib {
+  display: block;
+  font-size: 0.78rem;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--md-default-fg-color--light);
+  margin-top: 0.5rem;
+}
+
+.qq-stats {
+  display: flex;
+  gap: 0.9rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 2.2rem 0 2.6rem;
+}
+
+.qq-stat {
+  text-align: center;
+  padding: 0.9rem 1.5rem;
+  border-radius: 0.7rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  background: var(--md-code-bg-color);
+  min-width: 8.4rem;
+}
+
+.qq-stat .num {
+  display: block;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--md-primary-fg-color);
+}
+
+[data-md-color-scheme="slate"] .qq-stat .num {
+  color: #b39ddb;
+}
+
+.qq-stat .lbl {
+  font-size: 0.68rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--md-default-fg-color--light);
+}
+
+/* ---------- content polish ---------- */
+
+figure {
+  margin: 1.4rem auto;
+}
+
+figcaption {
+  font-size: 0.78rem;
+  color: var(--md-default-fg-color--light);
+  max-width: 36rem;
+  margin: 0.5rem auto 0;
+}
+
+.md-typeset .qq-lesson {
+  border-left: 4px solid var(--md-primary-fg-color);
+  padding: 0.7rem 1rem;
+  background: var(--md-code-bg-color);
+  border-radius: 0 0.4rem 0.4rem 0;
+}
