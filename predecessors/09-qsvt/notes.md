@@ -1,69 +1,104 @@
 # Autopsy 10 — QSP / Qubitization / QSVT: the grand unification
 
+*Not one problem — a language every algorithm turns out to speak.*
+
 ## 1. The problem
 
-Not one problem — a *language*. Gilyén–Su–Low–Wiebe 2019 (arXiv 1806.01838):
-given a matrix A block-encoded in a unitary, apply an (almost) arbitrary
-bounded polynomial p(A) to its singular values, using deg(p) applications of
-the unitary and ONE extra qubit. Nearly every earlier algorithm is a choice
-of polynomial:
+Gilyén–Su–Low–Wiebe 2019 (arXiv 1806.01838): given a matrix $A$ block-encoded
+in a unitary, apply an (almost) arbitrary bounded polynomial $p(A)$ to its
+singular values, using $\deg(p)$ applications of the unitary and ONE extra
+qubit. Nearly every earlier algorithm is a choice of polynomial:
 
-| polynomial | algorithm |
+| Polynomial | Algorithm |
 |---|---|
-| sign(x) | search / amplitude amplification |
-| e^{-ixt} (poly approx) | Hamiltonian simulation |
-| 1/x (poly approx on [1/κ, 1]) | HHL / linear systems |
-| threshold/step | phase estimation, ground states |
-| e^{-βx} approximants | Gibbs states (ground C speaks this language) |
+| $\mathrm{sign}(x)$ | search / amplitude amplification |
+| approx. of $e^{-ixt}$ | Hamiltonian simulation |
+| approx. of $1/x$ on $[1/\kappa, 1]$ | HHL / linear systems |
+| threshold / step | phase estimation, ground states |
+| approx. of $e^{-\beta x}$ | Gibbs states — hunting ground C speaks QSVT |
 
 ## 2. The classical wall
 
-Inherited from whichever problem you instantiate — QSVT is a compiler, not
-an advantage claim. (The dequantization mirror exists and is instructive:
+Inherited from whichever problem you instantiate — QSVT is a **compiler, not
+an advantage claim**. Its dequantization mirror exists and is instructive:
 "quantum-inspired" classical algorithms do low-degree polynomial transforms
-on *sampled* sketches — QSVT's advantage survives only when the
-block-encoding is something classical sampling can't imitate, e.g. a sparse
-Hamiltonian's structure rather than low-rank data. Next autopsy.)
+on *sampled sketches*. QSVT's advantage survives only when the block-encoding
+is something classical sampling cannot imitate — a sparse Hamiltonian's
+structure, not low-rank data (next autopsy).
 
 ## 3. The primitive
 
-Two nested ideas, demoed exactly in `qsvt_demo.py`:
+Two nested ideas, both live in [`qsvt_demo.py`](qsvt_demo.py):
 
-1. **Qubitization:** block-encode Hermitian A (‖A‖<1) as
-   W = [[A, B], [−B, A]], B = √(I−A²). W is unitary; on each eigenvector of
-   A with λ = cos θ, W rotates a 2D invariant subspace by θ. All spectral
-   information becomes *rotation angles* — a matrix has been turned into a
-   collection of independent single-qubit problems. Then
-   (W^d)_top-left = T_d(A): **d applications of one unitary = degree-d
-   Chebyshev polynomial of the matrix.** Verified to 1e−10 in the tests.
-2. **QSP phases:** interleave W with single-qubit z-rotations
-   e^{iφ_k Z} in that 2D subspace; the achievable top-left entries sweep out
-   essentially all bounded polynomials of parity d mod 2 (quantum signal
-   processing, Low–Chuang). Choosing φ's = choosing your algorithm.
+**1 · Qubitization.** Block-encode Hermitian $A$ ($\|A\| < 1$) in the walk
+operator
+
+$$
+W = \begin{pmatrix} A & B \\ -B & A \end{pmatrix},
+\qquad B = \sqrt{I - A^2}.
+$$
+
+$W$ is unitary, and on each eigenvector of $A$ with $\lambda = \cos\theta$ it
+rotates a 2D invariant subspace by $\theta$ — the whole matrix becomes a
+stack of independent single-qubit rotations. Consequently
+
+$$
+\big(W^d\big)_{\text{top-left}} = T_d(A)
+$$
+
+— **$d$ applications of one unitary implement the degree-$d$ Chebyshev
+polynomial of the encoded matrix** (verified to $10^{-10}$ in our tests).
+
+<figure markdown="span">
+  ![Chebyshev polynomials from walk-operator powers](fig-chebyshev.svg#only-light)
+  ![Chebyshev polynomials from walk-operator powers](fig-chebyshev-dark.svg#only-dark)
+  <figcaption>What the top-left block of W^d does to each eigenvalue of A:
+  Chebyshev curves T₁…T₄. QSP phases interpolate between such polynomials —
+  choosing phases is choosing your algorithm.</figcaption>
+</figure>
+
+**2 · QSP phases.** Interleave $W$ with single-qubit rotations
+$e^{i\phi_k Z}$ in that 2D subspace; the achievable top-left entries sweep
+out essentially all bounded polynomials of parity $d \bmod 2$ (Low–Chuang
+quantum signal processing). Choosing $\phi_1,\dots,\phi_d$ *is* choosing your
+algorithm.
 
 ## 4. The hardness evidence
 
-None of its own (see §2) — but a *completeness* fact worth pinning: any
-BQP computation can be phrased as a QSVT of a sparse block-encoding, so
-"which polynomials of which block-encodings are classically feasible" is a
-complete language for the advantage question. When we evaluate a candidate
-in the hunt phase, translating it into QSVT form is a fast way to see what
-resource is actually being consumed (degree × block-encoding cost).
+None of its own (see §2) — but a completeness fact worth pinning: any BQP
+computation can be phrased as a QSVT of a sparse block-encoding, so *"which
+polynomials of which block-encodings are classically feasible"* is a complete
+language for the advantage question.
+
+!!! tip "How the Quest uses this"
+
+    When we evaluate a hunt-phase candidate, translating it into QSVT form —
+    degree × block-encoding cost — is the fastest way to see which resource
+    is actually being consumed, and which factor (encoding or degree) the
+    classical attack will target.
 
 ## 5. The lesson — YOUR TURN
 
-*(Own words. Prompts: if all algorithms are polynomials, then advantage =
-(a) a block-encoding classical algorithms can't sample-imitate, times (b) a
-polynomial degree classically unaffordable — which factor did Tang attack?
-Which factor does Hamiltonian simulation win on? Where would a DQI-style
-decoding step sit in this decomposition?)*
+!!! abstract "Write this section yourself"
+
+    If all algorithms are polynomials, advantage $=$ (a) a block-encoding
+    classical algorithms can't sample-imitate $\times$ (b) a polynomial
+    degree classically unaffordable. Which factor did Tang attack? Which does
+    Hamiltonian simulation win on? Where would a DQI-style decoding step sit?
 
 ## Exercises
 
-- [ ] Verify by hand the 2×2 rotation claim: for eigenvalue λ = cos θ of A,
-      write W's action on span{|v⟩⊗e₁, |v⟩⊗e₂-ish blocks} and get the
-      rotation matrix. (This is the entire theorem; 10 lines.)
-- [ ] Grover from QSVT: which A, which polynomial, and where does the √N
-      come from as a *degree*? One paragraph.
-- [ ] Run the demo. Then modify it (locally, throwaway) to check d = 20 —
-      where does numerical error creep in, and why?
+!!! example "Run it"
+
+    ```bash
+    .venv/bin/python predecessors/09-qsvt/qsvt_demo.py
+    .venv/bin/pytest predecessors/09-qsvt -q
+    ```
+
+- [ ] Verify the 2×2 rotation claim by hand: for eigenvalue
+      $\lambda = \cos\theta$, write $W$'s action on the invariant plane and
+      obtain the rotation matrix. This IS the theorem; ten lines.
+- [ ] Grover from QSVT: which $A$, which polynomial, and where does
+      $\sqrt N$ appear as a *degree*? One paragraph.
+- [ ] Modify the demo (throwaway) to $d = 20$: where does numerical error
+      creep in, and why?
