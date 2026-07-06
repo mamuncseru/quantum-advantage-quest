@@ -10,6 +10,9 @@ silence. Format: date · candidate · decision · one-line reason · link.
 | 2026-07-06 | C1 | **opened** | Bakshi–Tan verified; 3 knobs pre-registered, numerics-first plan ([brief](C1-fields-and-mixers.md)) |
 | 2026-07-06 | A∩C | **watch** | HDQI verified at abstract level; entering requires a sharper question + proof-level pass ([brief](AC-hdqi-boundary.md)) |
 
+| 2026-07-06 (2) | A2 | **keep, advanced** | Novelty check passed (no collision, 3 independent methods); transplant derived; reduces to Q(A2.1) sparse-rational decoding + Q(A2.2) modulus design; constant-ℓ list decoder implemented and its tests corrected the theory twice ([note](notes/A2-crt-opi-derivation.md)) |
+| 2026-07-06 (2) | A1 | **keep, sharpened** | 2606.04843 pp. 1–6 read: obstruction is objective-type, not metric; H2′ = Lee-metric counting objectives; A1 and A2 now share the "coordinate-decomposable non-Hamming DQI" spine |
+
 ## Review cadence
 
 Weekly during active hunting. A candidate with no progress against its first
