@@ -1,106 +1,143 @@
 # Solution sketches & self-attack checklists
 
-Since the AI won't always be available to attack your drafts, this file is
-the substitute protocol: **draft first, on paper, completely — only then
-read the sketch, and grade your draft against the "common holes" list.**
-A draft you check before finishing teaches you nothing.
+!!! warning "Protocol"
+
+    This file substitutes for a live adversary: **draft first, on paper,
+    completely — only then read the sketch**, and grade your draft against
+    the "common holes" list. A draft you check before finishing teaches you
+    nothing.
 
 ---
 
 ## Proof draft #0 — BV classical lower bounds
 
-**(a) Deterministic, ≥ n queries.** Adversary argument. Maintain the set S of
-secrets consistent with answers so far (initially 2ⁿ). A query x with answer
-bit b keeps {s : s·x = b}; the adversary answers to keep the larger half, so
-|S| shrinks by at most 2× per query. After q < n queries |S| ≥ 2^(n−q) ≥ 2,
-two consistent secrets remain, and the algorithm errs on one of them. ∎
+**(a) Deterministic, $\ge n$ queries.** Adversary argument. Maintain the set
+$S$ of secrets consistent with the answers so far (initially $|S| = 2^n$). A
+query $x$ answered with bit $b$ keeps $\{s : s\cdot x = b\}$; the adversary
+answers to keep the larger half, so $|S|$ shrinks by at most $2\times$ per
+query. After $q < n$ queries $|S| \ge 2^{\,n-q} \ge 2$: two consistent
+secrets remain, and the algorithm errs on one of them. $\blacksquare$
 
-**(b) Randomized, Ω(n).** Yao: fix the uniform distribution over s; it
-suffices to bound deterministic algorithms' average success. After q queries
-x₁..x_q, the posterior on s is uniform on an affine subspace of dimension
-≥ n − q; the algorithm's output is correct with probability ≤ 2^(q−n).
-Success ≥ 2/3 forces q ≥ n − log₂(3/2). ∎ (Sharper than Ω(n): n − O(1).)
+**(b) Randomized, $\Omega(n)$.** Yao's principle: fix the uniform
+distribution over $s$ and bound deterministic algorithms' average success.
+After $q$ queries the posterior on $s$ is uniform on an affine subspace of
+dimension $\ge n - q$, so the output is correct with probability
+$\le 2^{\,q-n}$. Success $\ge 2/3$ forces $q \ge n - \log_2(3/2)$.
+$\blacksquare$ *(sharper than $\Omega(n)$: it's $n - O(1)$.)*
 
-*Common holes:* (i) treating "1 bit per query" as a proof rather than
-deriving the subspace structure; (ii) forgetting the adversary must answer
-*consistently* with some s; (iii) in (b), bounding only worst-case error
-instead of distributional error (Yao needs the latter).
+??? failure "Common holes"
 
-## Proof draft #1 — Simon classical lower bound Ω(2^(n/2))
+    1. Treating "1 bit per query" as a proof rather than deriving the
+       subspace structure.
+    2. Forgetting the adversary must answer *consistently* with some $s$.
+    3. In (b), bounding worst-case error instead of distributional error —
+       Yao needs the latter.
 
-Sketch (randomized, via Yao against uniform s ≠ 0): condition on the event
-that no collision f(xᵢ) = f(xⱼ) has been seen among q queries. Distinct
-queries with no collision are consistent with every s ∉ {xᵢ ⊕ xⱼ}, a set of
-size ≥ 2ⁿ − 1 − C(q,2); the answers are exchangeable across those s, so the
-posterior is near-uniform and P(output = s) ≤ (C(q,2) + 1)/(2ⁿ − 1 − C(q,2))
-+ P(collision). P(collision) ≤ C(q,2)/(2ⁿ − 1) since for fixed (xᵢ, xⱼ) the
-event s = xᵢ⊕xⱼ has probability ≤ 1/(2ⁿ−1). Success ≥ 2/3 needs
-C(q,2) = Ω(2ⁿ), i.e. q = Ω(2^(n/2)). ∎
+## Proof draft #1 — Simon classical lower bound $\Omega(2^{n/2})$
 
-*Common holes:* (i) proving only the birthday bound for a *specific*
-strategy (uniform querying) instead of all strategies; (ii) not handling
-adaptive queries — fix by conditioning on the transcript; (iii) ignoring
-that a no-collision transcript still leaks the *negative* information
-s ∉ {xᵢ⊕xⱼ} (bound its size, as above, don't wave at it).
+Sketch (randomized, Yao against uniform $s \ne 0$): condition on seeing no
+collision among $q$ (adaptive) queries. A no-collision transcript is
+consistent with every $s \notin \{x_i \oplus x_j\}$ — at least
+$2^n - 1 - \binom{q}{2}$ secrets — and the answers are exchangeable across
+them, so
+
+$$
+P(\text{output} = s) \;\le\;
+\frac{\binom{q}{2} + 1}{\,2^n - 1 - \binom{q}{2}\,} \; + \; P(\text{collision}),
+\qquad
+P(\text{collision}) \le \frac{\binom{q}{2}}{2^n - 1}.
+$$
+
+Success $\ge 2/3$ needs $\binom{q}{2} = \Omega(2^n)$, i.e.
+$q = \Omega(2^{n/2})$. $\blacksquare$
+
+??? failure "Common holes"
+
+    1. Proving the birthday bound only for *uniform* querying instead of all
+       strategies.
+    2. Not handling adaptive queries — fix by conditioning on the transcript.
+    3. Hand-waving away the *negative* information a no-collision transcript
+       leaks ($s \notin \{x_i \oplus x_j\}$) — bound its size, as above.
 
 ## Proof draft #2 — Miller reduction (factoring → order finding)
 
-Given odd composite N (not a prime power), random a coprime to N with order
-r: if r is even and x = a^(r/2) ≢ −1 (mod N), then x² ≡ 1, x ≢ ±1, so
-N | (x−1)(x+1) while dividing neither factor; gcd(x±1, N) are nontrivial.
-The counting step (the real content — don't skip it): by CRT over the prime
-power factors of N, for random a the order's 2-adic valuation is "spread,"
-and P(r even ∧ a^(r/2) ≢ −1) ≥ 1/2. Draft the CRT argument in full; check
-against Nielsen–Chuang Thm A4.13.
+Given odd composite $N$ (not a prime power) and random $a$ coprime to $N$
+with order $r$: if $r$ is even and $x = a^{r/2} \not\equiv -1 \pmod N$, then
+$x^2 \equiv 1$, $x \not\equiv \pm 1$, so $N \mid (x-1)(x+1)$ while dividing
+neither factor; $\gcd(x \pm 1, N)$ are nontrivial. **The counting step is the
+real content** — don't skip it: by CRT over the prime-power factors of $N$,
+the 2-adic valuations of the per-factor orders are independent enough that
 
-*Common holes:* forgetting "prime power" and "even N" exclusions (both have
-classical poly algorithms — the reduction needs them excluded); asserting
-the ≥ 1/2 probability without the CRT/valuation argument.
+$$
+P\big(r \text{ even} \;\wedge\; a^{r/2} \not\equiv -1\big) \;\ge\; \tfrac12 .
+$$
 
-## Proof draft #3 — BBBV Ω(√N)
+Draft the CRT argument in full; check against Nielsen–Chuang Thm A4.13.
 
-Hybrid argument. Run algorithm A for T queries on the empty oracle; let
-q_x = Σ_t |α_{x,t}|² be the total query mass on item x (Σ_x q_x = T... with
-unit mass per step, Σ_x Σ_t |α_{x,t}|² = T). There exists x with
-Σ_t |α_{x,t}| ≤ Σ over light items: pick x minimizing query mass, q_x ≤ T/N.
-Switching the oracle to mark x changes the final state by at most
-2 Σ_t |α_{x,t}| ≤ 2√(T · q_x) ≤ 2T/√N (Cauchy–Schwarz). Distinguishing
-marked from empty needs constant trace distance ⇒ T = Ω(√N). ∎
+??? failure "Common holes"
 
-*Common holes:* the Cauchy–Schwarz step (Σ|α_t| vs √(T Σ|α_t|²)) done
-backwards; forgetting the perturbation must be tracked through subsequent
-unitaries (it's fine — unitaries preserve the error norm; say so).
+    Forgetting the "odd" and "not a prime power" exclusions (both have
+    classical poly algorithms — the reduction needs them excluded); asserting
+    the $\ge 1/2$ probability without the valuation argument.
+
+## Proof draft #3 — BBBV $\Omega(\sqrt N)$
+
+Hybrid argument. Run algorithm $\mathcal{A}$ for $T$ steps on the empty
+oracle; let $q_x = \sum_t |\alpha_{x,t}|^2$ be the total query mass on item
+$x$, so $\sum_x q_x = T$. Some $x^\*$ has $q_{x^\*} \le T/N$. Switching the
+oracle to mark $x^\*$ perturbs the final state by at most
+
+$$
+2 \sum_t |\alpha_{x^\*,t}|
+\;\le\; 2\sqrt{T \cdot q_{x^\*}}
+\;\le\; \frac{2T}{\sqrt N}
+\qquad \text{(Cauchy–Schwarz)},
+$$
+
+and unitarity preserves the accumulated error norm through subsequent steps.
+Distinguishing marked from empty needs constant trace distance
+$\Rightarrow T = \Omega(\sqrt N)$. $\blacksquare$
+
+??? failure "Common holes"
+
+    The Cauchy–Schwarz step done backwards
+    ($\sum_t |\alpha_t|$ vs $\sqrt{T \sum_t |\alpha_t|^2}$); forgetting to
+    argue the perturbation survives subsequent unitaries (it does — say why).
 
 ## Trotter first-order bound
 
-‖e^{-i(A+B)δ} − e^{-iAδ}e^{-iBδ}‖ ≤ ‖[A,B]‖δ²/2 + O(δ³) by Taylor expansion;
-telescoping over n steps (unitarity ⇒ errors add): total ≤ n·(t/n)²‖[A,B]‖/2
-= t²‖[A,B]‖/2n. Strang symmetrization cancels the δ² commutator term,
-leaving δ³ (nested commutators) ⇒ t³/n². Your slopes: −1.0, −2.0 measured.
+$\big\| e^{-i(A+B)\delta} - e^{-iA\delta} e^{-iB\delta} \big\|
+\le \tfrac12 \|[A,B]\|\,\delta^2 + O(\delta^3)$ by Taylor expansion;
+unitarity makes errors add across the $n$ slices (telescoping), so the total
+is $\le \tfrac{t^2 \|[A,B]\|}{2n}$. Strang symmetrization cancels the
+$\delta^2$ commutator term, leaving nested commutators at $\delta^3$
+$\Rightarrow t^3/n^2$. Measured slopes in `predecessors/08`: $-1.0$, $-2.0$.
 
 ## Session-1 code exercise — reference BV implementation
 
-Only read after yours is green:
+??? example "Only open after your version is green"
 
-```python
-def bernstein_vazirani(oracle, n):
-    psi = zero_state(n)
-    for q in range(n):
-        psi = apply(psi, H, [q])
-    psi = apply(psi, oracle, list(range(n)))
-    for q in range(n):
-        psi = apply(psi, H, [q])
-    return sample(psi, shots=1)[0]   # all amplitude sits on |s>
-```
+    ```python
+    def bernstein_vazirani(oracle, n):
+        psi = zero_state(n)
+        for q in range(n):
+            psi = apply(psi, H, [q])
+        psi = apply(psi, oracle, list(range(n)))
+        for q in range(n):
+            psi = apply(psi, H, [q])
+        return sample(psi, shots=1)[0]   # all amplitude sits on |s⟩
+    ```
 
-## The standing self-attack checklist (apply to EVERY proof you write)
+## The standing self-attack checklist
 
-1. Where exactly is each hypothesis used? (Unused hypothesis = wrong proof
-   or wrong theorem.)
+Apply to EVERY proof you write — curriculum and hunt phase alike:
+
+1. Where exactly is each hypothesis used? (An unused hypothesis means a wrong
+   proof or a wrong theorem.)
 2. Does the argument survive an adversarial instance? Construct one.
-3. Randomized baselines: did you prove the bound against distributions or
+3. Randomized baselines: did you prove the bound against distributions, or
    only against deterministic strategies?
 4. Adaptivity: does your argument secretly assume non-adaptive queries?
 5. Constants and logs: does the claimed separation survive them?
-6. Access models: are the quantum and classical sides given symmetric power?
-   (The Tang question — ask it of your own claims first.)
+6. **Access models: are the quantum and classical sides given symmetric
+   power?** (The Tang question — ask it of your own claims first.)
