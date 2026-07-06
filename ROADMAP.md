@@ -26,6 +26,13 @@ advantage before proving it.
 
 **Gate:** 2–3 candidate results that survived our own classical attacks.
 
+> **2026-07-06 — Phase 2 opened early**, overlapping Phase 1 study, to
+> front-load AI-assisted groundwork before access constraints. What exists so
+> far: primary-source verification of all six load-bearing frontier papers
+> (two sweep-framing corrections found), four pre-registered candidates with
+> kill criteria, and the advantage-window tool validated against the DQI
+> paper's own numbers. See `hunt/README.md`.
+
 ## Phase 3 — STRIKE (weeks 14–20): The main proof
 
 All effort on the best candidate. Rigorous proof attempt AND classical-attack
