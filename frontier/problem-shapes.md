@@ -1,0 +1,71 @@
+# The Problem-Shape Catalog
+
+The distillation of the Predecessors curriculum: which shapes of problem
+structure map to which quantum mechanisms, what kills each, and what stands.
+**This is the hunting weapon.** Drafted by the AI 2026-07-06; your job is to
+argue with it, annotate it, and rewrite entries in your own words as you
+finish each autopsy — a catalog you haven't fought with is someone else's.
+
+## Shapes that work
+
+| # | Problem shape | Mechanism | Exemplar | Separation | What kills / caps it |
+|---|---|---|---|---|---|
+| 1 | Global/aggregate property of f under a promise | Interference computes a Fourier coefficient | Deutsch–Jozsa | exp. vs *exact deterministic only* | randomized classical baseline (O(1)) |
+| 2 | Answer = location of Fourier mass (hidden linear structure) | Fourier sampling over Z₂ⁿ | Bernstein–Vazirani | n vs 1, robust | information bound caps at factor n |
+| 3 | Hidden coset/period structure, each query near-worthless classically | Fourier sampling + classical algebra | Simon | exponential + robust (oracle) | needs instantiation to matter |
+| 4 | Shape 3 with an **efficiently computable f over an abelian group** | QFT + phase estimation + continued fractions | **Shor** | superpoly, Tier-2 hardness (50 yr of number theory) | none known in 30 years |
+| 5 | Unstructured search / mean estimation | Amplitude amplification/estimation | Grover, AE | quadratic, provably optimal (BBBV) | overhead eats it on hardware; never compounds |
+| 6 | Graph traversal where classical drift fails but spectral dispersion sails | Quantum walk (ballistic vs diffusive) | Glued trees | exponential (oracle, non-Fourier!) | no instantiation found in 20 yr |
+| 7 | Reversible Markov chain with gap δ | Szegedy quantization: δ → √δ | MNRS search | quadratic | same as 5 |
+| 8 | Dynamics of a quantum system (quantum-native input) | Trotter / LCU / qubitization | Ham. simulation | BQP-complete (worst case) | instance-wise classical methods (TN, QMC, Pauli paths) |
+| 9 | Polynomial transform of a block-encoded matrix | QSVT | (compiler for 4,5,8,11) | = degree × encoding advantage | dequantized iff encoding ≈ sampleable data |
+| 10 | Objective whose Fourier spectrum lives on a **decodable code** | DQI: optimization → syndrome decoding | OPI (standing, 2026) | superpoly vs best known (Prange) | classical decoders catching up; killed on sparse/random codes |
+| 11 | Gibbs state of non-commuting local H, intermediate β | Lindbladian samplers (Davies → CKG) | Rajakumar–Watson hardness; Bakshi–Tan template | conditional (PH-style assumptions) | expanding "provably easy" atlas; no gap theorems yet |
+| 12 | Learning/estimation with quantum memory across copies | entangled measurements | shadow tomography separations, Huang–Chen–Preskill | exponential *sample* complexity, provable | needs quantum data access — which is also its shield |
+
+## Anti-shapes (the graveyard — do not enter)
+
+- **No structure at all** → quadratic ceiling, theorem (BBBV, Aaronson–Ambainis).
+- **Nonabelian hidden structure** (Sₙ, dihedral) → representation theory
+  smears frequency across matrix blocks; 30 years, no exit. (But the
+  graveyard IS a hardness assumption viewed from the other side — lattice
+  crypto rests on it. Usable.)
+- **Low-rank classical data behind a state-preparation assumption** →
+  Tang's mirror: grant the baseline ℓ²-sampling access and the advantage
+  evaporates. *Access-model symmetry is a law of nature for us.*
+- **Random/sparse instances of code problems** → 2026's lesson: OGP/AMP +
+  enhanced Prange reclaim everything unstructured; only algebraic structure
+  (RS, AG, rank-metric codes) has survived contact with classical algorithms.
+- **Obfuscation as hardness** ("we couldn't simulate it") → peaked circuits
+  died in one GPU-hour (Apr 2026). Hardness needs a mechanism, not a shrug.
+
+## The meta-patterns (argue with these)
+
+1. **Named algorithm = old primitive + new problem + instantiable oracle.**
+   (Shor: Simon's primitive + Miller's reduction + a^x mod N. DQI: Fourier
+   sampling + a 60-year-old decoding toolbox + OPI.)
+2. **Advantage survives where the input is quantum-native or the structure
+   is algebraic**; it dies where the input is classical data (access models)
+   or the instance is random (statistical-physics obstructions).
+3. **The quantum side buys one global transform per query** (Fourier
+   coefficient, spectral sample, syndrome); classical simulation pays per
+   *value*. Every real separation in this table cashes exactly that check.
+4. **The classical toolbox is a quantum resource**: decoders (DQI), lattice
+   reduction?, list decoding?, belief propagation? — "which other classical
+   algorithms can be run coherently on superpositions to quantum profit"
+   is an underexplored generator of candidates. (This is meta-pattern 1
+   read as a search directive.)
+
+## The hunt-phase search directives (grounds A & C, from the 2026 sweep)
+
+- A1: transplant DQI to a new structured metric/scheme (Gabidulin/rank
+  metric done once, June 2026, classically un-stress-tested — run the
+  enhanced-Prange playbook against it; publishable either way).
+- A2: new objective→code reductions (which optimization problems have
+  constraint-Fourier spectra landing on decodable algebraic codes?).
+- C1: second instance of "break the dequantizer, keep the mixer"
+  (Bakshi–Tan recipe; candidate knobs: quasi-periodic fields, weak
+  non-commuting perturbations of hard commuting models).
+- C2: mixing-time separation for a specific family (even conditional).
+- A∩C: the HDQI boundary — which code Hamiltonians are decodable-hence-
+  quantum-preparable but resist classical cluster dynamics. Least crowded.
