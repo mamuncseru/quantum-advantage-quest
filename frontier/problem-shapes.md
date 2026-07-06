@@ -11,7 +11,7 @@ finish each autopsy — a catalog you haven't fought with is someone else's.
 | # | Problem shape | Mechanism | Exemplar | Separation | What kills / caps it |
 |---|---|---|---|---|---|
 | 1 | Global/aggregate property of f under a promise | Interference computes a Fourier coefficient | Deutsch–Jozsa | exp. vs *exact deterministic only* | randomized classical baseline (O(1)) |
-| 2 | Answer = location of Fourier mass (hidden linear structure) | Fourier sampling over Z₂ⁿ | Bernstein–Vazirani | n vs 1, robust | information bound caps at factor n |
+| 2 | Answer = location of Fourier mass (hidden linear structure) | Fourier sampling over $\mathbb{Z}_2^n$ | Bernstein–Vazirani | n vs 1, robust | information bound caps at factor n |
 | 3 | Hidden coset/period structure, each query near-worthless classically | Fourier sampling + classical algebra | Simon | exponential + robust (oracle) | needs instantiation to matter |
 | 4 | Shape 3 with an **efficiently computable f over an abelian group** | QFT + phase estimation + continued fractions | **Shor** | superpoly, Tier-2 hardness (50 yr of number theory) | none known in 30 years |
 | 5 | Unstructured search / mean estimation | Amplitude amplification/estimation | Grover, AE | quadratic, provably optimal (BBBV) | overhead eats it on hardware; never compounds |
