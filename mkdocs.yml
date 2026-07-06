@@ -1,0 +1,70 @@
+site_name: Quantum Advantage Quest
+site_description: A problem-first expedition toward genuine quantum advantage — curriculum, tested code, and an open lab notebook.
+site_url: https://mamuncseru.github.io/quantum-advantage-quest/
+repo_url: https://github.com/mamuncseru/quantum-advantage-quest
+repo_name: mamuncseru/quantum-advantage-quest
+edit_uri: ""
+
+# docs/ is a directory of symlinks into the repo root — single source of truth
+exclude_docs: |
+  __pycache__/
+  *.pyc
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+
+nav:
+  - Home: index.md
+  - Roadmap: ROADMAP.md
+  - Curriculum:
+      - The Predecessors program: curriculum/00-curriculum.md
+      - Self-study guide: curriculum/self-study-guide.md
+      - Solutions & self-attack: curriculum/solutions.md
+  - Autopsies:
+      - "01 · Deutsch–Jozsa": predecessors/01-deutsch-jozsa/notes.md
+      - "02 · Bernstein–Vazirani": predecessors/02-bernstein-vazirani/notes.md
+      - "03 · Simon": predecessors/03-simon/notes.md
+      - "04 · Shor": predecessors/04-shor/notes.md
+      - "05 · The HSP graveyard": predecessors/05-hsp-graveyard/notes.md
+      - "06 · Grover & the BBBV ceiling": predecessors/06-grover/notes.md
+      - "07–08 · Quantum walks": predecessors/07-quantum-walks/notes.md
+      - "09 · Hamiltonian simulation": predecessors/08-hamiltonian-simulation/notes.md
+      - "10 · QSP / QSVT": predecessors/09-qsvt/notes.md
+      - "11 · HHL & Tang": predecessors/10-hhl-tang/notes.md
+      - "12 · Decoded Quantum Interferometry": predecessors/11-dqi/notes.md
+      - "13 · Quantum Gibbs sampling": predecessors/12-gibbs-lindblad/notes.md
+  - Frontier:
+      - Problem-Shape Catalog: frontier/problem-shapes.md
+      - Literature sweep 2026 H1: frontier/lit-sweep-2026H1.md
