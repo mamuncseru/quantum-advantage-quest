@@ -2,6 +2,30 @@
 
 **Pre-registered 2026-07-06.**
 
+!!! success "Status update, same day — kill criterion 3 cleared"
+
+    Novelty check complete ([full report](notes/A2-novelty-check.md)): **no
+    collision** across all ~27 DQI papers, the citation graph of 2408.08292,
+    and a grep of the DQI v5 LaTeX source (zero occurrences of "Chinese").
+    The name "optimal residue intersection" is unclaimed. Nearest occupied
+    point: Regev-reduction for DLOG in finite abelian groups (2605.03972) —
+    still RS codes over fields. The technical map is in
+    [the derivation note](notes/A2-crt-opi-derivation.md): the transplant
+    reduces to Q(A2.1) (closest CRT-sparse integer = sparse rational
+    approximation, the Fourier dual of GRS decoding) and Q(A2.2) (max-min
+    Diophantine modulus design — the CRT-dual of MDS code design).
+
+    Two pressure points the check surfaced, now part of the brief:
+    **(i)** Kothari–O'Donnell–Wu (2510.07515) *dequantized* CLZ's SIS∞
+    speedup — the one prior "over ℤ without field structure" claim in this
+    family fell classically; our window step lives in that neighborhood and
+    must be treated accordingly. **(ii)** Useful ingredient: GSS 2000
+    already built the CRT analogue of the Koetter–Vardy soft decoder —
+    exactly the object a soft-decoded CRT-DQI would consume. Also pinned:
+    large-list list-recovery of CRT codes (our regime, $|F_i| \approx
+    p_i/2$) has **no classical literature at all** — the exact mirror of
+    OPI's believed hardness.
+
 ## The question
 
 DQI converts any max-LinSAT objective into syndrome decoding of
