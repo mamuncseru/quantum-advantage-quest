@@ -17,16 +17,19 @@ where, without fields, everything is provably classically easy. The seam:
 > into the intermediate-$\beta$ regime where no easiness results wait to
 > squeeze it?**
 
-Candidate knobs, in priority order:
+Candidate knobs — **re-prioritized 2026-07-06 by the first atlas**
+([results note](notes/C1-atlas-results.md)): the Davies gap stayed open at
+all 72 points probed, and *disordered* fields preserve Gibbs entanglement at
+strong field where uniform fields re-productize the state (log-negativity at
+h = 8, β = 2: random 0.45, quasiperiodic 0.05, uniform 0.00). Target regime
+relocated to intermediate β with inhomogeneous moderate-to-strong fields.
 
-1. **Quasi-periodic fields** (Aubry–André-type) — breaks translation
-   invariance in a structured way; classical cluster expansions and
-   transfer-matrix methods degrade differently than under random fields.
-2. **Weak non-commuting perturbation of a classically hard commuting model**
-   — start where classical hardness is known (commuting case) and ask how
-   much non-commutativity the quantum mixer tolerates before its gap closes.
-3. **Field gradients / boundary-driven profiles** — hardness from
-   inhomogeneity rather than strength.
+1. **Random on-site fields** (promoted by the data) — strongest
+   entanglement protection; disorder-averaging and larger n next.
+2. **Quasi-periodic fields** (Aubry–André-type) — intermediate protection;
+   structured enough for transfer-matrix analysis on the classical side.
+3. **Weak non-commuting perturbation of a classically hard commuting model**
+   — unchanged: start where hardness is known, ask what the mixer tolerates.
 
 ## What we can compute (and nobody has published)
 
