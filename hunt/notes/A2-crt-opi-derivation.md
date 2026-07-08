@@ -301,6 +301,17 @@ the naive lattice route is blocked.
     push the list through DQI's uncomputation as a superposition (changes
     the amplitude analysis — may be fatal, may be fine).
 
+!!! danger "2026-07-08 — escape route (i) narrowed after the Lee kill"
+
+    We tried to route (i) through a Lee-metric scheme (size-noise ≈ Lee
+    weight, decode in the Lee scheme). That is **dead**: the Lee metric is not
+    an association scheme for $q\ge5$ ([kill](AC-lee-metric-KILLED.md)), so
+    there is no scheme-based decoder to borrow. What remains of (i) is purely
+    algebraic — a rational-function-reconstruction analogue of Berlekamp–
+    Massey on $\mathbb{Z}/M$ with no metric detour; existence open. **Route
+    (ii), list-decoding through DQI's uncomputation, is now the most likely
+    surviving path** and the next thing to attempt directly.
+
 ## 9. Next actions
 
 1. Await novelty-check agent (kill criterion 3).
