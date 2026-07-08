@@ -19,7 +19,7 @@ finish each autopsy — a catalog you haven't fought with is someone else's.
 | 7 | Reversible Markov chain with gap δ | Szegedy quantization: δ → √δ | MNRS search | quadratic | same as 5 |
 | 8 | Dynamics of a quantum system (quantum-native input) | Trotter / LCU / qubitization | Ham. simulation | BQP-complete (worst case) | instance-wise classical methods (TN, QMC, Pauli paths) |
 | 9 | Polynomial transform of a block-encoded matrix | QSVT | (compiler for 4,5,8,11) | = degree × encoding advantage | dequantized iff encoding ≈ sampleable data |
-| 10 | Objective whose Fourier spectrum lives on a **decodable code** | DQI: optimization → syndrome decoding | OPI (standing, 2026) | superpoly vs best known (Prange) | classical decoders catching up; killed on sparse/random codes |
+| 10 | Objective whose Fourier spectrum lives on a **decodable code** | DQI: optimization → syndrome decoding | OPI (standing, 2026) | superpoly vs best known (Prange) | classical decoders catching up; killed on sparse/random codes; **needs a P-polynomial translation scheme — rare (see hunt finding below)** |
 | 11 | Gibbs state of non-commuting local H, intermediate β | Lindbladian samplers (Davies → CKG) | Rajakumar–Watson hardness; Bakshi–Tan template | conditional (PH-style assumptions) | expanding "provably easy" atlas; no gap theorems yet |
 | 12 | Learning/estimation with quantum memory across copies | entangled measurements | shadow tomography separations, Huang–Chen–Preskill | exponential *sample* complexity, provable | needs quantum data access — which is also its shield |
 
@@ -69,3 +69,20 @@ finish each autopsy — a catalog you haven't fought with is someone else's.
 - C2: mixing-time separation for a specific family (even conditional).
 - A∩C: the HDQI boundary — which code Hamiltonians are decodable-hence-
   quantum-preparable but resist classical cluster dynamics. Least crowded.
+
+## Hunt findings that sharpen this catalog (dated)
+
+- **2026-07-07 — the DQI decoder must beat lattice geometry, not just exist.**
+  Sparse recovery under *archimedean* (size) noise does not reduce to LLL:
+  the modular kernel supplies short ℓ²-vectors that are ℓ⁰-dense
+  non-solutions. RS escapes via Berlekamp–Massey (algebra), not lattices.
+  ⇒ shape #10 needs an *algebraic* decoder; "it's a lattice problem" is not
+  enough. (hunt/notes/A2-crt-opi-derivation.md §8)
+- **2026-07-08 — DQI-beyond-Hamming is gated on a P-POLYNOMIAL TRANSLATION
+  SCHEME, and these are rare.** Hamming ✅, rank ✅ (bilinear forms), Lee ❌
+  for q≥5 (not even an association scheme — computed). The scheme axiom, not
+  the decoder, is the *first* gate; the eigenvalues $2\cos(2\pi t/q)$ must
+  form an arithmetic progression, true only for q≤4. ⇒ the "new metric ⇒ new
+  advantage" program is far narrower than it looks; the live question is the
+  classification of distance-regular Cayley graphs carrying hard objectives.
+  (hunt/notes/AC-lee-metric-KILLED.md)
