@@ -57,6 +57,38 @@ temperature: exactly the seam where neither the easiness atlas nor the
 existing hardness results reach. That is C1's target region, now with
 coordinates.
 
+## Update 2026-07-07 — scaling to n = 8, and a correction
+
+Second numerical run ([`code/negativity_scaling.py`](../code/negativity_scaling.py),
+[`negscale-results.csv`](../negscale-results.csv)), at the structure-rich
+point β = 2, h = 1.5, half-chain cut, random profile disorder-averaged over
+12 seeds:
+
+<figure markdown="span">
+  ![Entanglement vs system size](../fig-negscale.svg#only-light)
+  ![Entanglement vs system size](../fig-negscale-dark.svg#only-dark)
+</figure>
+
+**Finding 4 — the entanglement is size-robust.** Log-negativity across the
+half-chain cut does **not** decay from n = 3 to n = 8 for any profile — it is
+flat-to-rising (uniform reaches 1.04 at n = 8). So the field-induced
+entanglement of Finding 2 is a genuine bulk feature, not a small-system
+artifact. This is the load-bearing positive result: the "keep structure"
+half of the mechanism survives scaling, at least to n = 8.
+
+!!! warning "Correction to Finding 2's ordering"
+
+    The disorder ordering (random > quasiperiodic > uniform) was measured at
+    **strong** field (h = 8), where uniform fields re-productize. At the
+    **moderate** field h = 1.5, all three profiles are comparably entangled
+    (uniform is even highest at n = 8). So "disorder protects entanglement"
+    is a **strong-field** statement, not a universal one. The genuinely
+    interesting C1 regime is therefore **strong disordered field** (large h,
+    random) — where uniform → 0 but random stays ≈ 0.4 — and the next scaling
+    run must confirm that *gap* persists in n, not just that entanglement
+    exists. The moderate-field point is entangled but offers no
+    quantum-vs-classical separation lever.
+
 ## What this changes in the C1 brief
 
 1. Knob priority *reversed*: random fields (was knob 3's cousin) now lead;
