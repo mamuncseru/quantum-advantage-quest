@@ -14,13 +14,13 @@ def test_pattern_roundtrip():
 
 
 def test_planted_recovery_constant_ell():
-    # LIST decoding at generic moduli: the planted t is always recovered,
-    # but uniqueness needs the d_min(2*ell) modulus-design condition —
-    # see derivation note section 7(ii), corrections 1-2 / Q(A2.2).
+    # UNIQUE decoding below d_min(2*ell)/2 = M/(2 P_max(2*ell)) — the exact
+    # radius from the minimum-distance theorem (note section 7).
     for seed in range(6):
         moduli, t, t_prime, delta = planted_instance(m=18, ell=2, seed=seed)
         hits = decode(t_prime, moduli, ell=2, delta=delta)
         assert t in hits
+        assert len(hits) == 1
 
 
 def test_zero_noise_is_trivial_readout():

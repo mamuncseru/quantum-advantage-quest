@@ -65,11 +65,12 @@ def planted_instance(m, ell, seed, noise_frac=0.25):
     support = sorted(rng.sample(range(m), ell))
     ks = [rng.randrange(1, moduli[i]) for i in support]
     t = crt_sparse(moduli, support, ks)
-    # Uniqueness is governed by the FINEST progression among all weight-<=ell
-    # patterns — the ell LARGEST moduli — not by the planted support.
-    # (Session finding: the naive per-support bound admits ~10^3 spurious
-    # candidates; see derivation note section 7(ii'), corrected.)
-    finest = prod(sorted(moduli)[-ell:])
+    # Uniqueness radius = d_min(2*ell)/2 with the exact minimum-distance law
+    #     d_min(w) = M / P_max(w),  P_max(w) = product of the w largest moduli
+    # (two weight-<=ell integers differ by a weight-<=2*ell integer, and by
+    # CRT the residue-1 combination always achieves M/P_S on any support S —
+    # theorem verified numerically 2026-07-07, note section 7).
+    finest = prod(sorted(moduli)[-2 * ell:])
     delta_max = M // (2 * finest) - 1
     delta = int(noise_frac * delta_max)
     noise = rng.randint(-delta, delta) if delta > 0 else 0
