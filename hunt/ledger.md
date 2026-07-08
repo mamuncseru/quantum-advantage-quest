@@ -19,6 +19,11 @@ silence. Format: date · candidate · decision · one-line reason · link.
 | 2026-07-07 | C1 | **advanced** | Scaling to n=8: field-induced entanglement is size-robust (doesn't decay); correction — disorder ordering is a strong-field effect only; target regime = strong disordered field ([note](notes/C1-atlas-results.md)) |
 | 2026-07-07 | A1∩A2 | **new: Lee-metric spine** | Both obstructions point at coordinate-decomposable non-Hamming DQI; Lee metric over $\mathbb{Z}_q$ is the shared target and A2's escape route (i); 3 pre-registered kills, cheapest first ([note](notes/AC-lee-metric-dqi.md)) |
 
+| 2026-07-08 | A1∩A2 Lee spine | **KILLED** | Computed: Lee metric on $\mathbb{Z}_q^n$ is not an association scheme for $q\ge5$ (witness $p_{11}^2\in\{1,2\}$ on $\mathbb{Z}_5^2$); no P-polynomial structure ⇒ no DQI. Mechanism: $2\cos(2\pi t/q)$ is an AP only for $q\le4$ ([kill note](notes/AC-lee-metric-KILLED.md)) |
+| 2026-07-08 | A1 | **narrowed to H1′** | H2′ (Lee circumvention) dead; only the obstruction-*theorem* target remains — an honest negative result |
+| 2026-07-08 | A2 | **escape (i) narrowed** | Lee-routed decoder dead; remaining paths = purely-algebraic $\mathbb{Z}/M$ decoder (open) or list-decoding-through-uncomputation (ii, now most likely) |
+| 2026-07-08 | A3 | **seeded** | Redirection: enumerate P-polynomial translation schemes (Doob scheme first) × (hard objective? algebraic decoder?) — the real map of DQI-beyond-Hamming ([brief](A3-p-polynomial-schemes.md)) |
+
 ## Review cadence
 
 Weekly during active hunting. A candidate with no progress against its first
