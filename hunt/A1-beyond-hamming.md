@@ -38,19 +38,17 @@ coordinate-decomposable, so no counting objective exists there — which is
 
 ## Pre-registration (hypotheses sharpened after the read)
 
-- **Two competing hypotheses, both worked simultaneously:**
-    - (H1′) Obstruction theorem: for ANY distance-minimization objective in a
-      scheme where efficient decoding radius < typical target-to-code
-      distance, no DQI additive guarantee exists. (Likely provable at
-      scheme-parameter generality; would subsume their appendix as the
-      special case.)
-    - (H2′) Circumvention by objective type: pick **coordinate-decomposable
-      non-Hamming metrics** — Lee metric over $\mathbb{Z}_q$ first, block
-      sum-rank second — where counting objectives (max-LinSAT with target
-      sets) exist and the semicircle-type guarantee is absolute. Needs:
-      P-polynomiality of the Lee scheme (classical, known), Lee-metric codes
-      with efficient decoders (exist — negacyclic/BCH-type constructions),
-      and the Jacobi analysis transplanted.
+- **H2′ is DEAD (2026-07-08).** The Lee-metric circumvention failed at its
+  first gate — Lee is not an association scheme for $q\ge5$, so the "counting
+  objective in a coordinate-decomposable metric" idea has no P-polynomial
+  home ([kill note](notes/AC-lee-metric-KILLED.md)). Sum-rank inherits the
+  same covering-radius obstruction as rank. Only H1′ remains.
+- **H1′ (now the whole candidate) — the obstruction theorem:** for ANY
+  distance-minimization objective in a P-polynomial scheme where efficient
+  decoding radius < typical target-to-code distance, no DQI additive
+  guarantee exists. This is a clean, honest **negative** theorem target
+  (not a new-advantage target): it would explain the rank-metric authors'
+  disclaimer at full generality and delimit where shape #10 can pay off.
 - **Convergence note:** A2's open problem Q(A2.1) — closest CRT-sparse
   integer under *size* noise — is itself Lee/archimedean-metric decoding.
   If H2′ produces Lee-metric DQI machinery, it feeds A2 directly. The two
