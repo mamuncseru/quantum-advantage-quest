@@ -100,3 +100,7 @@ nav:
       - "A2 · Objective→code reductions": hunt/A2-objective-code-reductions.md
       - "C1 · Fields and mixers": hunt/C1-fields-and-mixers.md
       - "A∩C · HDQI boundary": hunt/AC-hdqi-boundary.md
+      - "Note · CRT-OPI derivation": hunt/notes/A2-crt-opi-derivation.md
+      - "Note · CRT-OPI novelty check": hunt/notes/A2-novelty-check.md
+      - "Note · C1 atlas results": hunt/notes/C1-atlas-results.md
+      - "Note · Lee-metric DQI": hunt/notes/AC-lee-metric-dqi.md
