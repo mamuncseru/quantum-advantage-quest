@@ -1,10 +1,20 @@
 # A1∩A2 working note — Lee-metric DQI, the shared spine
 
-!!! warning "Epistemic status"
+!!! failure "SUPERSEDED 2026-07-08 — this direction was killed"
 
-    Framing note, AI-drafted 2026-07-07, unverified. Connects two threads
-    (A1's objective-type obstruction, A2's decoder obstruction) into one
-    target. No claim — a map of why this is the right next object.
+    The conjecture below was tested and **failed at its first gate**: the Lee
+    metric on $\mathbb{Z}_q^n$ is not even an association scheme for $q\ge5$,
+    so DQI's shell/Jacobi machinery has no foothold. See
+    **[AC-lee-metric-KILLED.md](AC-lee-metric-KILLED.md)** for the
+    computation, the concrete witness, and the redirection to candidate A3.
+    This note is kept for the reasoning trail — it shows *why* Lee looked
+    right (coordinate-decomposable, counting objective) and what we missed
+    (the scheme axiom precedes the decoder question).
+
+!!! warning "Original epistemic status (2026-07-07)"
+
+    Framing note, AI-drafted, unverified. Connects two threads (A1's
+    objective-type obstruction, A2's decoder obstruction) into one target.
 
 ## Why the two candidates converged here
 
