@@ -164,19 +164,53 @@ $$
   decoder is honestly a **list decoder** at generic moduli. DQI's
   uncomputation needs uniqueness per branch, so:
 
-!!! question "Q(A2.2) — the modulus design problem (the session's sharpest question)"
+!!! success "Q(A2.2) — RESOLVED (2026-07-07): the minimum-distance theorem"
 
-    Choose $m$ moduli maximizing $d_{\min}(2\ell)$ — i.e. keep every sparse
-    rational combination $\sum k_i/p_i$ far from all integers. This is the
-    CRT-dual analogue of designing an MDS/BCH code (maximize minimum
-    distance), phrased as a max-min Diophantine condition. RS-DQI works
-    because Vandermonde structure solves the analogous design problem for
-    free. Candidate designs to try: prime powers of a single prime,
-    primes in arithmetic progression, Sylvester-style doubly exponential
-    sets (where $\sum 1/p_i$ approximations are well understood).
+    **Theorem (elementary; verified numerically 4/4 configurations, then
+    5/5 planted-decoding seeds).** For any coprime moduli,
 
-A positive fragment survives both corrections: with designed-or-lucky
-moduli and constant $\ell$, CRT-DQI state preparation is poly-time. But…
+    $$
+    d_{\min}(w) \;=\; \frac{M}{P_{\max}(w)},
+    \qquad P_{\max}(w) = \text{product of the } w \text{ largest moduli.}
+    $$
+
+    *Lower bound:* a support-$S$ integer is a multiple of $M/P_S \ge
+    M/P_{\max}(|S|)$. *Upper bound:* the map $(k_i) \mapsto \sum_i k_i
+    (P_S/p_i) \bmod P_S$ hits **every** residue (CRT), in particular $1$ —
+    so some weight-$\le|S|$ integer equals exactly $M/P_S$. $\blacksquare$
+
+    **Consequences.** (1) Unique decoding radius is exactly
+    $M/(2P_{\max}(2\ell))$ — implemented, and planted recovery is now
+    unique, 5/5 seeds. (2) The "modulus design" freedom **evaporates**:
+    $d_{\min}$ depends only on modulus *sizes*. Every balanced modulus set
+    is automatically extremal — the number-theoretic twin of "Reed–Solomon
+    is MDS," with CRT playing Vandermonde's role. No design can beat it;
+    none is needed.
+
+!!! abstract "The open-window statement (the candidate's viability, made precise)"
+
+    With balanced moduli ($p_i \approx \bar p$), combine the three
+    constraints — window noise $\Delta \approx M/X = M^{1-\kappa}$,
+    uniqueness $\Delta < M/(2P_{\max}(2\ell))$, and the Prange-beating
+    margin — at $\mu = 1/2$:
+
+    $$
+    \underbrace{\frac{\kappa^2}{4}}_{\text{beat Prange}}
+    \;<\; \frac{\ell}{m} \;<\;
+    \underbrace{\frac{\kappa}{2}}_{\text{unique decoding}}
+    $$
+
+    **The window is nonempty for every rate $0 < \kappa < 2$** — e.g.
+    $\kappa = 0.1$: $0.0025 < \ell/m < 0.05$. Information-theoretically,
+    CRT-DQI has room to live. Everything now rides on ONE question: an
+    *efficient* decoder at sparsity $\ell = \varepsilon m$ within the
+    theorem radius (Q(A2.1) at linear sparsity), plus the Gaussian-window
+    amplitude bookkeeping. Enumeration ($O(m^\ell)$) certifies the
+    constant-$\ell$ fragment only.
+
+A positive fragment thus survives, now on solid ground: at constant
+$\ell$, CRT-DQI state preparation is poly-time with provably unique
+uncomputation. But…
 
 **(iii) The margin computation forces linear $\ell$.** Setting the
 semicircle payoff equal to CRT-Prange: beating
@@ -219,7 +253,55 @@ NP-hardness for *arbitrary* moduli is plausible and worth attempting as the
 complementary result (it would mirror "syndrome decoding is NP-hard, RS
 decoding is easy" exactly).
 
-## 8. Next actions
+## 8. Self-attack (2026-07-07): the natural lattice decoder FAILS
+
+The crux subroutine — the decoder DQI runs coherently to uncompute — is
+Q(A2.1) at *linear* sparsity. The RS analogue (Berlekamp–Massey) is
+efficient because syndrome decoding of RS duals reduces to it. Does the CRT
+analogue reduce to lattice reduction? **We built the natural Kannan-embedding
+lattice and ran exact LLL on it** ([`code/lll_decode.py`](../code/lll_decode.py)).
+It fails at every sparsity (recovery rate 12–38%, i.e. chance):
+
+| $m$ | $\ell$ | LLL recovery rate |
+|---|---|---|
+| 12 | 1 | 0.25 |
+| 12 | 2 | 0.38 |
+| 16 | 1–3 | 0.12 |
+
+**Why — a clean structural obstruction.** A weight-1 integer is
+$t = a\,(M/p_j)$. But $p_i\,(M/p_i) = M \equiv 0$, so each
+$p_i \cdot e_i$ is a **weight-1 lattice vector of $\ell^2$-norm $p_i$** in
+coefficient space — a *non-solution* that LLL prefers whenever
+$p_i < |a|$. The modular kernel $\{p_i e_i\}$ is always shorter than the
+planted coefficient at the small primes. **$\ell^2$-shortness $\ne$
+$\ell^0$-sparsity**, and the kernel pollutes the lattice with short junk.
+
+This is the CRT-side echo of a classical fact: minimum-*Hamming*-weight
+decoding is NP-hard in general (Berlekamp–McEliece–van Tilborg) while
+minimum-*Euclidean* (lattice) is LLL-able. RS escapes via algebraic
+(Berlekamp–Massey) structure, not lattice geometry. CRT has no Vandermonde;
+the naive lattice route is blocked.
+
+!!! danger "Consequence for A2 — honest downgrade"
+
+    The crux decoder does **not** come for free from lattice reduction. A2's
+    viability now rests entirely on whether an *algebraic* dual-CRT decoder
+    exists at linear radius — a genuinely open, possibly hard, question. The
+    **constant-$\ell$ fragment stands** (enumeration + the $d_{\min}$
+    uniqueness theorem give provably-correct poly-time preparation), but the
+    margin computation says constant $\ell$ does **not** beat Prange
+    asymptotically. So: A2 is not dead, but it is **gated on one hard
+    subroutine**, and the probability I assign to a clean efficient decoder
+    existing dropped materially after this attack. Recorded as such.
+
+    *Two escape routes not yet tried, in priority order:* (i) an algebraic
+    decoder using the multiplicative structure of $(\mathbb{Z}/M)^\times$
+    (the CRT analogue of BM's LFSR-synthesis — does a "rational function
+    reconstruction over $\mathbb{Z}$" exist?); (ii) accept list decoding and
+    push the list through DQI's uncomputation as a superposition (changes
+    the amplitude analysis — may be fatal, may be fine).
+
+## 9. Next actions
 
 1. Await novelty-check agent (kill criterion 3).
 2. Attack Q(A2.1): try (i) reduce to known CRT list decoding by re-encoding
