@@ -24,6 +24,14 @@ silence. Format: date · candidate · decision · one-line reason · link.
 | 2026-07-08 | A2 | **escape (i) narrowed** | Lee-routed decoder dead; remaining paths = purely-algebraic $\mathbb{Z}/M$ decoder (open) or list-decoding-through-uncomputation (ii, now most likely) |
 | 2026-07-08 | A3 | **seeded** | Redirection: enumerate P-polynomial translation schemes (Doob scheme first) × (hard objective? algebraic decoder?) — the real map of DQI-beyond-Hamming ([brief](A3-p-polynomial-schemes.md)) |
 
+| 2026-07-08 (2) | A3 product branch | **closed (theorem)** | Cartesian products of connected graphs are DR iff Hamming or Doob (rederived + verified; known: Song '86/Egawa '81) — coordinate-decomposable DQI has exactly one non-Hamming point; Clebsch is the AP-eigenvalue near-miss proving the spectral test insufficient ([note](notes/A3-product-theorem.md)) |
+| 2026-07-08 (2) | A3-Doob | **opened, flagged** | The unique live door: counting objective over Shrikhande-radial pair predicates (not single-form expressible: $\|B_1\|=7$, level sets have size $4k$), self-dual scheme, array $=H(2m{+}n,4)$; gates = linear-radius Doob decoder (open in literature) + hardness. First K3 check already fired a red flag: predicate-aware block-Prange ($10\tau/32$) strictly beats array-matched Prange ($9\tau/32$) — window at most Hamming's ([note §Doob](notes/A3-product-theorem.md)) |
+| 2026-07-08 (2) | A1 | **H2′ closure total** | The product theorem upgrades the Lee kill: the entire coordinate-decomposable circumvention space contains only Doob — H1′ obstruction theorem target unchanged, its complement now maximally sharp |
+| 2026-07-08 (2) | C1 | **strong-field gap data** | Gap-vs-n at h=8 random field, β=1: mean gap ≈ 1.01, min ≥ 0.9996 across **n=3–5** (n=6 dense 4096² eig infeasible here; incrementally-written CSV) — mixer survives in the target regime ([csv](strongfield-gap.csv)) |
+
+| 2026-07-08 (3) | A3-Doob | **K3 FIRED — closed** | Doob-DQI = new geometry, no new advantage. Rigorous: semicircle alphabet-independent (Eq 6, no $q$) + Doob density menu $\subseteq H(N,16)$ ⇒ payoff subset of Hamming; pair-predicate conditional bias $3/4$ ⇒ classical slope $10/32>9/32$ (exact). Empirical: greedy tracks optimum within ~1%. ([resolution](notes/A3-doob-resolved.md), 5 tests) |
+| 2026-07-08 (3) | **coord-decomposable branch** | **CLOSED (theorem)** | Product theorem + Lee kill + Doob K3 ⇒ **Hamming is the unique DQI advantage home among coordinate-decomposable metrics.** A2 (CRT-OPI) unaffected — never used a metric scheme |
+
 ## Review cadence
 
 Weekly during active hunting. A candidate with no progress against its first
