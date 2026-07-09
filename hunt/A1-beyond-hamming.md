@@ -43,6 +43,11 @@ coordinate-decomposable, so no counting objective exists there — which is
   objective in a coordinate-decomposable metric" idea has no P-polynomial
   home ([kill note](notes/AC-lee-metric-KILLED.md)). Sum-rank inherits the
   same covering-radius obstruction as rank. Only H1′ remains.
+  **Upgrade (same day, second session):** the closure is now *total* — a
+  Cartesian product of connected graphs is distance-regular iff Hamming or
+  Doob ([product theorem](notes/A3-product-theorem.md)), so the H2′ search
+  space holds exactly one non-Hamming point, the Doob scheme, which *does*
+  support a counting objective and moved to A3 as a live candidate.
 - **H1′ (now the whole candidate) — the obstruction theorem:** for ANY
   distance-minimization objective in a P-polynomial scheme where efficient
   decoding radius < typical target-to-code distance, no DQI additive
