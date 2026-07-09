@@ -96,3 +96,13 @@ finish each autopsy — a catalog you haven't fought with is someone else's.
   only non-Hamming coordinate-decomposable DQI home is the Doob scheme —
   counting objective over pair predicates, decoder open.
   (hunt/notes/A3-product-theorem.md)
+- **2026-07-08 (3) — the coordinate-decomposable branch is CLOSED: Hamming
+  is the unique advantage home.** Doob-DQI resolved: new geometry, no new
+  advantage. The semicircle (Eq 6) is *alphabet-independent*, and Doob's
+  reachable density menu is a subset of $H(N,16)$'s ⇒ Doob's payoff is a
+  subset of the Hamming family's; meanwhile its pair-predicate objective
+  leaks conditional bias ($3/4$) that strengthens the classical baseline
+  ($10/32 > 9/32$, exact). So Doob's advantage window $\le$ Hamming's. With
+  Lee ($q\ge5$, not a scheme) and the product theorem, this closes shape
+  #10's coordinate-decomposable branch entirely — a publishable negative
+  boundary. (hunt/notes/A3-doob-resolved.md)
