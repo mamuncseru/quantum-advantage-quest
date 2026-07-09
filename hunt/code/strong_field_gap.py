@@ -40,17 +40,21 @@ def gap_at(n, seed):
 
 
 if __name__ == "__main__":
+    # Davies superoperator is 4^n x 4^n dense; n<=5 is the feasible ceiling
+    # for a non-Hermitian eig here (n=6 is 4096^2 — impractical). Write each
+    # row as it completes so a partial run still leaves a real artifact.
+    out = ROOT / "hunt" / "strongfield-gap.csv"
+    seeds = {3: 8, 4: 8, 5: 4}
     print(f"Davies gap at strong disordered field (beta={BETA}, h={H}):\n")
     print(f"{'n':>3} {'seeds':>6} {'mean gap':>10} {'min gap':>9} {'std':>8}")
-    rows = []
-    for n in (3, 4, 5, 6):
-        reps = 8 if n <= 5 else 4
-        gaps = [gap_at(n, s) for s in range(reps)]
-        rows.append((n, np.mean(gaps), np.min(gaps), np.std(gaps)))
-        print(f"{n:>3} {reps:>6} {np.mean(gaps):>10.4f} {np.min(gaps):>9.4f} "
-              f"{np.std(gaps):>8.4f}", flush=True)
-    with open(ROOT / "hunt" / "strongfield-gap.csv", "w") as fh:
-        fh.write("n,mean_gap,min_gap,std\n")
-        for r in rows:
-            fh.write(f"{r[0]},{r[1]:.6f},{r[2]:.6f},{r[3]:.6f}\n")
-    print("\ndone — if min gap stays bounded away from 0, the mixer survives.")
+    with open(out, "w") as fh:
+        fh.write("n,seeds,mean_gap,min_gap,std\n")
+        fh.flush()
+        for n, reps in seeds.items():
+            gaps = [gap_at(n, s) for s in range(reps)]
+            print(f"{n:>3} {reps:>6} {np.mean(gaps):>10.4f} "
+                  f"{np.min(gaps):>9.4f} {np.std(gaps):>8.4f}", flush=True)
+            fh.write(f"{n},{reps},{np.mean(gaps):.6f},{np.min(gaps):.6f},"
+                     f"{np.std(gaps):.6f}\n")
+            fh.flush()
+    print("\ndone — min gap bounded away from 0 ⇒ the mixer survives.")
