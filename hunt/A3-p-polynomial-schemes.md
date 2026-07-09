@@ -21,6 +21,18 @@ same day** — see below.
     action 1 below is done; the halved/folded-cube quotient rows are the
     remaining enumeration work.
 
+!!! failure "Update 2026-07-08 (third pass) — Doob K3 fired: the branch is CLOSED"
+
+    Doob-DQI is a new geometry but **not a new advantage**
+    ([resolution](notes/A3-doob-resolved.md)): its payoff is a subset of the
+    Hamming family's (semicircle Eq 6 is alphabet-independent; Doob's density
+    menu $\subseteq H(N,16)$'s), while its pair-predicate objective hands the
+    classical attacker a strictly stronger baseline (conditional bias $3/4$ ⇒
+    slope $10/32 > 9/32$, verified exactly). Empirically, greedy local search
+    tracks the true optimum within ~1% on random instances. **Conclusion for
+    the whole branch: among coordinate-decomposable metrics, Hamming is the
+    unique DQI advantage home.** A publishable negative boundary for shape #10.
+
 ## The question, corrected
 
 The Lee kill taught us the real gate for DQI-beyond-Hamming is not the
