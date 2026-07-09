@@ -1,7 +1,25 @@
 # A3 — Which P-polynomial translation schemes carry a hard objective?
 
 **Seeded 2026-07-08**, the redirection forced by the Lee kill
-([note](notes/AC-lee-metric-KILLED.md)). Status: **scoping**.
+([note](notes/AC-lee-metric-KILLED.md)). Status: **first branch closed the
+same day** — see below.
+
+!!! success "Update 2026-07-08 (second session) — the product branch is a theorem"
+
+    The enumeration question is *answered* for all Cartesian-product
+    schemes: **a product of connected graphs is distance-regular iff it is
+    Hamming or Doob** (independently derived and computationally verified;
+    lit-check then found the classification is known — Song 1986 + Egawa
+    1981). Coordinate-decomposable DQI therefore lives on exactly two
+    geometries, and only **Doob $D(m,n)$** is non-Hamming: a counting
+    objective over Shrikhande-radial *pair* predicates, self-dual scheme,
+    array identical to $H(2m+n,4)$; gates = Doob decoder + hardness
+    separation, kills pre-registered. Full proof, witnesses (the Clebsch
+    near-miss shows AP-eigenvalues are not sufficient), and the updated
+    scheme×objective×decoder map:
+    [notes/A3-product-theorem.md](notes/A3-product-theorem.md). Doob first
+    action 1 below is done; the halved/folded-cube quotient rows are the
+    remaining enumeration work.
 
 ## The question, corrected
 
