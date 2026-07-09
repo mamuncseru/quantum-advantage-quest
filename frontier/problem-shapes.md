@@ -86,3 +86,13 @@ finish each autopsy — a catalog you haven't fought with is someone else's.
   advantage" program is far narrower than it looks; the live question is the
   classification of distance-regular Cayley graphs carrying hard objectives.
   (hunt/notes/AC-lee-metric-KILLED.md)
+- **2026-07-08 (2) — the coordinate-decomposable classification is DONE:
+  Hamming and Doob, nothing else.** Cartesian products of connected graphs
+  are distance-regular iff Hamming $H(N,q)$ or Doob $D(m,n)$ (rederived,
+  then found known: Song 1986 + Egawa 1981). The AP-eigenvalue test is
+  necessary but NOT sufficient — the Clebsch graph passes it (eigenvalues
+  5,1,−3, common difference 4) yet Clebsch□Clebsch fails $a_2=2a_1$. The
+  binding gate is the intersection axiom. Consequence for shape #10: the
+  only non-Hamming coordinate-decomposable DQI home is the Doob scheme —
+  counting objective over pair predicates, decoder open.
+  (hunt/notes/A3-product-theorem.md)
