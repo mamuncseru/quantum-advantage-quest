@@ -187,6 +187,23 @@ Honesty ledger, before anyone gets excited:
    uplift), kill. Cheapest first: compute the block-Prange baseline —
    it is array-determined and may already close the window.
 
+    **K3 first check (done 2026-07-08, red flag).** Radial predicates
+    have *form-aligned conditional bias*: for $g = 1_{B_1}$
+    ($\mu' = 7/16$), pinning one form to $u=0$ satisfies the block with
+    probability $3/4$ (the surviving elements are $(0,0),(0,\pm1)$). A
+    budget of $N$ pinned forms is therefore better spent one-per-block
+    (marginal $3/4 - 7/16 = 5/16$) than two-per-block (marginal $1/4$):
+    with $\tau = N/m'$, the predicate-aware baseline achieves
+    $\frac{7}{16} + \frac{10}{32}\tau$ versus the array-matched Prange's
+    $\frac{7}{16} + \frac{9}{32}\tau$ — **strictly stronger, at every
+    budget**. The DQI side is array-determined; the classical side is
+    not. Unless the general-scheme payoff formula for pair predicates
+    delivers an uplift beyond Hamming's (no reason to expect it — the
+    Jacobi data are identical), the Doob window is *at most* Hamming's
+    and likely narrower. Next action: derive the exact Doob-DQI payoff
+    for radial pair predicates and quantify; if it clears nothing beyond
+    Hamming, K3 fires and the door closes honestly.
+
 ### Where this leaves the A3 map
 
 | P-polynomial translation scheme | objective type | decoder | status |
@@ -194,10 +211,27 @@ Honesty ledger, before anyone gets excited:
 | Hamming $H(N,q)$ | counting ✅ | classical families ✅ | taken (DQI) |
 | forms schemes (bilinear/alternating/Hermitian) | distance-min only | Gabidulin etc. | obstruction — disclaimed (A1) |
 | **products beyond these** | — | — | **closed by this theorem** |
-| **Doob $D(m,n)$** | **counting ✅ (pair predicates)** | **open** | **the unique live door** |
-| non-product schemes (halved/folded cubes, quotients) | ? | ? | open rows — next enumeration target |
+| **Doob $D(m,n)$** | **counting ✅ (pair predicates)** | **open** | **the unique live door (K3-flagged)** |
+| halved cube $\tfrac12 H(d,2)$ | Hamming-radial subclass | even subcodes | **reduces to Hamming DQI** |
+| folded cube | complement-symmetric Hamming-radial | codes $\ni \mathbf{1}$ | **reduces to Hamming DQI** |
 
-The halved/folded cubes are P-polynomial translation schemes that are
-*quotients*, not products — the theorem does not touch them. They are the
-next cheapest rows to fill (expectation: reducible to Hamming DQI, but
-that is a computation, not a belief).
+**The quotient rows close by inspection.** The halved cube is the Hamming
+scheme *restricted to the even-weight subgroup* (its distance is
+$\mathrm{wt}/2$ — a rescaled Hamming weight), and the folded cube is
+Hamming *on the quotient* $\mathbb{Z}_2^d/\langle\mathbf{1}\rangle$ (its
+distance is $\min(\mathrm{wt}, d-\mathrm{wt})$). Their Bose–Mesner
+algebras are restrictions/fusions of Hamming's; their radial functions
+are subclasses of Hamming-radial functions; a DQI instance on either is a
+Hamming-DQI instance whose dual code carries a side condition (even
+weight, resp. contains $\mathbf{1}$). New geometry: none.
+
+**Two boundary caveats, so this map is not oversold.** (1) Bounded-diameter
+schemes are DQI-irrelevant regardless of structure: every connected
+translation SRG (Paley graphs, …) is trivially P-polynomial with diameter
+2, but the semicircle payoff needs the shell count to scale with the
+instance — only *unbounded-diameter* families matter. (2) There is **no
+completeness theorem** for unbounded-diameter P-polynomial translation
+schemes (that classification is open); this map covers the known
+families — Hamming and its quotients, Doob, and the forms schemes — not
+all conceivable ones. Within the coordinate-decomposable branch, however,
+the closure is a theorem, not a survey.
