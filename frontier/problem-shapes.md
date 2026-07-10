@@ -106,3 +106,12 @@ finish each autopsy — a catalog you haven't fought with is someone else's.
   Lee ($q\ge5$, not a scheme) and the product theorem, this closes shape
   #10's coordinate-decomposable branch entirely — a publishable negative
   boundary. (hunt/notes/A3-doob-resolved.md)
+- **2026-07-09 — the "algebraic decoder" demand of the 07-07 finding is
+  MET for CRT: the decoder is Euclid.** Sparse CRT patterns are smooth
+  denominators of reduced fractions; continued fractions (= rational number
+  reconstruction, the $\mathbb{Z}$-twin of Berlekamp–Massey's
+  $\mathbb{F}_q[x]$ Euclid) decode them at the exact $d_{\min}$ radius, poly
+  time, linear sparsity. Lesson for shape #10: when a decoding problem
+  resists lattices, ask whether the structure is *multiplicative* — the
+  $\ell^0\ne\ell^2$ obstruction dissolves in the right representation.
+  (hunt/notes/A2-crt-opi-derivation.md §10)
