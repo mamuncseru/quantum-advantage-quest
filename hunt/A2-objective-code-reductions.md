@@ -2,6 +2,23 @@
 
 **Pre-registered 2026-07-06.**
 
+!!! success "Update 2026-07-09 — Q(A2.1) RESOLVED: the crux decoder is continued fractions"
+
+    The gate that downgraded A2 on 07-07 is open. A sparse CRT pattern is
+    the *prime factorization of one reduced denominator*
+    ($\gcd(K, P_S)=1$ automatically), so Legendre's theorem decodes it from
+    the windowed value by plain continued fractions — poly time at **linear
+    sparsity**, on **exactly** the unique-decoding window $\ell/m<\kappa/2$
+    of the $d_{\min}$ theorem. Verified head-to-head on the instances where
+    LLL scored 12–38%: CF recovers 8/8 everywhere; the threshold at
+    $\kappa/2$ is information-theoretic, not algorithmic. The BM↔CF
+    dictionary completes the transplant: both decoders are Euclid, in
+    $\mathbb{F}_q[x]$ and $\mathbb{Z}$ respectively.
+    ([derivation note §10](notes/A2-crt-opi-derivation.md), `code/cf_decode.py`,
+    6 tests.) **Remaining gates before any advantage claim:** the
+    Gaussian-window amplitude bookkeeping, and the Bleichenbacher–Nguyen
+    classical inventory (upgraded to urgent — symmetric effort).
+
 !!! success "Status update, same day — kill criterion 3 cleared"
 
     Novelty check complete ([full report](notes/A2-novelty-check.md)): **no
