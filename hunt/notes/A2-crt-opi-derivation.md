@@ -321,3 +321,88 @@ the naive lattice route is blocked.
    NP-hardness reduction at general $\ell$.
 3. Human (deferred batch): verify §2–§4 derivations; then DQI §5 at proof
    level side-by-side.
+
+## 10. Q(A2.1) RESOLVED in the unique window (2026-07-09): the decoder is Euclid
+
+!!! success "The algebraic decoder of §8's escape route (i) exists, and it is continued fractions"
+
+    **Claim (elementary, computationally verified).** In the entire
+    unique-decoding window $\ell/m < \kappa/2$, Q(A2.1) is solvable in
+    polynomial time at **linear sparsity** by continued fractions.
+    [`code/cf_decode.py`](../code/cf_decode.py), tests green; decodes at
+    $\ell = m/10$, $m = 120$ in ~1 ms where enumeration is $\sim 10^{25}$.
+
+**The observation §7(iv) walked past.** A weight-$\ell$ integer satisfies
+$t/M \equiv \sum_{i \in S} k_i/p_i \pmod 1 = K/P_S$ — and this fraction is
+**automatically in lowest terms**: mod any $p_j$, $j \in S$, the sum
+collapses to $k_j \,(P_S/p_j) \not\equiv 0$, so $\gcd(K, P_S) = 1$. The
+sparse support is not additive data; it is the **prime factorization of one
+denominator**. §7(iv) noted "$\ell = 1$ is continued fractions" — but the
+argument never used $\ell = 1$.
+
+**The decoder.** Given $\theta = t'/M$ with $|\theta - K/P_S| \le \eta$:
+
+1. Run the continued-fraction expansion of $\theta$ (exact Euclid on a
+   rational — poly in $\log M$).
+2. For each convergent $h/k$: trial-divide $k$ by the known moduli; accept
+   iff $k$ factors squarefree over them with support size $\le \ell$ and
+   the (circular) distance to $\theta$ is $\le \eta$.
+3. Read off $k_i = h \cdot (k/p_i)^{-1} \bmod p_i$ on the support.
+
+**Why it is correct exactly on the window.** Legendre: $|\theta - K/Q| <
+1/(2Q^2)$ with $\gcd(K,Q) = 1$ forces $K/Q$ to be a convergent. With
+balanced moduli, $P_S \approx M^{\ell/m}$ and $\eta \approx M^{-\kappa}$,
+so the Legendre condition reads $\ell/m < \kappa/2 + o(1)$ — **the same
+inequality as the $d_{\min}(2\ell)$ uniqueness radius** (§7). Decodability
+and well-definedness of the uncomputation coincide; there is no gap for a
+better algorithm to fill, and no need for escape route (ii)'s list
+machinery inside the window.
+
+**Why LLL failed where this succeeds.** The sparse structure is
+*multiplicative* (a smooth denominator), invisible to the coefficient-space
+lattice with its $\{p_i e_i\}$ kernel junk — but transparent to the 2-dim
+lattice reduction that CF is. On lll_decode.py's own noise-free instances
+(12–38% recovery), CF recovers 8/8 at every configuration.
+
+**The dictionary completes.** §8 asked for "a rational-function-
+reconstruction analogue of Berlekamp–Massey on $\mathbb{Z}$." That object
+is classical: **rational number reconstruction**. Berlekamp–Massey *is*
+extended Euclid in $\mathbb{F}_q[x]$ recovering a rational function;
+Legendre/CF *is* Euclid in $\mathbb{Z}$ recovering a rational number.
+
+| RS-OPI | CRT-OPI |
+|---|---|
+| Vandermonde structure | CRT structure |
+| Berlekamp–Massey = Euclid in $\mathbb{F}_q[x]$ | continued fractions = Euclid in $\mathbb{Z}$ |
+| decodes to $d/2$ (half min distance) | decodes to $d_{\min}(2\ell)/2$ exactly |
+
+**Computed thresholds** (m = 40, κ = 0.3, 10 seeds each): recovery 10/10 at
+every $\ell/m \le 0.125$; 6/10 at the wall $\ell/m = 0.150 = \kappa/2$
+(Legendre marginal, as predicted); 0/10 beyond. The failure above the wall
+is information-theoretic ($d_{\min}$), not algorithmic.
+
+!!! warning "What this does NOT yet give (the candidate's honest state)"
+
+    A2's asymptotic-advantage chain is now: window nonempty ✅ (§7 theorem)
+    → efficient decoder on the whole window ✅ (this section) → **two open
+    gates remain:**
+
+    1. **Gaussian-window amplitude bookkeeping** (§4, flagged since day
+       one): that the taper's tails through the nonlinear step cost only
+       $o(1)$ payoff. The decoder is deterministic poly-time, so it runs
+       coherently (compute, subtract, uncompute); failure mass = noise
+       tails + the marginal shell, degrading payoff by $O(\varepsilon)$
+       under DQI's imperfect-decoder tolerance — but this must be *derived*,
+       not asserted. The April-2024 LWE bug lived exactly here.
+    2. **Classical-attack inventory, now URGENT** (self-attack #1
+       upgraded): the same CF structure that unlocks the quantum decoder
+       could power a classical algorithm for CRT-OPI itself. CF does not
+       obviously find high-agreement $x < X$ (Prange remains the baseline),
+       but Bleichenbacher–Nguyen noisy-CRT lattice attacks must be
+       inventoried at symmetric effort *before* any advantage statement.
+
+    Novelty status: the ingredients (Legendre, rational reconstruction) are
+    textbook; a first search found no prior statement of "CRT-sparse
+    decoding under archimedean noise = smooth-denominator recovery via CF,
+    tight at the $d_{\min}$ radius." Deeper check queued with the standing
+    novelty protocol.
