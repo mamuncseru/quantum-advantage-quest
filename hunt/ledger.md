@@ -32,6 +32,8 @@ silence. Format: date · candidate · decision · one-line reason · link.
 | 2026-07-08 (3) | A3-Doob | **K3 FIRED — closed** | Doob-DQI = new geometry, no new advantage. Rigorous: semicircle alphabet-independent (Eq 6, no $q$) + Doob density menu $\subseteq H(N,16)$ ⇒ payoff subset of Hamming; pair-predicate conditional bias $3/4$ ⇒ classical slope $10/32>9/32$ (exact). Empirical: greedy tracks optimum within ~1%. ([resolution](notes/A3-doob-resolved.md), 5 tests) |
 | 2026-07-08 (3) | **coord-decomposable branch** | **CLOSED (theorem)** | Product theorem + Lee kill + Doob K3 ⇒ **Hamming is the unique DQI advantage home among coordinate-decomposable metrics.** A2 (CRT-OPI) unaffected — never used a metric scheme |
 
+| 2026-07-09 | A2 | **UN-GATED — Q(A2.1) resolved positive** | The crux decoder exists and is *continued fractions*: sparse pattern = prime factorization of one reduced denominator ($\gcd(K,P_S)=1$ automatic), Legendre condition ≡ the $d_{\min}$ uniqueness window ($\ell/m<\kappa/2$) exactly. Poly-time at linear sparsity (m=120, ℓ=12, ~1ms vs $10^{25}$ enumeration); 8/8 on LLL's 12–38% instances; threshold at $\kappa/2$ confirmed information-theoretic. BM↔CF: both are Euclid, in $\mathbb{F}_q[x]$ vs $\mathbb{Z}$. Remaining gates: Gaussian-window amplitude bookkeeping + Bleichenbacher–Nguyen classical inventory (urgent) ([note §10](notes/A2-crt-opi-derivation.md)) |
+
 ## Review cadence
 
 Weekly during active hunting. A candidate with no progress against its first
