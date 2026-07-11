@@ -73,6 +73,14 @@ finish each autopsy — a catalog you haven't fought with is someone else's.
   data — sample separations collapse (AAKS), so hunt the computational
   one: memory advantage ⟺ Gibbs-preparation hardness; window = low-T,
   ≥2D/glassy, slow-mixing.
+- L2 (2026-07-11): same collapse pattern one level up — memory advantage
+  for *channel* learning dies on sparse (physical) noise, constructively;
+  hunt the boundary (non-Markovian, unknown frame) or the no-advantage
+  theorem.
+- L3 (2026-07-11): the Cerezo trainability⇒simulability conjecture,
+  access-symmetrized on quantum data; memory-measurable losses as the
+  escape mechanism; measured rates 0.36 vs 1.65 bits/k with the MPS
+  confound as the standing caveat.
 
 ## Hunt findings that sharpen this catalog (dated)
 
