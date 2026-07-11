@@ -139,3 +139,21 @@ the ℓ>1 exact-numerics replication (mechanism is ℓ-generic; cheap on a
 compute node), then the Phase-3 question: write the construction as a
 theorem statement with all constants, and hand the classical-attack
 surface to a fresh adversarial pass.
+
+## Update 2026-07-11 (later) — ℓ = 2 replication: mechanism confirmed ℓ-generic
+
+Same instance, state extended to shells 0–2
+($w_0 + w_1 S + w_2 Q$, $Q = \sum_{i<j} g_i g_j$ — still a pattern
+function, same exact histogram method;
+[`code/windowed_payoff_l2.py`](../code/windowed_payoff_l2.py)):
+
+- design point ($\sigma_f = 1.2$): windowed = unwindowed to
+  $1.4\times10^{-11}$; payoff 0.692 (vs 0.560 at ℓ=1 — more shells,
+  more boost, as expected);
+- state-side threshold: first deviation at $3\sigma_f = 15 =
+  d_{\min}(5)$ **exactly** ($9\times10^{-6}$ at $\sigma_f = 5$);
+- decoder-side wall: between cut 48 and 120, bracketing
+  $d_{\min}(4)/2 = 52$.
+
+The lemma's $d_{\min}(2\ell+1)$ prediction is now confirmed at two
+values of ℓ with measured, not fitted, thresholds.
