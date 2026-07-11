@@ -295,6 +295,134 @@ def fig_nines():
         save(fig, "fig-nines", mode)
 
 
+# -------------------------------------------------------------- transmon --
+
+def fig_transmon():
+    import numpy as np
+    phi = np.linspace(-1.35 * np.pi, 1.35 * np.pi, 400)
+    ucos = -np.cos(phi)
+    uharm = -1 + phi ** 2 / 2
+    levels = [-0.85, -0.58, -0.36]          # anharmonic: 0.27, 0.22
+    ghosts = [-0.85, -0.58, -0.31]          # harmonic:   0.27, 0.27
+    names = ["|0⟩", "|1⟩", "|2⟩"]
+    for mode in ("light", "dark"):
+        ink = INK[mode]
+        blue = SERIES[mode][0]
+        fig, ax = new_fig(mode, (7.0, 3.9))
+        ax.plot(phi, ucos, color=blue, linewidth=2.0, zorder=3)
+        ax.plot(phi, uharm, color=ink["muted"], linewidth=1.4,
+                linestyle="--", alpha=0.85, zorder=2)
+        for e, g, nm in zip(levels, ghosts, names):
+            half = np.arccos(min(1.0, -e))
+            ax.plot([-half, half], [e, e], color=ink["primary"],
+                    linewidth=1.6, zorder=4)
+            ax.text(half + 0.12, e, nm, va="center",
+                    color=ink["primary"], fontsize=10)
+            hhalf = np.sqrt(2 * (g + 1))
+            ax.plot([-hhalf, hhalf], [g, g], color=ink["muted"],
+                    linewidth=1.1, linestyle="--", alpha=0.85, zorder=2)
+        arr = dict(arrowstyle="<->", color=ink["secondary"], lw=1.1)
+        ax.annotate("", (-0.62, levels[0]), (-0.62, levels[1]),
+                    arrowprops=arr)
+        ax.text(-0.74, -0.715, "ω₀₁", ha="right",
+                color=ink["secondary"], fontsize=9)
+        ax.annotate("", (-1.02, levels[1]), (-1.02, levels[2]),
+                    arrowprops=arr)
+        ax.text(-1.14, -0.475, "ω₁₂", ha="right",
+                color=ink["secondary"], fontsize=9)
+        ax.text(0, 0.32, "harmonic oscillator: equal steps,\nno way to "
+                "address one transition", ha="center",
+                color=ink["muted"], fontsize=8.5, style="italic")
+        ax.text(0, -1.22, "Josephson cosine well: ω₁₂ < ω₀₁ — drive ω₀₁ "
+                "and the rest of the ladder stays dark",
+                ha="center", color=ink["secondary"], fontsize=8.5)
+        ax.set_xlim(-4.6, 4.6)
+        ax.set_ylim(-1.38, 0.62)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.grid(False)
+        ax.set_xlabel("superconducting phase φ")
+        ax.set_ylabel("energy  (units of $E_J$)")
+        ax.set_title("The transmon: an oscillator with unequal steps — "
+                     "that inequality IS the qubit")
+        save(fig, "fig-transmon", mode)
+
+
+# -------------------------------------------------------------- lattices --
+
+def fig_lattices():
+    import numpy as np
+
+    def hex_edges():
+        centers = [(0.0, 0.0), (np.sqrt(3), 0.0),
+                   (np.sqrt(3) / 2, 1.5)]
+        edges, seen = [], set()
+        for cx, cy in centers:
+            vs = [(cx + np.cos(a), cy + np.sin(a))
+                  for a in np.deg2rad([30, 90, 150, 210, 270, 330])]
+            for i in range(6):
+                a, b = vs[i], vs[(i + 1) % 6]
+                key = tuple(sorted((tuple(np.round(a, 3)),
+                                    tuple(np.round(b, 3)))))
+                if key not in seen:
+                    seen.add(key)
+                    edges.append((a, b))
+        return edges
+
+    for mode in ("light", "dark"):
+        ink = INK[mode]
+        blue = SERIES[mode][0]
+        fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.3))
+        fig.patch.set_alpha(0.0)
+        for ax in axes:
+            ax.set_facecolor("none")
+            ax.set_aspect("equal")
+            ax.axis("off")
+
+        # left: heavy-hex — qubits on corners AND edge midpoints
+        ax = axes[0]
+        corners, mids = set(), []
+        for a, b in hex_edges():
+            m = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+            ax.plot([a[0], b[0]], [a[1], b[1]], color=ink["axis"],
+                    linewidth=1.2, zorder=1)
+            corners.add(tuple(np.round(a, 3)))
+            corners.add(tuple(np.round(b, 3)))
+            mids.append(m)
+        cs = np.array(sorted(corners))
+        ms = np.array(mids)
+        ax.scatter(cs[:, 0], cs[:, 1], s=52, color=blue, zorder=3,
+                   edgecolors=SURFACE[mode], linewidths=1.0)
+        ax.scatter(ms[:, 0], ms[:, 1], s=52, color=blue, zorder=3,
+                   edgecolors=SURFACE[mode], linewidths=1.0)
+        ax.text(0.5, -0.06, "heavy-hex (IBM Heron) — degree ≤ 3",
+                transform=ax.transAxes, ha="center",
+                color=ink["secondary"], fontsize=9.5)
+
+        # right: square lattice with a coupler on every edge
+        ax = axes[1]
+        n, mgap = 4, 5
+        for i in range(mgap):
+            for j in range(n):
+                if i < mgap - 1:
+                    ax.plot([i, i + 1], [j, j], color=ink["axis"],
+                            linewidth=1.2, zorder=1)
+                if j < n - 1:
+                    ax.plot([i, i], [j, j + 1], color=ink["axis"],
+                            linewidth=1.2, zorder=1)
+        xs, ys = np.meshgrid(range(mgap), range(n))
+        ax.scatter(xs.ravel(), ys.ravel(), s=52, color=blue, zorder=3,
+                   edgecolors=SURFACE[mode], linewidths=1.0)
+        ax.text(0.5, -0.06, "square (Willow, Zuchongzhi 3, Nighthawk) — degree 4",
+                transform=ax.transAxes, ha="center",
+                color=ink["secondary"], fontsize=9.5)
+
+        fig.suptitle("Two answers to frequency crowding: fewer neighbors, "
+                     "or tunable everything", color=ink["secondary"],
+                     fontsize=10, y=0.98)
+        save(fig, "fig-lattices", mode)
+
+
 # ----------------------------------------------------------------- table --
 
 def fmt_err(e):
@@ -353,4 +481,6 @@ if __name__ == "__main__":
     fig_logical()
     fig_depth()
     fig_nines()
+    fig_transmon()
+    fig_lattices()
     emit_table()
