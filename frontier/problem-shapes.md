@@ -88,6 +88,16 @@ finish each autopsy — a catalog you haven't fought with is someone else's.
   structure as the shield; γ* exponents Gibbs −0.42 vs Haar −1.30
   (thermal weight-concentration); the L1-tension (low-T advantage vs
   high-T robustness) is the question.
+- L6–L10 (2026-07-11, second batch): L6 hidden-frame/topological shield
+  for distributed comparison (absorbs L9's certification gap — same
+  theorem); L7 symmetry-class leakage lemma (collapse-leaning); L8
+  purification dividend / mixing-time sandwich (converse of L1); L10
+  QUALM gap on physical dynamics (coherent FI grows T²/2, ratio does not
+  saturate). First review: 7 standalone live, 2 probation, 1 merged —
+  the ground's meta-lesson so far: **every sample separation collapses
+  on parameterized physical data; what survive are computational residues
+  (preparation, frames, temporal coherence) — and each residue is a
+  hardness assumption wearing a learning costume.**
 
 ## Hunt findings that sharpen this catalog (dated)
 
