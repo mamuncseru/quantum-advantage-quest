@@ -101,6 +101,7 @@ nav:
       - "A3 · P-polynomial schemes": hunt/A3-p-polynomial-schemes.md
       - "C1 · Fields and mixers": hunt/C1-fields-and-mixers.md
       - "A∩C · HDQI boundary": hunt/AC-hdqi-boundary.md
+      - "L1 · Memory vs mixing": hunt/L1-memory-vs-mixing.md
       - "Note · CRT-OPI derivation": hunt/notes/A2-crt-opi-derivation.md
       - "Note · CRT-OPI novelty check": hunt/notes/A2-novelty-check.md
       - "Note · C1 atlas results": hunt/notes/C1-atlas-results.md
