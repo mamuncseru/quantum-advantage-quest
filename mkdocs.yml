@@ -104,6 +104,8 @@ nav:
       - "L1 · Memory vs mixing": hunt/L1-memory-vs-mixing.md
       - "L2 · Physical noise learning": hunt/L2-physical-noise-learning.md
       - "L3 · Trainability vs surrogates": hunt/L3-trainability-surrogates.md
+      - "L4 · The magic transition": hunt/L4-magic-transition.md
+      - "L5 · Noise threshold of memory advantages": hunt/L5-noise-threshold.md
       - "Note · CRT-OPI derivation": hunt/notes/A2-crt-opi-derivation.md
       - "Note · CRT-OPI novelty check": hunt/notes/A2-novelty-check.md
       - "Note · C1 atlas results": hunt/notes/C1-atlas-results.md
