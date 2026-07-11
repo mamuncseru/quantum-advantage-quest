@@ -69,6 +69,10 @@ finish each autopsy — a catalog you haven't fought with is someone else's.
 - C2: mixing-time separation for a specific family (even conditional).
 - A∩C: the HDQI boundary — which code Hamiltonians are decodable-hence-
   quantum-preparable but resist classical cluster dynamics. Least crowded.
+- L1 (ground L, added 2026-07-11): shape #12 restricted to *physical*
+  data — sample separations collapse (AAKS), so hunt the computational
+  one: memory advantage ⟺ Gibbs-preparation hardness; window = low-T,
+  ≥2D/glassy, slow-mixing.
 
 ## Hunt findings that sharpen this catalog (dated)
 
