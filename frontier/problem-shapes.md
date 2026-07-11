@@ -81,6 +81,13 @@ finish each autopsy — a catalog you haven't fought with is someone else's.
   access-symmetrized on quantum data; memory-measurable losses as the
   escape mechanism; measured rates 0.36 vs 1.65 bits/k with the MPS
   confound as the standing caveat.
+- L4 (2026-07-11): the magic transition — computational learnability of
+  Clifford+T states in the open strip ω(log n) < t < o(n); collision-mass
+  decay ~0.1 bits/T measured; may merge with L2's unknown-frame suspect.
+- L5 (2026-07-11): noise robustness of memory advantages — physical
+  structure as the shield; γ* exponents Gibbs −0.42 vs Haar −1.30
+  (thermal weight-concentration); the L1-tension (low-T advantage vs
+  high-T robustness) is the question.
 
 ## Hunt findings that sharpen this catalog (dated)
 
