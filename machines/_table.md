@@ -2,13 +2,13 @@
 
 | Machine | Modality | Qubits | 2Q error | Status | Page |
 |---|---|---:|---:|---|---|
-| Fujitsu/RIKEN 256q | Superconducting | 256 | — | deployed | soon |
-| IBM Heron r2 | Superconducting | 156 | 3.0×10⁻³ | deployed | soon |
-| IBM Nighthawk | Superconducting | 120 | — | deployed | soon |
-| Google Willow | Superconducting | 105 | 3.3×10⁻³ | prototype | soon |
-| USTC Zuchongzhi 3.0 | Superconducting | 105 | 3.8×10⁻³ | prototype | soon |
-| Rigetti Ankaa-3 | Superconducting | 84 | 5.0×10⁻³ | deployed | soon |
-| IQM Radiance 54 | Superconducting | 54 | — | deployed | soon |
+| Fujitsu/RIKEN 256q | Superconducting | 256 | — | deployed | [Fujitsu + RIKEN](superconducting-field.md) |
+| IBM Heron r2 | Superconducting | 156 | 3.0×10⁻³ | deployed | [IBM](ibm.md) |
+| IBM Nighthawk | Superconducting | 120 | — | deployed | [IBM](ibm.md) |
+| Google Willow | Superconducting | 105 | 3.3×10⁻³ | prototype | [Google Quantum AI](google.md) |
+| USTC Zuchongzhi 3.0 | Superconducting | 105 | 3.8×10⁻³ | prototype | [USTC (Hefei)](zuchongzhi.md) |
+| Rigetti Ankaa-3 | Superconducting | 84 | 5.0×10⁻³ | deployed | [Rigetti Computing](superconducting-field.md) |
+| IQM Radiance 54 | Superconducting | 54 | — | deployed | [IQM Quantum Computers](superconducting-field.md) |
 | IonQ Tempo | Trapped ion | 100 | 1.0×10⁻³ | prototype | soon |
 | Quantinuum Helios | Trapped ion | 98 | 7.9×10⁻⁴ | deployed | soon |
 | Quantinuum H2 | Trapped ion | 56 | 1.3×10⁻³ | deployed | soon |
