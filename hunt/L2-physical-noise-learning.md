@@ -87,11 +87,23 @@ Live suspects, in order of physical realism:
 - **Access honesty:** ancilla-free side gets adaptivity and arbitrary
   single-copy input states; no hobbled baselines.
 
+## Suspect 1, first data (2026-07-11, same day)
+
+Smallest non-Markovian dyad (system qubit + persistent bath qubit,
+$U(\theta) = e^{-i\theta(XX+YY)/4}$, $T = 2$ steps,
+[`code/nonmarkov_fisher.py`](code/nonmarkov_fisher.py)): temporal quantum
+memory (probe kept coherent across steps + Bell measurement) achieves
+**2.9–4.0× the Fisher information** of the best measure-and-reprepare
+Pauli protocol across the $\theta$ grid. Restricted protocol classes,
+one instance — an existence probe, not a separation. The scaling question
+is pre-registered: does the ratio grow with $T$ and bath size (toward a
+genuine separation), or saturate at a constant (kill 2 territory)?
+
 ## First actions
 
 1. Deep novelty pass on the sparse collapse + no-advantage formulation.
-2. Formalize suspect 1: smallest non-Markovian family (one qubit +
-   one bath qubit, $T$ steps) where memory-assisted learning provably
-   beats single-copy — or prove it cannot.
+2. Scale suspect 1: FI ratio vs $T$ and bath dimension; then the
+   protocol-class-free version (quantum Fisher information of the comb
+   vs the memoryless tester hierarchy).
 3. Connect to HilbertBench: the collapse result, if it holds up, is a
    correctness certificate for single-copy noise-profiling pipelines.
