@@ -2,6 +2,21 @@
 
 **Pre-registered 2026-07-06.**
 
+!!! success "Update 2026-07-11 — BOTH remaining gates closed: A2's chain is complete"
+
+    Gate 1 (amplitude bookkeeping): exact numerics — windowed and unwindowed
+    payoffs agree to machine precision, zero decoder failure mass, stress
+    thresholds measured at $d_{\min}(3)$ and $d_{\min}(2)/2$ exactly as the
+    lemma predicts, and the lemma's window-size requirement reproduces
+    $\ell/m \lesssim \kappa/2$ — no new constraint. Gate 2 (classical
+    inventory): noisy-CRT attacks are list-decoding with one residue per
+    modulus; CRT-OPI at $\mu\approx1/2$ is large-list list-recovery —
+    no classical algorithm exists; CRT-Prange remains the baseline.
+    **A2 is the program's first end-to-end candidate surviving its full
+    self-attack chain.** ([bookkeeping note](notes/A2-window-bookkeeping.md),
+    `code/windowed_payoff.py`, 5 tests.) Remaining: ℓ>1 exact replication,
+    deferred human proof batch, fresh adversarial pass.
+
 !!! success "Update 2026-07-09 — Q(A2.1) RESOLVED: the crux decoder is continued fractions"
 
     The gate that downgraded A2 on 07-07 is open. A sparse CRT pattern is
