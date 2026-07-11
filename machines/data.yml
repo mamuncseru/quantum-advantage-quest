@@ -1,0 +1,675 @@
+# Machines catalog — single source of truth.
+#
+# Every number that appears in a machines/ page table or figure lives HERE,
+# with a source and a date. Pages and scripts/make_machine_figures.py read
+# this file; nothing is hand-copied. Rules:
+#
+#   - Only numbers with a citable source. Approximations and vendor design
+#     specs are flagged in the *_note field next to the number.
+#   - null means "not published / not verified", never "zero".
+#   - Errors are fractions (99.62% fidelity -> err 3.8e-03).
+#   - Times in seconds (t1_s, t2_s, gate_2q_s) so modalities compare honestly.
+#   - status: deployed | prototype | research | contested | announced | retired
+#   - gate_based: false marks analog machines (annealers, Rydberg simulators,
+#     boson samplers) whose "qubit" counts must NOT be compared to gate-model
+#     qubit counts.
+#
+# Floats use the 1.0e-3 form (dot + signed exponent) so PyYAML parses them
+# as numbers, not strings.
+
+as_of: "2026-07"
+
+modalities:
+  superconducting: { label: "Superconducting", slot: 1 }
+  trapped-ion:     { label: "Trapped ion",     slot: 2 }
+  neutral-atom:    { label: "Neutral atom",    slot: 3 }
+  photonic:        { label: "Photonic",        slot: 4 }
+  spin:            { label: "Silicon spin",    slot: 5 }
+  topological:     { label: "Topological",     slot: 6 }
+  annealing:       { label: "Annealing",       slot: 7 }
+
+machines:
+
+  # ------------------------------------------------------------------ IBM
+  - id: ibm-heron-r2
+    name: "IBM Heron r2"
+    org: IBM
+    country: USA
+    page: ibm.md
+    modality: superconducting
+    status: deployed
+    gate_based: true
+    year: 2024
+    qubits: 156
+    logical: null
+    qubit: "fixed-frequency transmon, tunable couplers"
+    connectivity: "heavy-hex lattice (degree <= 3)"
+    native_2q: "CZ"
+    err_2q: 3.0e-03
+    err_2q_note: "median CZ error ~0.3% across fleet; >50% of tested pairs above 99.9% on recent calibrations"
+    err_1q: null
+    t1_s: 2.5e-04
+    t1_note: "median T1 ~250 us (fleet-level, approximate)"
+    t2_s: null
+    gate_2q_s: 6.8e-08
+    gate_2q_note: "CZ ~68 ns"
+    claim: "Utility-scale error mitigation; workhorse of the IBM Quantum cloud fleet"
+    skeptic: "The 2023 'utility' experiment (Eagle) was matched classically within weeks — tensor networks and Pauli propagation"
+    sources:
+      - https://newsroom.ibm.com/2025-11-12-ibm-delivers-new-quantum-processors,-software,-and-algorithm-breakthroughs-on-path-to-advantage-and-fault-tolerance
+      - https://quantum.cloud.ibm.com/announcements/en/product-updates/2026-01-05-nighthawk
+      - https://www.tomshardware.com/tech-industry/semiconductors/ibm-unveils-new-120-qubit-processor-and-software-stack
+
+  - id: ibm-nighthawk
+    name: "IBM Nighthawk"
+    org: IBM
+    country: USA
+    page: ibm.md
+    modality: superconducting
+    status: deployed
+    gate_based: true
+    year: 2025
+    qubits: 120
+    logical: null
+    qubit: "fixed-frequency transmon, 218 tunable couplers"
+    connectivity: "square lattice (degree 4)"
+    native_2q: "CZ"
+    err_2q: null
+    err_2q_note: "fleet median not yet published; vendor claims circuits of ~5,000 2Q gates, 7,500 targeted end-2026"
+    err_1q: null
+    t1_s: 3.5e-04
+    t1_note: "median T1 ~350 us (vendor)"
+    t2_s: null
+    gate_2q_s: null
+    claim: "Square-lattice successor to Heron; IBM's declared vehicle for 'quantum advantage by end of 2026'"
+    skeptic: "Advantage claim is pre-registered marketing until an actual beyond-classical task with a hardened baseline lands"
+    sources:
+      - https://newsroom.ibm.com/2025-11-12-ibm-delivers-new-quantum-processors,-software,-and-algorithm-breakthroughs-on-path-to-advantage-and-fault-tolerance
+      - https://quantum.cloud.ibm.com/announcements/en/product-updates/2026-01-05-nighthawk
+
+  # --------------------------------------------------------------- Google
+  - id: google-willow
+    name: "Google Willow"
+    org: Google Quantum AI
+    country: USA
+    page: google.md
+    modality: superconducting
+    status: prototype
+    gate_based: true
+    year: 2024
+    qubits: 105
+    logical: 1
+    logical_note: "distance-7 surface code below threshold: error suppression factor Lambda = 2.14, logical lifetime 2.4x best physical qubit"
+    qubit: "frequency-tunable transmon, tunable couplers"
+    connectivity: "square lattice (degree 4)"
+    native_2q: "CZ"
+    err_2q: 3.3e-03
+    err_2q_note: "mean CZ error 0.33% (Nature 2025 QEC paper)"
+    err_1q: 3.5e-04
+    err_1q_note: "mean single-qubit error 0.035%"
+    t1_s: 9.8e-05
+    t1_note: "T1 approaching 100 us (vendor)"
+    t2_s: null
+    gate_2q_s: null
+    claim: "First below-threshold surface code (Dec 2024); 'Quantum Echoes' verifiable OTOC advantage claim (Oct 2025)"
+    skeptic: "Sycamore's 2019 RCS claim was spoofed by tensor networks within three years; the OTOC claim is now under the same classical attack cycle"
+    sources:
+      - https://blog.google/technology/research/google-willow-quantum-chip/
+      - https://www.nature.com/articles/s41586-024-08449-y
+      - https://quantumzeitgeist.com/google-quantum-computing/
+
+  # ----------------------------------------------------------------- USTC
+  - id: ustc-zuchongzhi-3
+    name: "USTC Zuchongzhi 3.0"
+    org: USTC (Hefei)
+    country: China
+    page: zuchongzhi.md
+    modality: superconducting
+    status: prototype
+    gate_based: true
+    year: 2025
+    qubits: 105
+    logical: null
+    qubit: "frequency-tunable transmon, 182 couplers, flip-chip"
+    connectivity: "square lattice (degree 4)"
+    native_2q: "CZ"
+    err_2q: 3.8e-03
+    err_2q_note: "parallel two-qubit fidelity 99.62% (PRL 2025)"
+    err_1q: 1.0e-03
+    err_1q_note: "parallel single-qubit fidelity 99.90%"
+    t1_s: 7.2e-05
+    t1_note: "coherence time 72 us"
+    t2_s: null
+    gate_2q_s: null
+    claim: "83-qubit, 32-cycle random circuit sampling claimed 10^15x beyond classical (PRL cover, Mar 2025)"
+    skeptic: "Same benchmark class in which every previous supremacy margin shrank once classical algorithms caught up"
+    sources:
+      - https://link.aps.org/doi/10.1103/PhysRevLett.134.090601
+      - https://english.cas.cn/head/202503/t20250305_903086.shtml
+      - https://arxiv.org/abs/2412.11924
+
+  # -------------------------------------------- Rigetti / IQM / the field
+  - id: rigetti-ankaa-3
+    name: "Rigetti Ankaa-3"
+    org: Rigetti Computing
+    country: USA
+    page: superconducting-field.md
+    modality: superconducting
+    status: deployed
+    gate_based: true
+    year: 2024
+    qubits: 84
+    logical: null
+    qubit: "frequency-tunable transmon, tunable couplers"
+    connectivity: "square lattice (degree 4)"
+    native_2q: "iSWAP / fSim"
+    err_2q: 5.0e-03
+    err_2q_note: "median fSim fidelity 99.5%; median iSWAP 99.0%"
+    err_1q: null
+    t1_s: null
+    t2_s: null
+    gate_2q_s: 5.6e-08
+    gate_2q_note: "fSim 56 ns (iSWAP 72 ns)"
+    claim: "84-qubit system with 99.5% median fSim fidelity (Dec 2024); chiplet strategy (Cepheus multi-die) is the scaling bet"
+    skeptic: "A full nine behind IBM/Google on 2Q error; the chiplet inter-die gates are the number to watch, and they are not published"
+    sources:
+      - https://investors.rigetti.com/news-releases/news-release-details/rigetti-computing-launches-84-qubit-ankaatm-3-system-achieves
+      - https://www.globenewswire.com/news-release/2024/12/23/3001239/0/en/Rigetti-Computing-Launches-84-Qubit-Ankaa-3-System-Achieves-99-5-Median-Two-Qubit-Gate-Fidelity-Milestone.html
+
+  - id: iqm-radiance
+    name: "IQM Radiance 54"
+    org: IQM Quantum Computers
+    country: Finland
+    page: superconducting-field.md
+    modality: superconducting
+    status: deployed
+    gate_based: true
+    year: 2025
+    qubits: 54
+    logical: null
+    qubit: "transmon, tunable couplers"
+    connectivity: "square lattice"
+    native_2q: "CZ"
+    err_2q: null
+    err_2q_note: "fleet median not independently pinned; vendor communications cite ~99.5% median 2Q on delivered systems — to verify on page pass"
+    err_1q: null
+    t1_s: null
+    t2_s: null
+    gate_2q_s: null
+    claim: "Leading European full-stack vendor; on-prem systems delivered across Europe and Asia"
+    skeptic: "Third-party spec aggregators contradict each other on IQM numbers; only on-prem operator reports are trustworthy"
+    sources:
+      - https://quantumzeitgeist.com/top-superconducting-quantum-computing-companies/
+
+  - id: fujitsu-riken-256
+    name: "Fujitsu/RIKEN 256q"
+    org: Fujitsu + RIKEN
+    country: Japan
+    page: superconducting-field.md
+    modality: superconducting
+    status: deployed
+    gate_based: true
+    year: 2025
+    qubits: 256
+    logical: null
+    qubit: "transmon"
+    connectivity: "3D-integrated lattice"
+    native_2q: null
+    err_2q: null
+    err_1q: null
+    t1_s: null
+    t2_s: null
+    gate_2q_s: null
+    claim: "256-qubit machine (Apr 2025), 1,000-qubit follow-up planned for 2026 at the RIKEN RQC-Fujitsu center"
+    skeptic: "Scaled qubit count with no published fleet fidelities — count without quality is the oldest trap in the field"
+    sources:
+      - https://www.fujitsu.com/global/about/resources/news/press-releases/2025/0422-01.html
+
+  # ----------------------------------------------------------- Quantinuum
+  - id: quantinuum-h2
+    name: "Quantinuum H2"
+    org: Quantinuum
+    country: USA/UK
+    page: quantinuum.md
+    modality: trapped-ion
+    status: deployed
+    gate_based: true
+    year: 2024
+    qubits: 56
+    logical: 12
+    logical_note: "12 logical qubits via Microsoft qubit-virtualization on H2 (Sep 2024); 4 logical with ~800x error suppression in Apr 2024"
+    qubit: "171Yb+ hyperfine clock states (138Ba+ sympathetic cooling)"
+    connectivity: "all-to-all (QCCD ion transport, racetrack trap)"
+    native_2q: "ZZ (arbitrary angle)"
+    err_2q: 1.3e-03
+    err_2q_note: "typical two-qubit gate infidelity ~1.3e-3 (99.87%)"
+    err_1q: 3.0e-05
+    err_1q_note: "typical 99.997%"
+    t1_s: null
+    t2_s: 1.0e+00
+    t2_note: "hyperfine qubit memory, order seconds (conservative)"
+    gate_2q_s: null
+    claim: "Quantum-volume record line; RCS XEB at ~100x beyond-classical cost estimate (2024)"
+    skeptic: "Wall-clock throughput: QCCD transport makes shots slow — fidelity per gate is bought with time"
+    sources:
+      - https://www.quantinuum.com/blog/quantinuum-h-series-quantum-computer-accelerates-through-3-more-performance-records-for-quantum-volume-2-20-2-21-and-2-22
+      - https://arxiv.org/abs/2406.02501
+
+  - id: quantinuum-helios
+    name: "Quantinuum Helios"
+    org: Quantinuum
+    country: USA/UK
+    page: quantinuum.md
+    modality: trapped-ion
+    status: deployed
+    gate_based: true
+    year: 2025
+    qubits: 98
+    logical: 48
+    logical_note: "48 logical qubits in launch demo (vendor claim, Nov 2025 magnetism simulation)"
+    qubit: "137Ba+ hyperfine qubits"
+    connectivity: "all-to-all (QCCD; rotatable ion-storage ring + two gate regions)"
+    native_2q: "ZZ (arbitrary angle)"
+    err_2q: 7.9e-04
+    err_2q_note: "average 2Q infidelity 7.9(2)e-4 (arXiv:2511.05465)"
+    err_1q: 2.5e-05
+    err_1q_note: "average 1Q infidelity 2.5(1)e-5"
+    spam_err: 4.8e-04
+    spam_note: "average SPAM infidelity 4.8(6)e-4"
+    t1_s: null
+    t2_s: 1.0e+00
+    t2_note: "hyperfine qubit memory, order seconds (conservative)"
+    gate_2q_s: null
+    claim: "Highest published 2Q fidelity of any commercial machine; 98 fully connected qubits (Nov 2025)"
+    skeptic: "Sub-1e-3 error on 98 qubits is genuinely new territory — the open question is clock speed, not quality"
+    sources:
+      - https://arxiv.org/abs/2511.05465
+      - https://www.quantinuum.com/press-releases/quantinuum-announces-commercial-launch-of-new-helios-quantum-computer-that-offers-unprecedented-accuracy-to-enable-generative-quantum-ai-genqai
+      - https://quantumcomputingreport.com/sandia-national-laboratories-and-quantinuum-validate-98-qubit-helios-trapped-ion-framework/
+
+  # ----------------------------------------------------------------- IonQ
+  - id: ionq-forte
+    name: "IonQ Forte"
+    org: IonQ
+    country: USA
+    page: ionq.md
+    modality: trapped-ion
+    status: deployed
+    gate_based: true
+    year: 2023
+    qubits: 36
+    logical: null
+    qubit: "171Yb+ hyperfine (single linear chain)"
+    connectivity: "all-to-all (AOD-steered Raman beams on a static chain)"
+    native_2q: "MS / ZZ"
+    err_2q: 4.0e-03
+    err_2q_note: "vendor spec 99.6% typical"
+    err_1q: 2.0e-04
+    err_1q_note: "vendor spec 99.98%"
+    t1_s: null
+    t2_s: 1.0e+00
+    t2_note: "hyperfine memory, order seconds (conservative)"
+    gate_2q_s: null
+    claim: "#AQ 36 (vendor metric); Forte Enterprise deployed in data centers"
+    skeptic: "'Algorithmic qubits' is a self-defined benchmark with error mitigation baked in — treat as marketing until independently reproduced"
+    sources:
+      - https://www.ionq.com/quantum-systems/forte
+      - https://www.ionq.com/quantum-systems/compare
+
+  - id: ionq-tempo
+    name: "IonQ Tempo"
+    org: IonQ
+    country: USA
+    page: ionq.md
+    modality: trapped-ion
+    status: prototype
+    gate_based: true
+    year: 2026
+    qubits: 100
+    logical: null
+    qubit: "171Yb+ hyperfine; Oxford Ionics electronic-control trap integration next"
+    connectivity: "all-to-all"
+    native_2q: "MS / ZZ"
+    err_2q: 1.0e-03
+    err_2q_note: "vendor design spec 99.9% — first deliveries 2026, treat as spec not measurement"
+    err_1q: 1.0e-04
+    err_1q_note: "vendor design spec 99.99%"
+    t1_s: null
+    t2_s: null
+    gate_2q_s: null
+    claim: "100-qubit datacenter-form system; R&D (Oxford Ionics chip traps) claims first 2Q gate past 99.99%"
+    skeptic: "The 4-nines gate is a lab record on a prototype pair, not a system median"
+    sources:
+      - https://www.ionq.com/quantum-systems/compare
+      - https://www.ionq.com/news/ionq-achieves-landmark-result-setting-new-world-record-in-quantum-computing
+
+  # ---------------------------------------------------------------- QuEra
+  - id: quera-aquila
+    name: "QuEra Aquila"
+    org: QuEra Computing
+    country: USA
+    page: quera.md
+    modality: neutral-atom
+    status: deployed
+    gate_based: false
+    year: 2022
+    qubits: 256
+    logical: null
+    qubit: "87Rb ground/Rydberg states (analog mode)"
+    connectivity: "programmable geometry (optical tweezers)"
+    native_2q: null
+    err_2q: null
+    err_1q: null
+    t1_s: null
+    t2_s: null
+    gate_2q_s: null
+    claim: "256-atom programmable analog quantum simulator, public on AWS Braket since 2022"
+    skeptic: "Analog-mode results (phase diagrams, MIS) have repeatedly been matched by tensor networks and heuristics at these sizes"
+    sources:
+      - https://www.quera.com/aquila
+      - https://aws.amazon.com/braket/quantum-computers/quera/
+
+  - id: quera-harvard-logical
+    name: "QuEra-Harvard logical processor"
+    org: QuEra + Harvard (Lukin group)
+    country: USA
+    page: quera.md
+    modality: neutral-atom
+    status: prototype
+    gate_based: true
+    year: 2026
+    qubits: 448
+    logical: 96
+    logical_note: "96 logical qubits from 448 atoms using [[16,6,4]]-family high-rate codes, below-threshold (Nature, Jan 2026); 37 operational logical qubits deployed at AIST Japan"
+    qubit: "87Rb hyperfine ground states; Rydberg blockade CZ; movable tweezers"
+    connectivity: "reconfigurable (atom shuttling between zones)"
+    native_2q: "CZ (Rydberg blockade)"
+    err_2q: 5.0e-03
+    err_2q_note: "physical Rydberg CZ 99.5% (Evered et al., Nature 2023)"
+    err_1q: null
+    t1_s: null
+    t2_s: 1.0e+00
+    t2_note: "hyperfine memory, order seconds (conservative)"
+    gate_2q_s: null
+    claim: "Most logical qubits demonstrated anywhere (96, Jan 2026); 2:1 physical-to-logical qLDPC demo (Apr 2026)"
+    skeptic: "Logical clock rate and mid-circuit measurement/atom-reload overheads are the honest denominators — not yet competitive on wall-clock"
+    sources:
+      - https://www.businesswire.com/news/home/20260112950379/en/
+      - https://spectrum.ieee.org/neutral-atom-quantum-computing
+
+  # --------------------------------------------------------------- Pasqal
+  - id: pasqal-orion
+    name: "Pasqal Orion class"
+    org: Pasqal
+    country: France
+    page: pasqal.md
+    modality: neutral-atom
+    status: deployed
+    gate_based: false
+    year: 2025
+    qubits: 100
+    logical: null
+    qubit: "87Rb, analog Rydberg mode (digital mode on roadmap)"
+    connectivity: "programmable geometry (optical tweezers)"
+    native_2q: null
+    err_2q: null
+    err_1q: null
+    t1_s: null
+    t2_s: null
+    gate_2q_s: null
+    claim: "~100-atom analog QPUs delivered on-prem (Julich, GENCI); >1,000 atoms trapped in lab (2024); 250-qubit QPU targeted 2026"
+    skeptic: "Delivered machines are analog-mode; the digital gate-based roadmap is where the hard part lives"
+    sources:
+      - https://www.pasqal.com/newsroom/
+      - https://postquantum.com/quantum-modalities/neutral-atom-quantum/
+
+  # ------------------------------------------------------- Atom Computing
+  - id: atom-computing-gen2
+    name: "Atom Computing gen-2"
+    org: Atom Computing (+ Microsoft)
+    country: USA
+    page: atom-computing.md
+    modality: neutral-atom
+    status: prototype
+    gate_based: true
+    year: 2023
+    qubits: 1180
+    logical: 24
+    logical_note: "24 entangled logical qubits with Microsoft qubit-virtualization (Nov 2024); Magne system targets 50 logical for QuNorth Denmark"
+    qubit: "171Yb nuclear spin (I=1/2) in optical tweezers, 1,225-site array"
+    connectivity: "reconfigurable (tweezer transport)"
+    native_2q: "CZ (Rydberg blockade)"
+    err_2q: null
+    err_1q: null
+    t1_s: null
+    t2_s: 4.0e+01
+    t2_note: "~40 s nuclear-spin coherence (vendor-reported)"
+    gate_2q_s: null
+    claim: "First gate-based platform past 1,000 physical qubits (Oct 2023)"
+    skeptic: "1,180 atoms trapped is not 1,180 computing qubits — published entangling fidelities at that scale are the missing number"
+    sources:
+      - https://atom-computing.com/quantum-startup-atom-computing-first-to-exceed-1000-qubits/
+      - https://postquantum.com/quantum-computing-companies/atom-computing/
+
+  # --------------------------------------------------------------- Xanadu
+  - id: xanadu-borealis
+    name: "Xanadu Borealis"
+    org: Xanadu
+    country: Canada
+    page: xanadu.md
+    modality: photonic
+    status: retired
+    gate_based: false
+    year: 2022
+    qubits: 216
+    qubits_note: "216 squeezed-light temporal modes — not gate-model qubits"
+    logical: null
+    qubit: "squeezed states in time-multiplexed fiber loops, PNR detectors"
+    connectivity: "3-loop temporal interferometer"
+    native_2q: null
+    err_2q: null
+    err_1q: null
+    t1_s: null
+    t2_s: null
+    gate_2q_s: null
+    claim: "Gaussian boson sampling advantage claim (Nature 2022), first on a public cloud"
+    skeptic: "Loss-exploiting classical samplers (Oh et al. 2023) later matched or beat parts of the claim"
+    sources:
+      - https://www.nature.com/articles/s41586-022-04725-x
+      - https://arxiv.org/abs/2306.03709
+
+  - id: xanadu-aurora
+    name: "Xanadu Aurora"
+    org: Xanadu
+    country: Canada
+    page: xanadu.md
+    modality: photonic
+    status: prototype
+    gate_based: true
+    year: 2025
+    qubits: 12
+    qubits_note: "12 physical qubits across 35 photonic chips, 4 racks, 13 km fiber"
+    logical: 12
+    logical_note: "12 GKP-encoded qubits with real-time error-correction decoding reported 2026 (vendor)"
+    qubit: "GKP bosonic code states in squeezed light; measurement-based"
+    connectivity: "modular — chips networked by optical fiber"
+    native_2q: null
+    err_2q: null
+    err_1q: null
+    t1_s: null
+    t2_s: null
+    gate_2q_s: null
+    claim: "First modular, networked photonic quantum computer running at room temperature (Nature, Jan 2025)"
+    skeptic: "Component losses are still orders of magnitude from fault-tolerance budgets — modularity solved topology, not loss"
+    sources:
+      - https://www.nature.com/articles/s41586-024-08406-9
+      - https://www.xanadu.ai/press/xanadu-unveils-aurora
+      - https://www.sec.gov/Archives/edgar/data/2097163/000121390026042075/ea028571201ex99-1.htm
+
+  # ------------------------------------------------------------- Jiuzhang
+  - id: ustc-jiuzhang-4
+    name: "USTC Jiuzhang 4.0"
+    org: USTC (Hefei)
+    country: China
+    page: jiuzhang.md
+    modality: photonic
+    status: prototype
+    gate_based: false
+    year: 2026
+    qubits: 1024
+    qubits_note: "1,024 squeezed-state inputs into an 8,176-mode interferometer; up to 3,050 photon detection events — not gate-model qubits"
+    logical: null
+    qubit: "squeezed light, hybrid spatial-temporal encoding"
+    connectivity: "fixed interferometer (Gaussian boson sampling)"
+    native_2q: null
+    err_2q: null
+    err_1q: null
+    t1_s: null
+    t2_s: null
+    gate_2q_s: null
+    claim: "GBS task in 25 us claimed at 10^42 years for El Capitan (Nature, May 2026); 92% source efficiency, 51% system efficiency"
+    skeptic: "Every prior Jiuzhang margin was cut by loss-exploiting classical samplers; at 3,050 clicks the output is also unverifiable in principle"
+    sources:
+      - https://english.cas.cn/newsroom/headlines/202605/t20260514_1159331.shtml
+      - https://phys.org/news/2026-05-prototype-optical-quantum-technology.html
+
+  # ------------------------------------------------------------ PsiQuantum
+  - id: psiquantum-omega
+    name: "PsiQuantum (Omega platform)"
+    org: PsiQuantum
+    country: USA
+    page: psiquantum.md
+    modality: photonic
+    status: announced
+    gate_based: true
+    year: 2025
+    qubits: null
+    logical: null
+    qubit: "dual-rail photonic qubits, fusion-based architecture (planned)"
+    connectivity: "fusion networks between photonic chips (planned)"
+    native_2q: null
+    err_2q: null
+    err_1q: null
+    t1_s: null
+    t2_s: null
+    gate_2q_s: null
+    claim: "Skipping NISQ entirely: million-qubit fault-tolerant sites under construction (Brisbane, Chicago); Omega chipset on GlobalFoundries 300mm (Nature 2025)"
+    skeptic: "The only major player with zero operational machines — the bet is pure manufacturing, and photon loss budgets remain unproven at system scale"
+    sources:
+      - https://www.nature.com/articles/s41586-025-08820-7
+      - https://www.psiquantum.com/news
+
+  # ----------------------------------------------------------------- Intel
+  - id: intel-tunnel-falls
+    name: "Intel Tunnel Falls"
+    org: Intel
+    country: USA
+    page: intel.md
+    modality: spin
+    status: research
+    gate_based: true
+    year: 2023
+    qubits: 12
+    logical: null
+    qubit: "Si/SiGe quantum-dot electron spin qubits"
+    connectivity: "linear array (exchange coupling)"
+    native_2q: "sqrt(SWAP) / exchange"
+    err_2q: null
+    err_2q_note: "field-best Si spin 2Q fidelity ~99.5% (Delft/RIKEN devices); Intel has not published a Tunnel Falls system median"
+    err_1q: null
+    t1_s: null
+    t2_s: null
+    gate_2q_s: null
+    claim: "Fabbed on 300mm EUV line, ~95% yield, >24,000 devices/wafer; Horse Ridge II cryo-CMOS control at 4 K; Argonne testbed Jan 2026"
+    skeptic: "A transistor-fab story, not yet a computing story — no system-level algorithm demo exists"
+    sources:
+      - https://newsroom.intel.com/new-technologies/quantum-computing-chip-to-advance-research
+      - https://quantumcomputingreport.com/argonne-national-laboratory-and-intel-deploy-12-qubit-silicon-quantum-dot-processor/
+
+  # -------------------------------------------------------------- Microsoft
+  - id: microsoft-majorana-1
+    name: "Microsoft Majorana 1"
+    org: Microsoft
+    country: USA
+    page: microsoft.md
+    modality: topological
+    status: contested
+    gate_based: true
+    year: 2025
+    qubits: 8
+    qubits_note: "8 topological qubits claimed; qubit operation not independently verified"
+    logical: null
+    qubit: "Majorana zero modes in InAs/Al nanowires (tetron, measurement-based)"
+    connectivity: "measurement-based (planned lattice)"
+    native_2q: null
+    err_2q: null
+    err_1q: null
+    t1_s: null
+    t2_s: null
+    gate_2q_s: null
+    claim: "Topoconductor chip (Feb 2025); Majorana 2 (Jun 2026) claims >1,000x stability, 20 s+ state lifetimes"
+    skeptic: "Nature Matters Arising (Legg) argues data selection; Frolov calls for retraction; the topological gap is inferred, never directly shown — status: contested"
+    sources:
+      - https://www.scientificamerican.com/article/top-quantum-computer-expert-claims-microsofts-topological-qubit-doesnt-hold-up/
+      - https://www.science.org/content/article/doubling-down-controversial-claims-microsoft-accelerates-quantum-computing-plans
+      - https://thequantuminsider.com/2026/06/02/microsoft-reports-advances-in-majorana-2-following-debate-over-last-years-topological-claims/
+
+  # ---------------------------------------------------------------- D-Wave
+  - id: dwave-advantage2
+    name: "D-Wave Advantage2"
+    org: D-Wave Quantum
+    country: USA/Canada
+    page: dwave.md
+    modality: annealing
+    status: deployed
+    gate_based: false
+    year: 2025
+    qubits: 4400
+    qubits_note: "4,400+ flux qubits — annealer qubits, not gate-model qubits"
+    logical: null
+    qubit: "rf-SQUID flux qubit"
+    connectivity: "Zephyr topology (20-way)"
+    native_2q: null
+    err_2q: null
+    err_1q: null
+    t1_s: null
+    t2_s: null
+    gate_2q_s: null
+    claim: "GA May 2025; Science (Mar 2025) spin-glass dynamics claimed beyond Frontier supercomputer; 40% higher energy scale, 75% lower noise vs Advantage"
+    skeptic: "Tensor-network rebuttals (Tindall et al. and others) matched significant parts of the Science claim classically within months"
+    sources:
+      - https://www.dwavequantum.com/media/wakjcpsf/adv2_4400q_whitepaper-1.pdf
+      - https://www.businesswire.com/news/home/20250520948155/en/
+      - https://postquantum.com/industry-news/d-wave-quantum-advantage/
+
+# ---------------------------------------------------------------------------
+# History: flagship gate-based machine sizes by year (for the timeline figure).
+# Photonic mode counts and annealer qubit counts are excluded on purpose —
+# they are not comparable units.
+history:
+  - { year: 2019, qubits: 53,   label: "Sycamore",      modality: superconducting }
+  - { year: 2021, qubits: 66,   label: "Zuchongzhi 2",  modality: superconducting }
+  - { year: 2021, qubits: 127,  label: "IBM Eagle",     modality: superconducting }
+  - { year: 2022, qubits: 20,   label: "H1",            modality: trapped-ion }
+  - { year: 2022, qubits: 256,  label: "Aquila",        modality: neutral-atom }
+  - { year: 2022, qubits: 433,  label: "IBM Osprey",    modality: superconducting }
+  - { year: 2023, qubits: 36,   label: "Forte",         modality: trapped-ion }
+  - { year: 2023, qubits: 1121, label: "IBM Condor",    modality: superconducting }
+  - { year: 2023, qubits: 1180, label: "Atom gen-2",    modality: neutral-atom }
+  - { year: 2024, qubits: 56,   label: "H2",            modality: trapped-ion }
+  - { year: 2024, qubits: 105,  label: "Willow",        modality: superconducting }
+  - { year: 2024, qubits: 156,  label: "Heron r2",      modality: superconducting }
+  - { year: 2025, qubits: 98,   label: "Helios",        modality: trapped-ion }
+  - { year: 2025, qubits: 105,  label: "Zuchongzhi 3",  modality: superconducting }
+  - { year: 2025, qubits: 120,  label: "Nighthawk",     modality: superconducting }
+  - { year: 2026, qubits: 448,  label: "QuEra logical", modality: neutral-atom }
+
+# Logical-qubit demonstrations (for the logical milestones figure).
+logical_milestones:
+  - { date: 2023.92, logical: 48, label: "Harvard-QuEra, 280 atoms",      modality: neutral-atom }
+  - { date: 2024.25, logical: 4,  label: "Microsoft+Quantinuum (800x)",   modality: trapped-ion }
+  - { date: 2024.70, logical: 12, label: "Microsoft+Quantinuum, H2",      modality: trapped-ion }
+  - { date: 2024.88, logical: 24, label: "Microsoft+Atom, entangled",     modality: neutral-atom }
+  - { date: 2024.94, logical: 1,  label: "Google d=7 below threshold",    modality: superconducting }
+  - { date: 2025.85, logical: 48, label: "Helios launch demo (vendor)",   modality: trapped-ion }
+  - { date: 2026.04, logical: 96, label: "QuEra [[16,6,4]] codes",        modality: neutral-atom }
