@@ -156,7 +156,7 @@ def test_scatter_points_exclude_analog_and_unsourced():
 
 def test_figures_exist_for_both_modes():
     for stem in ("fig-landscape", "fig-timeline", "fig-logical",
-                 "fig-depth", "fig-nines"):
+                 "fig-depth", "fig-nines", "fig-transmon", "fig-lattices"):
         assert (HERE / f"{stem}.svg").exists(), stem
         assert (HERE / f"{stem}-dark.svg").exists(), stem
 
