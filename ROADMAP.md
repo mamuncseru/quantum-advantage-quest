@@ -43,6 +43,14 @@ attempt run in parallel by design. Either outcome is progress.
 Full write-up of what survived — positive result or precise boundary. Harden
 proofs, paper-grade numerics, reproducibility package.
 
+## Side tracks (explicitly off the critical path)
+
+> **2026-07-11 — The Machines catalog opened** (`machines/`): a field guide
+> to every working quantum computer — fixed autopsy template, one sourced
+> data file, skeptic's box per machine. Motivation: "runs on near-term
+> devices" must never be a hand-wave in this program. Side track by
+> declaration; it does not count toward any phase gate.
+
 ## Known graveyards (do not enter)
 
 - Nonabelian hidden subgroup (dihedral → lattices)
