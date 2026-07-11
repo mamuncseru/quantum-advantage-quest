@@ -32,7 +32,30 @@ silence. Format: date · candidate · decision · one-line reason · link.
 | 2026-07-08 (3) | A3-Doob | **K3 FIRED — closed** | Doob-DQI = new geometry, no new advantage. Rigorous: semicircle alphabet-independent (Eq 6, no $q$) + Doob density menu $\subseteq H(N,16)$ ⇒ payoff subset of Hamming; pair-predicate conditional bias $3/4$ ⇒ classical slope $10/32>9/32$ (exact). Empirical: greedy tracks optimum within ~1%. ([resolution](notes/A3-doob-resolved.md), 5 tests) |
 | 2026-07-08 (3) | **coord-decomposable branch** | **CLOSED (theorem)** | Product theorem + Lee kill + Doob K3 ⇒ **Hamming is the unique DQI advantage home among coordinate-decomposable metrics.** A2 (CRT-OPI) unaffected — never used a metric scheme |
 
-| 2026-07-11 (3) | L4 | **opened** | The magic transition in state learning: poly learners at $t=O(\log n)$ (two-copy AND single-copy — lit), pseudorandom wall at $t=\Theta(n)$ (GIKL) ⇒ the open middle strip $\omega(\log n)<t<o(n)$ is the target. Numerics: collision mass of the Bell-difference distribution decays ~0.105 bits/T-gate (n=6, exact, 16 circuits/pt) — the cost curve made concrete. Possible merge with L2's unknown-frame suspect ([brief](L4-magic-transition.md)) |
+| 2026-07-11 (4) | L6 | **opened** | Topological/hidden-frame shield for distributed comparison: ALL (STOC'22) worst-case $2^{\Theta(n)}$ LOCC bound + the collapse-escape = locally-identical sectors; GHZ demo exact (marginals identical; frame-known product measurement leaks; hidden frame → 1 string among $4^n$ vs frame-free two-copy swap). Shared fate with L4 flagged ([brief](L6-topological-shield.md)) |
+| 2026-07-11 (4) | L7 | **opened, collapse-leaning** | Symmetry-class learning on quench data: exact dichotomy — dephased ensemble of real local H has EXACTLY zero low-weight odd-Y expectations, complex class Ω(1) ⇒ single-copy shadows decide the class; deliverable = the leakage theorem (an honest collapse), residue = L6's shield ([brief](L7-symmetry-class-learning.md)) |
+| 2026-07-11 (4) | L8 | **opened** | Purification dividend / mixing-time sandwich (converse of L1): fixed-β copies can't telescope $\log Z$; a preparer with a β-schedule can — exact: single-jump rel-var 21 vs 0.49 total at K=32 ([brief](L8-purification-dividend.md)) |
+| 2026-07-11 (4) | L9 | **opened** | Certification gap: $\rho + c\,Y^{\otimes n}$ has ALL marginals identical to honest Gibbs (max-ent fit certifies a lie) at trace distance 0.03; hidden-frame certification = the memory task; agnostic-tomography wave does the learning half only. Merge candidate with L6 ([brief](L9-certification-gap.md)) |
+| 2026-07-11 (4) | L10 | **opened + growth signal** | QUALM gap on physical dynamics: coherent-access FI grows $T^2/2$ vs sublinear incoherent — ratio 4.0→7.9 at T=2..4 (answers L2's kill-2: does NOT saturate); candidate = physical process family with superpoly separation, or the parameterized-comb collapse theorem ([brief](L10-qualm-gap.md)) |
+
+## Review 2026-07-11 — first ground-L kill/keep review (10 candidates is over capacity; the ledger rules apply)
+
+| Candidate | Decision | Reasoning |
+|---|---|---|
+| L1 | **keep (anchor)** | The frame theorem target (advantage ⟺ preparation hardness) anchors L5, L8; strongest theory target in the ground |
+| L2 | **keep, narrowed** | Scope = the no-advantage theorem for static structured noise (practical, certifies profiling); suspect 1 (temporal) TRANSFERRED to L10; unknown-frame suspect points at L4/L6 |
+| L3 | **keep, compute-gated** | Rates undecided (0.36→? with depth); next action needs a compute node; no theory work until the scan decides kill 1 |
+| L4 | **keep** | Well-posed open strip; crowded field is the risk; shared fate with L6's frame-finding |
+| L5 | **keep (sharpest new seam)** | The robustness-vs-advantage tension is fresh, computable, and no one owns it |
+| L6 | **keep, absorbs L9** | Hidden-frame core is one theorem; L6 carries it, L9's certification task becomes its operational payoff |
+| L7 | **probation** | Likely a pure collapse lemma: prove it (elementary), file as a boundary result, fold residue into L6; standalone only if a tenfold-way class refuses to leak |
+| L8 | **probation** | Sandwich converse is elegant but may be L1's annex; kill-1 lit check decides at next review |
+| L9 | **merged → L6** | Same hidden-frame theorem; no independent life |
+| L10 | **keep, absorbs L2-suspect-1** | Only candidate with a growing quantitative signal on dynamics; comb-SDP next |
+
+Net: **7 standalone live (L1–L6, L10), 2 probation (L7, L8), 1 merged (L9).**
+Priority order for effort: A2 write-up > L1 frame lemma > L5 tension scan >
+L6 lower bound > L10 comb-SDP > rest as reviews dictate. The magic transition in state learning: poly learners at $t=O(\log n)$ (two-copy AND single-copy — lit), pseudorandom wall at $t=\Theta(n)$ (GIKL) ⇒ the open middle strip $\omega(\log n)<t<o(n)$ is the target. Numerics: collision mass of the Bell-difference distribution decays ~0.105 bits/T-gate (n=6, exact, 16 circuits/pt) — the cost curve made concrete. Possible merge with L2's unknown-frame suspect ([brief](L4-magic-transition.md)) |
 | 2026-07-11 (3) | L5 | **opened + first evidence** | Noise robustness of memory advantages: 2512.10929 proved worst-case collapse; L5 conjecture = *physical* structure shields. Exact $\gamma^*$ scaling: **Gibbs −0.42 vs Haar −1.30** (log-log slope, n≤7) — thermal weight-concentration buys a 3× flatter exponent; the L1-tension (slow mixing wants low T, robustness wants weight concentration) is the candidate question ([brief](L5-noise-threshold.md)) |
 | 2026-07-11 (3) | A2 | **ℓ=2 bookkeeping replicated** | Windowed=unwindowed to $1.4\times10^{-11}$; state threshold at $3\sigma_f = d_{\min}(5) = 15$ exactly; decoder wall brackets $d_{\min}(4)/2$. Lemma confirmed at two ℓ values ([note update](notes/A2-window-bookkeeping.md)) |
 | 2026-07-11 (3) | L3 | **kill-1 first data** | Training rate rises with depth (0.13/0.28/0.36 bits/k at depth 2/4/6) toward the 1.65 surrogate rate but 4.5× below at depth 6 — window narrowing, undecided; compute-node scan next ([brief](L3-trainability-surrogates.md)) |
