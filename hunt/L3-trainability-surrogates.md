@@ -74,10 +74,24 @@ lower-bound evidence.
   inputs plus full classical compute; quantum learner's memory advantage
   must be the *only* asymmetry.
 
+## Kill-1 first data (2026-07-11, same day)
+
+Rate-persistence scan in the proportional regime $n = 2k$
+([`code/rate_persistence.py`](code/rate_persistence.py)): the training
+rate **rises with depth** — 0.13 / 0.28 / 0.36 bits per $k$ at depths
+2 / 4 / 6 — trending toward the surrogate rate (1.65) but still $4.5\times$
+below it at depth 6. Kill 1 has not fired; the narrowing trend is the
+honest headline. The window, if real, lives at *shallow-to-moderate*
+depth — which is also where ansätze are expressive enough to be useful,
+so the tension is genuine and undecided. Next: deeper + larger $n$ on a
+compute node, and gradient *signal* (not just variance) along optimization
+trajectories.
+
 ## First actions
 
 1. Rate-persistence scan: depth and $k/n$ scaling of
-   $\mathrm{Var}[\partial L_k]$ (compute-node scale, $n \le 14$).
+   $\mathrm{Var}[\partial L_k]$ — first pass done (above); extend to
+   $n \le 14$ and optimization trajectories on a compute node.
 2. Formalize the surrogate lower bound via the L1 machinery
    (single-copy purity estimation on the induced ensemble).
 3. Deep lit pass on post-2025 counterexample attempts.
