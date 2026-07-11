@@ -9,6 +9,8 @@ edit_uri: ""
 exclude_docs: |
   __pycache__/
   *.pyc
+  machines/_table.md
+  machines/test_machines.py
 
 theme:
   name: material
@@ -58,6 +60,8 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.highlight
   - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: docs
   - pymdownx.arithmatex:
       generic: true
   - pymdownx.emoji:
@@ -92,6 +96,9 @@ nav:
   - Frontier:
       - Problem-Shape Catalog: frontier/problem-shapes.md
       - Literature sweep 2026 H1: frontier/lit-sweep-2026H1.md
+  - Machines:
+      - The landscape: machines/index.md
+      - How to read a spec sheet: machines/metrics.md
   - Hunt:
       - Protocol & candidates: hunt/README.md
       - Verification log: hunt/00-verification-log.md
