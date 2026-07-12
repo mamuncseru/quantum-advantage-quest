@@ -83,7 +83,11 @@ strongest classical methods attacked the machine's flagship claim.
 
 Before reading any machine page, read **[how to read a spec sheet](metrics.md)**
 — it is the difference between memorizing vendor numbers and being able to
-smell what they omit.
+smell what they omit. Then read **[the gap](gap.md)** — the page that asks
+whether *any* of these is yet a quantum computer in the theoretical sense,
+and answers with arithmetic: the census of algorithm-grade logical qubits
+across the entire industry is currently **zero**, and every advantage claim
+since 2019 is scored there against the classical attack that followed it.
 
 ## Status vocabulary
 
