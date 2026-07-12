@@ -55,6 +55,14 @@ machines:
     gate_2q_note: "CZ ~68 ns"
     claim: "Utility-scale error mitigation; workhorse of the IBM Quantum cloud fleet"
     skeptic: "The 2023 'utility' experiment (Eagle) was matched classically within weeks — tensor networks and Pauli propagation"
+    caps:
+      mid_circuit_meas: true
+      feed_forward: true
+      qubit_reuse: true
+      arb_angle_2q: true
+      pulse_access: false
+      open_access: true
+    caps_note: "fractional (arbitrary-angle) gates and dynamic circuits are currently mutually exclusive; pulse-level access retired Feb 2025"
     sources:
       - https://newsroom.ibm.com/2025-11-12-ibm-delivers-new-quantum-processors,-software,-and-algorithm-breakthroughs-on-path-to-advantage-and-fault-tolerance
       - https://quantum.cloud.ibm.com/announcements/en/product-updates/2026-01-05-nighthawk
@@ -83,6 +91,14 @@ machines:
     gate_2q_s: null
     claim: "Square-lattice successor to Heron; IBM's declared vehicle for 'quantum advantage by end of 2026'"
     skeptic: "Advantage claim is pre-registered marketing until an actual beyond-classical task with a hardened baseline lands"
+    caps:
+      mid_circuit_meas: true
+      feed_forward: true
+      qubit_reuse: true
+      arb_angle_2q: null
+      pulse_access: false
+      open_access: true
+    caps_note: "Heron-generation software stack assumed; fractional-gate support not yet documented"
     sources:
       - https://newsroom.ibm.com/2025-11-12-ibm-delivers-new-quantum-processors,-software,-and-algorithm-breakthroughs-on-path-to-advantage-and-fault-tolerance
       - https://quantum.cloud.ibm.com/announcements/en/product-updates/2026-01-05-nighthawk
@@ -113,6 +129,14 @@ machines:
     gate_2q_s: null
     claim: "First below-threshold surface code (Dec 2024); 'Quantum Echoes' verifiable OTOC advantage claim (Oct 2025)"
     skeptic: "Sycamore's 2019 RCS claim was spoofed by tensor networks within three years; the OTOC claim is now under the same classical attack cycle"
+    caps:
+      mid_circuit_meas: true
+      feed_forward: true
+      qubit_reuse: true
+      arb_angle_2q: null
+      pulse_access: false
+      open_access: false
+    caps_note: "capabilities are lab-internal — there is no public access to run anything"
     sources:
       - https://blog.google/technology/research/google-willow-quantum-chip/
       - https://www.nature.com/articles/s41586-024-08449-y
@@ -143,6 +167,14 @@ machines:
     gate_2q_s: null
     claim: "83-qubit, 32-cycle random circuit sampling claimed 10^15x beyond classical (PRL cover, Mar 2025)"
     skeptic: "Same benchmark class in which every previous supremacy margin shrank once classical algorithms caught up"
+    caps:
+      mid_circuit_meas: null
+      feed_forward: null
+      qubit_reuse: null
+      arb_angle_2q: null
+      pulse_access: false
+      open_access: false
+    caps_note: "research prototype; user-facing capabilities undocumented"
     sources:
       - https://link.aps.org/doi/10.1103/PhysRevLett.134.090601
       - https://english.cas.cn/head/202503/t20250305_903086.shtml
@@ -172,6 +204,14 @@ machines:
     gate_2q_note: "fSim 56 ns (iSWAP 72 ns)"
     claim: "84-qubit system with 99.5% median fSim fidelity (Dec 2024); chiplet strategy (Cepheus multi-die) is the scaling bet"
     skeptic: "A full nine behind IBM/Google on 2Q error; the chiplet inter-die gates are the number to watch, and they are not published"
+    caps:
+      mid_circuit_meas: true
+      feed_forward: null
+      qubit_reuse: true
+      arb_angle_2q: true
+      pulse_access: true
+      open_access: true
+    caps_note: "the last major vendor still exposing pulse-level control (Quil-T); parametric iSWAP/fSim family"
     sources:
       - https://investors.rigetti.com/news-releases/news-release-details/rigetti-computing-launches-84-qubit-ankaatm-3-system-achieves
       - https://www.globenewswire.com/news-release/2024/12/23/3001239/0/en/Rigetti-Computing-Launches-84-Qubit-Ankaa-3-System-Achieves-99-5-Median-Two-Qubit-Gate-Fidelity-Milestone.html
@@ -198,6 +238,14 @@ machines:
     gate_2q_s: null
     claim: "Leading European full-stack vendor; on-prem systems delivered across Europe and Asia"
     skeptic: "Third-party spec aggregators contradict each other on IQM numbers; only on-prem operator reports are trustworthy"
+    caps:
+      mid_circuit_meas: null
+      feed_forward: null
+      qubit_reuse: null
+      arb_angle_2q: null
+      pulse_access: null
+      open_access: true
+    caps_note: "cloud access via IQM Resonance; feature documentation to pin on a verification pass"
     sources:
       - https://quantumzeitgeist.com/top-superconducting-quantum-computing-companies/
 
@@ -222,6 +270,14 @@ machines:
     gate_2q_s: null
     claim: "256-qubit machine (Apr 2025), 1,000-qubit follow-up planned for 2026 at the RIKEN RQC-Fujitsu center"
     skeptic: "Scaled qubit count with no published fleet fidelities — count without quality is the oldest trap in the field"
+    caps:
+      mid_circuit_meas: null
+      feed_forward: null
+      qubit_reuse: null
+      arb_angle_2q: null
+      pulse_access: null
+      open_access: false
+    caps_note: "partner-program access only"
     sources:
       - https://www.fujitsu.com/global/about/resources/news/press-releases/2025/0422-01.html
 
@@ -251,6 +307,14 @@ machines:
     gate_2q_s: null
     claim: "Quantum-volume record line; RCS XEB at ~100x beyond-classical cost estimate (2024)"
     skeptic: "Wall-clock throughput: QCCD transport makes shots slow — fidelity per gate is bought with time"
+    caps:
+      mid_circuit_meas: true
+      feed_forward: true
+      qubit_reuse: true
+      arb_angle_2q: true
+      pulse_access: false
+      open_access: true
+    caps_note: "the fullest feature set in the field: native arbitrary-angle ZZ, conditioned operations, measure-and-reuse"
     sources:
       - https://www.quantinuum.com/blog/quantinuum-h-series-quantum-computer-accelerates-through-3-more-performance-records-for-quantum-volume-2-20-2-21-and-2-22
       - https://arxiv.org/abs/2406.02501
@@ -282,6 +346,14 @@ machines:
     gate_2q_s: null
     claim: "Highest published 2Q fidelity of any commercial machine; 98 fully connected qubits (Nov 2025)"
     skeptic: "Sub-1e-3 error on 98 qubits is genuinely new territory — the open question is clock speed, not quality"
+    caps:
+      mid_circuit_meas: true
+      feed_forward: true
+      qubit_reuse: true
+      arb_angle_2q: true
+      pulse_access: false
+      open_access: true
+    caps_note: "H-series feature set carried forward; real-time classical compute alongside the QPU"
     sources:
       - https://arxiv.org/abs/2511.05465
       - https://www.quantinuum.com/press-releases/quantinuum-announces-commercial-launch-of-new-helios-quantum-computer-that-offers-unprecedented-accuracy-to-enable-generative-quantum-ai-genqai
@@ -312,6 +384,14 @@ machines:
     gate_2q_s: null
     claim: "#AQ 36 (vendor metric); Forte Enterprise deployed in data centers"
     skeptic: "'Algorithmic qubits' is a self-defined benchmark with error mitigation baked in — treat as marketing until independently reproduced"
+    caps:
+      mid_circuit_meas: false
+      feed_forward: false
+      qubit_reuse: false
+      arb_angle_2q: true
+      pulse_access: false
+      open_access: true
+    caps_note: "no generally exposed mid-circuit measurement on Forte-generation systems — it is a Tempo-roadmap item; partial-angle MS gates are native"
     sources:
       - https://www.ionq.com/quantum-systems/forte
       - https://www.ionq.com/quantum-systems/compare
@@ -339,6 +419,14 @@ machines:
     gate_2q_s: null
     claim: "100-qubit datacenter-form system; R&D (Oxford Ionics chip traps) claims first 2Q gate past 99.99%"
     skeptic: "The 4-nines gate is a lab record on a prototype pair, not a system median"
+    caps:
+      mid_circuit_meas: true
+      feed_forward: null
+      qubit_reuse: null
+      arb_angle_2q: true
+      pulse_access: false
+      open_access: false
+    caps_note: "mid-circuit measurement is a vendor-stated Tempo capability — spec until first deliveries are benchmarked"
     sources:
       - https://www.ionq.com/quantum-systems/compare
       - https://www.ionq.com/news/ionq-achieves-landmark-result-setting-new-world-record-in-quantum-computing
@@ -393,6 +481,14 @@ machines:
     gate_2q_s: null
     claim: "Most logical qubits demonstrated anywhere (96, Jan 2026); 2:1 physical-to-logical qLDPC demo (Apr 2026)"
     skeptic: "Logical clock rate and mid-circuit measurement/atom-reload overheads are the honest denominators — not yet competitive on wall-clock"
+    caps:
+      mid_circuit_meas: true
+      feed_forward: true
+      qubit_reuse: null
+      arb_angle_2q: false
+      pulse_access: false
+      open_access: false
+    caps_note: "zoned mid-circuit readout and transversal feed-forward demonstrated in lab demos — not a user-programmable service"
     sources:
       - https://www.businesswire.com/news/home/20260112950379/en/
       - https://spectrum.ieee.org/neutral-atom-quantum-computing
@@ -447,6 +543,14 @@ machines:
     gate_2q_s: null
     claim: "First gate-based platform past 1,000 physical qubits (Oct 2023)"
     skeptic: "1,180 atoms trapped is not 1,180 computing qubits — published entangling fidelities at that scale are the missing number"
+    caps:
+      mid_circuit_meas: true
+      feed_forward: null
+      qubit_reuse: null
+      arb_angle_2q: false
+      pulse_access: false
+      open_access: false
+    caps_note: "repetitive mid-circuit readout across the array is the platform's flagship demo; no public access"
     sources:
       - https://atom-computing.com/quantum-startup-atom-computing-first-to-exceed-1000-qubits/
       - https://postquantum.com/quantum-computing-companies/atom-computing/
@@ -501,6 +605,14 @@ machines:
     gate_2q_s: null
     claim: "First modular, networked photonic quantum computer running at room temperature (Nature, Jan 2025)"
     skeptic: "Component losses are still orders of magnitude from fault-tolerance budgets — modularity solved topology, not loss"
+    caps:
+      mid_circuit_meas: true
+      feed_forward: true
+      qubit_reuse: false
+      arb_angle_2q: false
+      pulse_access: false
+      open_access: false
+    caps_note: "measurement-based by construction — 'gates' are adaptive measurements with real-time feed-forward; semantics differ from circuit-model columns"
     sources:
       - https://www.nature.com/articles/s41586-024-08406-9
       - https://www.xanadu.ai/press/xanadu-unveils-aurora
@@ -582,6 +694,14 @@ machines:
     gate_2q_s: null
     claim: "Fabbed on 300mm EUV line, ~95% yield, >24,000 devices/wafer; Horse Ridge II cryo-CMOS control at 4 K; Argonne testbed Jan 2026"
     skeptic: "A transistor-fab story, not yet a computing story — no system-level algorithm demo exists"
+    caps:
+      mid_circuit_meas: null
+      feed_forward: null
+      qubit_reuse: null
+      arb_angle_2q: null
+      pulse_access: null
+      open_access: false
+    caps_note: "physics testbed shipped to labs; capabilities are whatever the lab wires up"
     sources:
       - https://newsroom.intel.com/new-technologies/quantum-computing-chip-to-advance-research
       - https://quantumcomputingreport.com/argonne-national-laboratory-and-intel-deploy-12-qubit-silicon-quantum-dot-processor/
@@ -609,6 +729,14 @@ machines:
     gate_2q_s: null
     claim: "Topoconductor chip (Feb 2025); Majorana 2 (Jun 2026) claims >1,000x stability, 20 s+ state lifetimes"
     skeptic: "Nature Matters Arising (Legg) argues data selection; Frolov calls for retraction; the topological gap is inferred, never directly shown — status: contested"
+    caps:
+      mid_circuit_meas: null
+      feed_forward: null
+      qubit_reuse: null
+      arb_angle_2q: null
+      pulse_access: null
+      open_access: false
+    caps_note: "qubit operation itself not independently verified — capability columns are premature"
     sources:
       - https://www.scientificamerican.com/article/top-quantum-computer-expert-claims-microsofts-topological-qubit-doesnt-hold-up/
       - https://www.science.org/content/article/doubling-down-controversial-claims-microsoft-accelerates-quantum-computing-plans
