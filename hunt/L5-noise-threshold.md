@@ -39,6 +39,31 @@ conjecture predicts flatter still at higher $T$... and *steeper* at very
 low $T$ — the robustness window and L1's advantage window may compete —
 that tension is the scientifically interesting part).
 
+## Tension scan (2026-07-11) — the co-window is empty at these sizes
+
+[`code/l5_tension.py`](code/l5_tension.py), $n = 5$ disordered
+Heisenberg, exact γ\* and Davies gap:
+
+| $\beta$ | γ\* (robustness) | $1/\text{gap}$ (slow-mixing = L1 advantage) | mean Pauli wt |
+|---|---|---|---|
+| 0.25 | **1.000** | 0.548 | 2.27 |
+| 0.50 | 0.065 | 0.662 | 2.77 |
+| 1.00 | 0.022 | 0.839 | 3.13 |
+| 2.00 | 0.016 | 0.942 | 3.25 |
+
+γ\* falls monotonically exactly as $1/\text{gap}$ rises: **robustness
+lives at high $T$ (fast mixing, no L1 advantage); L1's advantage regime
+(slow mixing, low $T$) is where the two-copy advantage is most
+noise-fragile.** The windows are disjoint. This **partially fires kill 2**:
+at these sizes physical structure does *not* shield L1's advantage — L5's
+honest role becomes **L1's NISQ-feasibility boundary**, a negative but
+publishable delimiter (and consistent with the [[L1 frame
+lemma|notes/L1-frame-lemma.md]], which independently found the same
+regime is where the (⇒) collapse degrades). Caveat: $n = 5$, and this
+small chain mixes fast at all these $\beta$ ($1/\text{gap} \le 0.94$) —
+genuinely slow-mixing (glassy/2D) families at larger $n$ are the only
+place a co-window could still hide; that is the one surviving question.
+
 ## Pre-registration
 
 - **Deliverable currency:** a theorem tying $\gamma^*$ to the weight
