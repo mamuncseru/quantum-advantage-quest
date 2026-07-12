@@ -32,7 +32,7 @@ spec = importlib.util.spec_from_file_location(
 davies = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(davies)
 
-N, EPS = 6, 0.05
+N, EPS = 5, 0.05
 
 
 def build_H(n, seed, h=1.0):
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     print(f"L5 tension scan, n={N}, disordered Heisenberg, eps={EPS}\n")
     print(f"{'beta':>6} {'gamma* (robust)':>16} {'Davies gap':>11} "
           f"{'1/gap (slow-mix)':>17} {'mean Pauli wt':>14}")
-    for beta in (0.25, 0.5, 1.0, 2.0, 4.0, 8.0):
+    for beta in (0.25, 0.5, 1.0, 2.0, 4.0):
         rho = gibbs_from_H(H, beta)
         spec_w = pauli_weight_spectrum(rho, N)
         gstar = gamma_star(spec_w, EPS)
@@ -72,7 +72,7 @@ if __name__ == "__main__":
         w = np.arange(N + 1)
         mwt = float((spec_w[1:] * w[1:]).sum() / spec_w[1:].sum())
         print(f"{beta:>6.2f} {gstar:>16.4f} {gap:>11.4f} "
-              f"{1/gap:>17.3f} {mwt:>14.2f}")
+              f"{1/gap:>17.3f} {mwt:>14.2f}", flush=True)
     print("\nRead: robustness wants gamma* large (weight-concentrated,")
     print("favored at LOW beta / high T); L1 advantage wants 1/gap large")
     print("(slow mixing). If gamma* falls monotonically as 1/gap rises,")
