@@ -153,6 +153,9 @@ reflexes:
   algorithms, and the [kill/keep ledger](../hunt/ledger.md) shows how fast
   those move when motivated.
 
+The full scoreboard — every claim since 2019 against the classical attack
+that answered it — lives in [the claim ledger](gap.md#6--the-claim-ledger).
+
 ## The checklist
 
 When a spec sheet lands on your desk, in order:
