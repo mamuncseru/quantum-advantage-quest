@@ -423,6 +423,227 @@ def fig_lattices():
         save(fig, "fig-lattices", mode)
 
 
+# ------------------------------------------------------------------ ions --
+
+def fig_ions():
+    import numpy as np
+    for mode in ("light", "dark"):
+        ink = INK[mode]
+        aqua = SERIES[mode][1]
+        fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.4),
+                                 gridspec_kw={"width_ratios": [1, 1.35]})
+        fig.patch.set_alpha(0.0)
+        for ax in axes:
+            ax.set_facecolor("none")
+            ax.axis("off")
+
+        # left: hyperfine clock qubit levels
+        ax = axes[0]
+        ax.set_xlim(0, 10)
+        ax.set_ylim(0, 10)
+        # ground manifold
+        ax.plot([1.5, 5.0], [1.6, 1.6], color=ink["primary"], lw=1.8)
+        ax.plot([1.5, 5.0], [3.4, 3.4], color=ink["primary"], lw=1.8)
+        ax.text(5.3, 1.5, "|0⟩  F=0", color=ink["primary"], fontsize=9)
+        ax.text(5.3, 3.3, "|1⟩  F=1", color=ink["primary"], fontsize=9)
+        ax.annotate("", (1.9, 3.4), (1.9, 1.6),
+                    arrowprops=dict(arrowstyle="<->", color=ink["secondary"],
+                                    lw=1.0))
+        ax.text(2.2, 2.4, "12.6 GHz\n(hyperfine)", color=ink["secondary"],
+                fontsize=7.5, va="center")
+        # excited manifold + Raman
+        ax.plot([2.2, 4.4], [8.6, 8.6], color=ink["muted"], lw=1.4)
+        ax.text(4.7, 8.5, "²P₁⁄₂", color=ink["muted"], fontsize=9)
+        ax.plot([3.0, 3.0], [1.6, 8.0], color=aqua, lw=1.6, zorder=2)
+        ax.plot([3.6, 3.6], [8.0, 3.4], color=aqua, lw=1.6, zorder=2)
+        ax.plot([2.6, 4.0], [8.0, 8.0], color=ink["muted"], lw=1.0,
+                linestyle=":")
+        ax.text(3.3, 9.3, "two Raman beams,\ndetuned from ²P₁⁄₂",
+                ha="center", color=ink["secondary"], fontsize=7.5)
+        ax.text(3.25, 0.3, "clock states: first-order\nB-field insensitive",
+                ha="center", color=ink["muted"], fontsize=7.5,
+                style="italic")
+        ax.set_title("the qubit: ¹⁷¹Yb⁺ / ¹³⁷Ba⁺ hyperfine",
+                     color=ink["secondary"], fontsize=9.5)
+
+        # right: QCCD shuttling vs static chain
+        ax = axes[1]
+        ax.set_xlim(0, 14)
+        ax.set_ylim(0, 10)
+        # QCCD rail (top)
+        ax.add_patch(plt.Rectangle((0.5, 6.4), 13.0, 1.6, fill=False,
+                                   edgecolor=ink["axis"], lw=1.2))
+        for x0, w, lab in [(0.5, 4.0, "storage"), (4.5, 3.5, "gate zone"),
+                           (8.0, 3.0, "junction"), (11.0, 2.5, "storage")]:
+            ax.plot([x0 + w, x0 + w], [6.4, 8.0], color=ink["axis"], lw=0.8,
+                    linestyle=":")
+            ax.text(x0 + w / 2, 8.4, lab, ha="center",
+                    color=ink["muted"], fontsize=7.5)
+        for x in (1.3, 2.2, 3.1, 11.8, 12.7):
+            ax.scatter(x, 7.2, s=42, color=aqua, zorder=3,
+                       edgecolors=SURFACE[mode], linewidths=1.0)
+        for x in (5.8, 6.6):
+            ax.scatter(x, 7.2, s=42, color=aqua, zorder=3,
+                       edgecolors=SURFACE[mode], linewidths=1.0)
+        ax.annotate("", (5.4, 6.0), (2.6, 6.0),
+                    arrowprops=dict(arrowstyle="->", color=ink["secondary"],
+                                    lw=1.0))
+        ax.text(4.0, 5.4, "shuttle any pair together → all-to-all",
+                color=ink["secondary"], fontsize=7.5)
+        ax.text(0.5, 9.4, "QCCD (Quantinuum): ions move",
+                color=ink["secondary"], fontsize=8.5)
+
+        # static chain (bottom)
+        for i, x in enumerate(np.linspace(2.5, 11.5, 9)):
+            ax.scatter(x, 1.8, s=42, color=aqua, zorder=3,
+                       edgecolors=SURFACE[mode], linewidths=1.0)
+        for x in (4.75, 9.25):
+            ax.annotate("", (x, 2.0), (x, 3.6),
+                        arrowprops=dict(arrowstyle="->", color=ink["muted"],
+                                        lw=1.4))
+        ax.text(7.0, 3.9, "steered beam pair", ha="center",
+                color=ink["muted"], fontsize=7.5)
+        ax.text(0.5, 0.3, "static chain (IonQ): beams move",
+                color=ink["secondary"], fontsize=8.5)
+        ax.set_title("the architecture: transport vs addressing",
+                     color=ink["secondary"], fontsize=9.5)
+
+        fig.suptitle("Trapped ions: perfect identical qubits — the "
+                     "engineering is in who talks to whom",
+                     color=ink["secondary"], fontsize=10, y=1.04)
+        save(fig, "fig-ions", mode)
+
+
+# -------------------------------------------------------------- tweezers --
+
+def fig_tweezers():
+    import numpy as np
+    for mode in ("light", "dark"):
+        ink = INK[mode]
+        yellow = SERIES[mode][2]
+        fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.4))
+        fig.patch.set_alpha(0.0)
+        for ax in axes:
+            ax.set_facecolor("none")
+            ax.axis("off")
+            ax.set_xlim(0, 10)
+            ax.set_ylim(0, 10)
+
+        # left: Rydberg blockade level picture
+        ax = axes[0]
+        lv = dict(color=ink["primary"], lw=1.8)
+        ax.plot([1.0, 4.0], [1.2, 1.2], **lv)
+        ax.text(4.3, 1.1, "|gg⟩", color=ink["primary"], fontsize=9)
+        ax.plot([1.0, 4.0], [5.0, 5.0], **lv)
+        ax.text(4.3, 4.9, "|gr⟩, |rg⟩", color=ink["primary"], fontsize=9)
+        ax.plot([1.0, 4.0], [8.8, 8.8], color=ink["muted"], lw=1.4,
+                linestyle="--")
+        ax.plot([1.0, 4.0], [7.6, 7.6], **lv)
+        ax.annotate("", (2.0, 8.75), (2.0, 7.7),
+                    arrowprops=dict(arrowstyle="<->", color=ink["secondary"],
+                                    lw=1.0))
+        ax.text(2.3, 8.15, "blockade shift V", color=ink["secondary"],
+                fontsize=7.5)
+        ax.text(4.3, 7.5, "|rr⟩ pushed away", color=ink["primary"],
+                fontsize=9)
+        ax.annotate("", (1.6, 4.9), (1.6, 1.3),
+                    arrowprops=dict(arrowstyle="->", color=yellow, lw=1.6))
+        ax.annotate("", (3.4, 8.7), (3.4, 5.1),
+                    arrowprops=dict(arrowstyle="->", color=yellow, lw=1.6,
+                                    linestyle=(0, (4, 3))))
+        ax.text(3.7, 6.3, "second excitation\nblocked", color=ink["muted"],
+                fontsize=7.5, style="italic")
+        ax.text(2.5, 0.15, "within ~5 µm, only ONE atom can reach the\n"
+                "Rydberg state — that conditionality is the CZ gate",
+                ha="center", color=ink["secondary"], fontsize=7.5)
+        ax.set_title("the gate: Rydberg blockade",
+                     color=ink["secondary"], fontsize=9.5)
+
+        # right: movable tweezers, zoned layout
+        ax = axes[1]
+        for x0, w, lab in [(0.3, 4.2, "storage zone"),
+                           (5.0, 2.8, "entangling\nzone"),
+                           (8.2, 1.6, "readout")]:
+            ax.add_patch(plt.Rectangle((x0, 2.2), w, 6.0, fill=False,
+                                       edgecolor=ink["axis"], lw=1.0,
+                                       linestyle=":"))
+            ax.text(x0 + w / 2, 8.7, lab, ha="center",
+                    color=ink["muted"], fontsize=7.5)
+        rng = np.random.default_rng(4)
+        for x, y in zip(rng.uniform(0.7, 4.1, 14),
+                        rng.uniform(2.7, 7.7, 14)):
+            ax.scatter(x, y, s=40, color=yellow, zorder=3,
+                       edgecolors=SURFACE[mode], linewidths=1.0)
+        for y in (4.0, 6.0):
+            ax.scatter(6.0, y, s=40, color=yellow, zorder=3,
+                       edgecolors=SURFACE[mode], linewidths=1.0)
+            ax.scatter(6.8, y, s=40, color=yellow, zorder=3,
+                       edgecolors=SURFACE[mode], linewidths=1.0)
+        ax.scatter(9.0, 5.0, s=40, color=yellow, zorder=3,
+                   edgecolors=SURFACE[mode], linewidths=1.0)
+        ax.annotate("", (5.8, 4.05), (3.4, 3.4),
+                    arrowprops=dict(arrowstyle="->", color=ink["secondary"],
+                                    lw=1.1))
+        ax.annotate("", (8.9, 5.0), (7.0, 6.0),
+                    arrowprops=dict(arrowstyle="->", color=ink["secondary"],
+                                    lw=1.1))
+        ax.text(5.0, 1.2, "optical tweezers MOVE atoms between zones:\n"
+                "connectivity is a compiler decision, not a chip layout",
+                ha="center", color=ink["secondary"], fontsize=7.5)
+        ax.set_title("the architecture: atoms in motion",
+                     color=ink["secondary"], fontsize=9.5)
+
+        fig.suptitle("Neutral atoms: identical qubits, reconfigurable "
+                     "wiring — the platform logical qubits like best",
+                     color=ink["secondary"], fontsize=10, y=1.04)
+        save(fig, "fig-tweezers", mode)
+
+
+# ------------------------------------------------------------------- gbs --
+
+def fig_gbs():
+    import numpy as np
+    for mode in ("light", "dark"):
+        ink = INK[mode]
+        green = SERIES[mode][3]
+        fig, ax = new_fig(mode, (7.0, 3.2))
+        ax.axis("off")
+        ax.set_xlim(0, 14)
+        ax.set_ylim(0, 9.0)
+        n = 6
+        ys = np.linspace(1.2, 6.8, n)
+        for y in ys:
+            ax.plot([1.6, 11.6], [y, y], color=ink["axis"], lw=1.1,
+                    zorder=1)
+            ax.scatter(1.2, y, s=60, marker="s", color=green, zorder=3,
+                       edgecolors=SURFACE[mode], linewidths=1.0)
+        for li, x in enumerate(np.linspace(4.2, 9.2, 6)):
+            start = 0 if li % 2 == 0 else 1
+            for a in range(start, n - 1, 2):
+                ax.plot([x, x + 0.9], [ys[a], ys[a + 1]], color=ink["axis"],
+                        lw=1.1, zorder=2)
+                ax.plot([x, x + 0.9], [ys[a + 1], ys[a]], color=ink["axis"],
+                        lw=1.1, zorder=2)
+        clicks = [2, 0, 1, 0, 3, 1]
+        for y, c in zip(ys, clicks):
+            ax.scatter(12.2, y, s=64, marker=">", color=green, zorder=3,
+                       edgecolors=SURFACE[mode], linewidths=1.0)
+            ax.text(13.0, y, str(c), va="center", color=ink["primary"],
+                    fontsize=9)
+        ax.text(0.7, 8.1, "squeezed-light\nsources", color=ink["secondary"],
+                fontsize=8)
+        ax.text(7.2, 8.1, "interferometer (beamsplitter mesh)",
+                ha="center", color=ink["secondary"], fontsize=8.5)
+        ax.text(12.6, 8.1, "photon\ncounts", ha="center",
+                color=ink["secondary"], fontsize=8)
+        ax.text(7.0, 0.1, "output distribution ∝ |Hafnian|² — #P-hard to "
+                "sample classically, and equally hard to VERIFY",
+                ha="center", color=ink["muted"], fontsize=8, style="italic")
+        ax.set_title("Gaussian boson sampling: the machine is the "
+                     "distribution", color=ink["secondary"], fontsize=10)
+        save(fig, "fig-gbs", mode)
+
+
 # ----------------------------------------------------------------- table --
 
 def fmt_err(e):
@@ -483,4 +704,7 @@ if __name__ == "__main__":
     fig_nines()
     fig_transmon()
     fig_lattices()
+    fig_ions()
+    fig_tweezers()
+    fig_gbs()
     emit_table()
