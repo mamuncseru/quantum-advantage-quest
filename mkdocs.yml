@@ -99,10 +99,26 @@ nav:
   - Machines:
       - The landscape: machines/index.md
       - How to read a spec sheet: machines/metrics.md
-      - "IBM · Heron → Starling": machines/ibm.md
-      - "Google · Willow": machines/google.md
-      - "USTC · Zuchongzhi": machines/zuchongzhi.md
-      - "The superconducting field": machines/superconducting-field.md
+      - Superconducting:
+          - "IBM · Heron → Starling": machines/ibm.md
+          - "Google · Willow": machines/google.md
+          - "USTC · Zuchongzhi": machines/zuchongzhi.md
+          - "The field · Rigetti, IQM, OQC…": machines/superconducting-field.md
+      - Trapped ion:
+          - "Quantinuum · H2, Helios": machines/quantinuum.md
+          - "IonQ · Forte, Tempo": machines/ionq.md
+      - Neutral atom:
+          - "QuEra · Aquila & logical": machines/quera.md
+          - "Pasqal · Orion": machines/pasqal.md
+          - "Atom Computing": machines/atom-computing.md
+      - Photonic:
+          - "Xanadu · Borealis, Aurora": machines/xanadu.md
+          - "USTC · Jiuzhang": machines/jiuzhang.md
+          - "PsiQuantum · the blueprint": machines/psiquantum.md
+      - Other physics:
+          - "Intel · silicon spin": machines/intel.md
+          - "Microsoft · Majorana (contested)": machines/microsoft.md
+          - "D-Wave · Advantage2": machines/dwave.md
   - Hunt:
       - Protocol & candidates: hunt/README.md
       - Verification log: hunt/00-verification-log.md
