@@ -175,7 +175,14 @@ $(w_k)_{k \le \ell}$ from DQI's optimal-polynomial prescription:
    $\sum_{|S| \le \ell} \sum_{(k_i)_{i \in S}} \big(\prod_{i\in S}
    \hat g_i(k_i)\big) |S, (k_i)\rangle$ — the CRT analogue of DQI's Dicke
    state over error patterns, with per-coordinate amplitudes
-   $\hat g_i$ the Fourier coefficients of $\mathbb{1}[\cdot \in F_i]$.
+   $\hat g_i$ the Fourier coefficients of the recentered indicators
+   $g_i = (\mathbb{1}_{F_i} - \mu_i)/\sqrt{\mu_i(1-\mu_i)}$.
+   **[JOINT J1 — the one genuine hole.]** The subset part is exactly
+   Hamming-DQI's Dicke-state preparation (alphabet-independent, so it
+   transplants verbatim); the per-coordinate part is $m$ independent
+   state preparations in dimension $p_i \le c_b \bar p$ (poly each). No
+   obstruction is identified, but the mixed-radix composition needs its
+   own written lemma — see §5.1.
 2. **Frequency computation.** Compute
    $t = \sum_{i \in S} (M/p_i) k_i \bmod M$ into a fresh register.
 3. **Window.** Convolve with a discrete Gaussian of frequency width
@@ -184,32 +191,52 @@ $(w_k)_{k \le \ell}$ from DQI's optimal-polynomial prescription:
    $|\delta| \lesssim \sigma_f\sqrt{\log(1/\varepsilon')}$.
 4. **Uncompute.** Run the decoder of Theorem 4.4 coherently on
    $\theta = t'/M$ and erase $|S,(k_i)\rangle$.
-5. **Inverse QFT** over $\mathbb{Z}_M$; measure $x$.
+5. **Inverse QFT** over $\mathbb{Z}_M$; measure $x$. Explicit window
+   constants: phase-center $x_0 = X/2$, real-space width
+   $\sigma_x = X/12$ (so mass outside $[0,X)$ is $\le 2e^{-18}$),
+   frequency width $\sigma_f = M/(2\pi\sigma_x)$, truncation radius
+   $R = \sigma_f\sqrt{2\ln(8 m N_\ell/\varepsilon)}$ with
+   $N_\ell \le \binom{m}{\ell}\bar p^{\ell}$ the sparse-frequency count.
 
-**What is proven:** steps 2–4 (Theorems 4.1–4.4 and §6). **What is
-sketched:** step 1 at general $\ell$ — DQI's Dicke-state machinery
-transplants coordinate-wise and the amplitudes are the same combinatorial
-objects, but the *proof* that the CRT shell state is preparable in
-$\mathrm{poly}(m)$ with the right normalization is written nowhere in
-this repo. **This is the largest open item in the construction.** It is
-believed routine (it is the part of DQI that is *not* problem-specific),
-but "believed routine" is exactly the phrase that preceded the
-April-2024 LWE bug, and it must be written out.
+**What is proven:** steps 2–5 (Theorems 4.1–4.4 and §6). **What is
+sketched:** step 1 at general $\ell$ (JOINT J1).
+
+### 5.1 JOINT J1 — the shell-state preparation (the one genuine hole)
+
+DQI's Dicke-state machinery transplants coordinate-wise and the
+amplitudes are the same combinatorial objects, but the *proof* that the
+CRT shell state is preparable in $\mathrm{poly}(m)$ with the right
+normalization is written nowhere in this repo. Decomposition of the
+obligation: (i) the subset register $\sum_{|S|\le\ell} w_{|S|}|S\rangle$
+is Hamming-DQI's symmetric Dicke preparation, alphabet-independent —
+transplants verbatim; (ii) the per-coordinate registers
+$\sum_{k_i\ne 0}\hat g_i(k_i)|k_i\rangle$ are $m$ independent
+$p_i$-dimensional state preparations, poly each; (iii) the composition
+must reproduce the shell Jacobi weights $w_k$ without cross-normalization
+error. Steps (i)–(ii) are standard; (iii) is the written-lemma debt.
+**Believed routine — it is precisely the part of DQI that is *not*
+problem-specific — but "believed routine" is the phrase that preceded the
+April-2024 LWE bug, so it must be written out before any claim.**
 
 ## 6. The window lemma (amplitude bookkeeping)
 
-**Lemma 6.1.** Let the Gaussian window have frequency width $\sigma_f$,
-truncated at $C\sigma_f\sqrt{\log(m/\varepsilon)}$. If
+**Lemma 6.1 (the master condition).** Suppose
 
 $$
-C\,\sigma_f\,\sqrt{\log(m/\varepsilon)} \;\le\; d_{\min}(2\ell + 1),
+\boxed{\;4\,\sigma_f\,\sqrt{2\ln(8 m N_\ell/\varepsilon)}
+\;\le\; \frac{M}{P_{\max}(2\ell+1)} \;=\; d_{\min}(2\ell+1)\;}
 $$
 
-then (i) the prepared state is $\varepsilon$-close to the ideal windowed
-state, (ii) the decoder is correct on all but $\varepsilon$ of the
-Gaussian mass, and (iii) the expected objective satisfies
+(for balanced moduli this holds iff $\ell/m \le \kappa/2 - O(1/m) -
+o(1)$). Then (i) the prepared state is $\varepsilon$-close to the ideal
+windowed state, (ii) the decoder is correct on all but $\varepsilon$ of
+the Gaussian mass (failures need $|\delta| > R$, truncated away), and
+(iii) the expected objective satisfies
 $\big|\mathbb{E}[f]_W - \mathbb{E}[f]\big| \le m\varepsilon'$ with
-$\varepsilon'$ superpolynomially small in the truncation parameter.
+$\varepsilon' \le \exp(-\Omega(\ln(8mN_\ell/\varepsilon)))$
+superpolynomially small. **[JOINT J2: (i)–(iii) hold at this program's
+level of rigor; the human pass must re-derive the Poisson-summation
+bookkeeping and the finite-$N_\ell$ union bound.]**
 
 *Proof idea.* By Poisson summation every window-induced correction is a
 Fourier coefficient of $W^2$ evaluated at a *nonzero difference of sparse
@@ -238,16 +265,19 @@ the decoder side) — measured, not fitted. Code:
 
 ## 7. The payoff, and the advantage window
 
-**Claim 7.1 (conditional on §5).** CRT-DQI achieves the DQI semicircle
-payoff with $\kappa$ in the role of the code rate:
+**Claim 7.1 (conditional on §5/J1).** CRT-DQI achieves the finite-size
+DQI payoff $\mathsf{SC}_{m,\ell}(\mu)$ — the top eigenvalue of the
+$(\ell{+}1)$-shell Jacobi form — which tends to the semicircle
 
 $$
-\frac{\langle f \rangle}{m} \;=\;
+\frac{\langle f \rangle}{m} \;\to\;
 \Big(\sqrt{\tfrac{\ell}{m}(1-\mu)} + \sqrt{\mu\,(1 - \tfrac{\ell}{m})}\Big)^{2}
 \qquad (\mu \le 1 - \ell/m),
 $$
 
-for any $\ell/m < \kappa/2$ (Theorem 4.4 + Lemma 6.1). Comparing with
+as $\ell, m \to \infty$, for any $\ell/m < \kappa/2$ (Theorem 4.4 +
+Lemma 6.1). *The honest statement is the finite-size $\mathsf{SC}$;
+the closed form is its limit.* Comparing with
 Proposition 2.1 at $\mu = 1/2$, CRT-DQI beats CRT-Prange iff
 
 $$
@@ -269,7 +299,7 @@ information-set baseline, the same margin DQI reports for RS-OPI.
 | 1 | Coefficient-space lattice decoder (LLL/Kannan) | **Tried, fails** — and that failure is *explained* (§4 remark), not merely observed |
 | 2 | Noisy-CRT lattice attacks (Bleichenbacher–Nguyen, Shparlinski–Steinfeld) | Solve list-*decoding* (one residue per modulus); CRT-OPI at $\mu\approx1/2$ is large-list list-*recovery* ($\ell_{\rm in} \sim p/2$), where GS-type methods are vacuous and **no classical literature exists** |
 | 3 | "CF empowers the classical attacker too" | CF solves the *Fourier-side* problem given $\theta$; no classical route is known to the high-payoff $\theta$'s without the quantum interference that concentrates amplitude on them. **This is the attack to keep hammering.** |
-| 4 | KOW dequantization of CLZ's SIS$_\infty$ (2510.07515) | The one prior "over $\mathbb{Z}$" claim in this family fell classically. Our window step lives in that neighbourhood — an independent adversarial pass is running specifically on this |
+| 4 | KOW dequantization of CLZ's SIS$_\infty$ (2510.07515) | The one prior "over $\mathbb{Z}$" claim in this family fell classically. Our window step lives in that neighbourhood — **a dedicated adversarial pass was launched 2026-07-11 but hit the session limit before delivering a verdict; it is OWED, not passed.** No attack has been completed on this document |
 | 5 | Hardness pedigree | **None claimed.** Same epistemic tier as OPI: no complexity-theoretic hardness in-regime; pedigree = the absence of attacks in 25 years of noisy-CRT literature |
 | 6 | Human proof-level verification | **Owed.** §4, §6 and this document's §5 gap |
 
