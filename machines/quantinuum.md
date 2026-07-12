@@ -95,6 +95,12 @@ makes high-rate qLDPC codes natural here — the same code-rate argument as
 with transport instead of tweezers. Declared ladder: Helios → Sol (2027) →
 **Apollo (~2029, fully fault-tolerant)**.
 
+**Distance to theory:** Helios's 7.9×10⁻⁴ is the field's best, and even
+here one 10⁻¹²-grade logical qubit costs distance-19 ≈ **720 physical
+qubits — 7× the machine**. The best quantum computer ever built holds zero
+algorithm-grade logical qubits; it is simply the *closest* zero.
+[The gap, computed →](gap.md#2--the-gap-computed)
+
 !!! danger "⚔ The skeptic's box"
 
     - **The RCS claim (Jun 2024, with JPMorgan):** 56-qubit XEB estimated
