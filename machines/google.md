@@ -93,6 +93,14 @@ logical qubits and magic-state work on the same platform. The gap to
 error, thousands of physical qubits per logical), but the sign of the
 derivative is finally right.
 
+**Distance to theory:** at Willow's 3.3×10⁻³ mean CZ error, one
+10⁻¹²-grade logical qubit costs distance-45 ≈ **4,050 physical qubits —
+39× the whole chip**; the demonstrated d=7 logical qubit has an error rate
+around 10⁻³ per cycle, nine orders from the algorithmic target. And the
+below-threshold result is memory + Clifford only — the fault-tolerant
+T gate does not exist here or anywhere.
+[The gap, computed →](gap.md#2--the-gap-computed)
+
 !!! danger "⚔ The skeptic's box"
 
     - **Sycamore 2019 is the field's great cautionary tale.** "10,000 years
