@@ -10,6 +10,8 @@ exclude_docs: |
   __pycache__/
   *.pyc
   machines/_table.md
+  machines/_gap.md
+  machines/_claims.md
   machines/test_machines.py
 
 theme:
@@ -99,6 +101,7 @@ nav:
   - Machines:
       - The landscape: machines/index.md
       - How to read a spec sheet: machines/metrics.md
+      - "The gap — is any of this a quantum computer?": machines/gap.md
       - Superconducting:
           - "IBM · Heron → Starling": machines/ibm.md
           - "Google · Willow": machines/google.md
@@ -119,6 +122,8 @@ nav:
           - "Intel · silicon spin": machines/intel.md
           - "Microsoft · Majorana (contested)": machines/microsoft.md
           - "D-Wave · Advantage2": machines/dwave.md
+  - Strike:
+      - "CRT-DQI · the theorem": strike/crt-dqi-theorem.md
   - Hunt:
       - Protocol & candidates: hunt/README.md
       - Verification log: hunt/00-verification-log.md
@@ -145,4 +150,5 @@ nav:
       - "Note · Lee-metric KILLED": hunt/notes/AC-lee-metric-KILLED.md
       - "Note · Product theorem (Hamming/Doob)": hunt/notes/A3-product-theorem.md
       - "Note · Doob resolved (K3 fired)": hunt/notes/A3-doob-resolved.md
+      - "Note · L1 frame lemma": hunt/notes/L1-frame-lemma.md
       - "Note · A2 window bookkeeping (Gate 1+2)": hunt/notes/A2-window-bookkeeping.md
