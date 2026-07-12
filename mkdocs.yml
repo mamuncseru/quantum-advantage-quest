@@ -12,7 +12,11 @@ exclude_docs: |
   machines/_table.md
   machines/_gap.md
   machines/_claims.md
+  machines/_caps.md
+  machines/snapshots/
+  machines/feasibility.py
   machines/test_machines.py
+  machines/test_feasibility.py
 
 theme:
   name: material
@@ -102,6 +106,7 @@ nav:
       - The landscape: machines/index.md
       - How to read a spec sheet: machines/metrics.md
       - "The gap — is any of this a quantum computer?": machines/gap.md
+      - "The toolkit — will it run?": machines/toolkit.md
       - Superconducting:
           - "IBM · Heron → Starling": machines/ibm.md
           - "Google · Willow": machines/google.md
