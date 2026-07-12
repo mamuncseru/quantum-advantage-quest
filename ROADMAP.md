@@ -38,6 +38,18 @@ advantage before proving it.
 All effort on the best candidate. Rigorous proof attempt AND classical-attack
 attempt run in parallel by design. Either outcome is progress.
 
+> **2026-07-11 — Phase 3 opened early on candidate A2 (CRT-DQI).** A2's
+> self-attack chain is complete (decoder = continued fractions; window
+> bookkeeping lemma validated exactly at ℓ=1,2), so effort concentrates
+> there ahead of schedule. Load-bearing statement:
+> `strike/crt-dqi-theorem.md` — the construction as a theorem with all
+> constants and the one remaining hole named (§5, shell-state
+> preparation). Running in parallel by design: a dedicated adversarial
+> cryptanalysis pass and the deferred human verification batch. Phase-2
+> gate is met (A2 surviving + A3 closed as a publishable negative +
+> seven live ground-L candidates), so this is a gate-passing transition,
+> not a skip.
+
 ## Phase 4 — WRITE (weeks 21–26)
 
 Full write-up of what survived — positive result or precise boundary. Harden
