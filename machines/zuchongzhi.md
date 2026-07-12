@@ -72,6 +72,11 @@ correction as the 3.0 follow-up program; a below-threshold replication on
 this chip would be the first independent confirmation of the Willow result —
 worth more to the field than another sampling record.
 
+**Distance to theory:** at 3.8×10⁻³ parallel 2Q error, one 10⁻¹²-grade
+logical qubit costs distance-53 ≈ **5,600 physical qubits — 53× the chip**.
+Logical qubits on board today: zero.
+[The gap, computed →](gap.md#2--the-gap-computed)
+
 !!! danger "⚔ The skeptic's box"
 
     - **The headline is an RCS claim: 83 qubits × 32 cycles, "10¹⁵× beyond
