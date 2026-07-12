@@ -9,21 +9,21 @@
 | USTC Zuchongzhi 3.0 | Superconducting | 105 | 3.8×10⁻³ | prototype | [USTC (Hefei)](zuchongzhi.md) |
 | Rigetti Ankaa-3 | Superconducting | 84 | 5.0×10⁻³ | deployed | [Rigetti Computing](superconducting-field.md) |
 | IQM Radiance 54 | Superconducting | 54 | — | deployed | [IQM Quantum Computers](superconducting-field.md) |
-| IonQ Tempo | Trapped ion | 100 | 1.0×10⁻³ | prototype | soon |
-| Quantinuum Helios | Trapped ion | 98 | 7.9×10⁻⁴ | deployed | soon |
-| Quantinuum H2 | Trapped ion | 56 | 1.3×10⁻³ | deployed | soon |
-| IonQ Forte | Trapped ion | 36 | 4.0×10⁻³ | deployed | soon |
-| Atom Computing gen-2 | Neutral atom | 1,180 | — | prototype | soon |
-| QuEra-Harvard logical processor | Neutral atom | 448 | 5.0×10⁻³ | prototype | soon |
-| QuEra Aquila | Neutral atom | 256† | — | deployed | soon |
-| Pasqal Orion class | Neutral atom | 100† | — | deployed | soon |
-| USTC Jiuzhang 4.0 | Photonic | 1,024† | — | prototype | soon |
-| Xanadu Borealis | Photonic | 216† | — | retired | soon |
-| Xanadu Aurora | Photonic | 12 | — | prototype | soon |
-| PsiQuantum (Omega platform) | Photonic | — | — | announced | soon |
-| Intel Tunnel Falls | Silicon spin | 12 | — | research | soon |
-| Microsoft Majorana 1 | Topological | 8 | — | contested | soon |
-| D-Wave Advantage2 | Annealing | 4,400† | — | deployed | soon |
+| IonQ Tempo | Trapped ion | 100 | 1.0×10⁻³ | prototype | [IonQ](ionq.md) |
+| Quantinuum Helios | Trapped ion | 98 | 7.9×10⁻⁴ | deployed | [Quantinuum](quantinuum.md) |
+| Quantinuum H2 | Trapped ion | 56 | 1.3×10⁻³ | deployed | [Quantinuum](quantinuum.md) |
+| IonQ Forte | Trapped ion | 36 | 4.0×10⁻³ | deployed | [IonQ](ionq.md) |
+| Atom Computing gen-2 | Neutral atom | 1,180 | — | prototype | [Atom Computing (+ Microsoft)](atom-computing.md) |
+| QuEra-Harvard logical processor | Neutral atom | 448 | 5.0×10⁻³ | prototype | [QuEra + Harvard (Lukin group)](quera.md) |
+| QuEra Aquila | Neutral atom | 256† | — | deployed | [QuEra Computing](quera.md) |
+| Pasqal Orion class | Neutral atom | 100† | — | deployed | [Pasqal](pasqal.md) |
+| USTC Jiuzhang 4.0 | Photonic | 1,024† | — | prototype | [USTC (Hefei)](jiuzhang.md) |
+| Xanadu Borealis | Photonic | 216† | — | retired | [Xanadu](xanadu.md) |
+| Xanadu Aurora | Photonic | 12 | — | prototype | [Xanadu](xanadu.md) |
+| PsiQuantum (Omega platform) | Photonic | — | — | announced | [PsiQuantum](psiquantum.md) |
+| Intel Tunnel Falls | Silicon spin | 12 | — | research | [Intel](intel.md) |
+| Microsoft Majorana 1 | Topological | 8 | — | contested | [Microsoft](microsoft.md) |
+| D-Wave Advantage2 | Annealing | 4,400† | — | deployed | [D-Wave Quantum](dwave.md) |
 
 † analog device — atom, mode, or annealer counts are **not** gate-model qubits and must not be compared to them.
 
