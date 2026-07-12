@@ -7,8 +7,8 @@
 
 The University of Science and Technology of China (Hefei), under Jian-Wei
 Pan's quantum program with Xiao-Bo Zhu leading the superconducting line. The
-same institution runs the Jiuzhang photonic samplers (page coming with the
-photonic batch) — one lab, two independent shots at beyond-classical claims. The machine is named
+same institution runs the [Jiuzhang photonic samplers](jiuzhang.md) — one
+lab, two independent shots at beyond-classical claims. The machine is named
 for Zu Chongzhi, the 5th-century mathematician who pinned π to seven digits.
 
 | Chip | Year | Qubits | The lesson it taught |
