@@ -38,6 +38,10 @@ silence. Format: date · candidate · decision · one-line reason · link.
 | 2026-07-11 (4) | L9 | **opened** | Certification gap: $\rho + c\,Y^{\otimes n}$ has ALL marginals identical to honest Gibbs (max-ent fit certifies a lie) at trace distance 0.03; hidden-frame certification = the memory task; agnostic-tomography wave does the learning half only. Merge candidate with L6 ([brief](L9-certification-gap.md)) |
 | 2026-07-11 (4) | L10 | **opened + growth signal** | QUALM gap on physical dynamics: coherent-access FI grows $T^2/2$ vs sublinear incoherent — ratio 4.0→7.9 at T=2..4 (answers L2's kill-2: does NOT saturate); candidate = physical process family with superpoly separation, or the parameterized-comb collapse theorem ([brief](L10-qualm-gap.md)) |
 
+| 2026-07-11 (5) | L5 | **kill-2 partially fires** | Tension scan (n=5, exact): γ\* falls monotonically as 1/gap rises — robustness (high T) and L1-advantage (low T, slow mixing) windows are DISJOINT. L5 → L1's NISQ-feasibility boundary (honest negative); only larger-n glassy/2D families could still hide a co-window ([brief](L5-noise-threshold.md)) |
+| 2026-07-11 (5) | A2 | **STRIKE: theorem document** | `strike/crt-dqi-theorem.md` — full construction with master condition $4\sigma_f\sqrt{2\ln(8mN_\ell/\varepsilon)} \le d_{\min}(2\ell{+}1)$, both structure theorems proved, decoder lemma, window lemma (J2), finite-size payoff; one hole named (J1: shell-state prep). Adversarial agent pass **incomplete — hit session limit, owed** ([doc](../strike/crt-dqi-theorem.md)) |
+| 2026-07-11 (5) | L1 | **(⇒) direction proved** | Fast preparation ⇒ no memory advantage (rebuild-and-swap simulation), clean in the high-T/fast-mixing regime; degrades at low T exactly where (⇐) expects advantage — the equivalence's seam is the mixing transition ([note](notes/L1-frame-lemma.md)) |
+
 ## Review 2026-07-11 — first ground-L kill/keep review (10 candidates is over capacity; the ledger rules apply)
 
 | Candidate | Decision | Reasoning |
