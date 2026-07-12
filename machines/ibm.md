@@ -116,6 +116,12 @@ Cockatoo (linked modules, 2027) → **Starling: ~200 logical qubits, 100M
 logical gates, 2029** in a purpose-built Poughkeepsie building. No logical
 qubits demonstrated on deployed hardware yet — the bet is all forward.
 
+**Distance to theory:** at Heron's 3×10⁻³, one algorithm-grade
+(10⁻¹²) logical qubit costs distance-43 ≈ **3,700 physical qubits — 24×
+the entire chip**. Today's whole fleet holds **zero** such logical qubits;
+the gross code's better rate is exactly an attempt to shrink that number,
+and it is undemonstrated. [The gap, computed →](gap.md#2--the-gap-computed)
+
 !!! danger "⚔ The skeptic's box"
 
     - **The 2023 "utility" claim died in weeks.** The Eagle kicked-Ising
