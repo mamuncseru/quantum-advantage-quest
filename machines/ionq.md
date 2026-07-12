@@ -74,6 +74,12 @@ as the four-nines gates arrive: at 10⁻⁴ physical error, small codes start
 buying real logical depth. Watch whether the 256-qubit system ships with
 an encoding story.
 
+**Distance to theory:** at Forte's measured 4×10⁻³, one 10⁻¹²-grade
+logical qubit needs ≈ **6,000 physical qubits — 168× the machine**; even at
+Tempo's spec-sheet 10⁻³ it is ≈ 880, nine times Tempo's size. Zero
+algorithm-grade logical qubits, here as everywhere.
+[The gap, computed →](gap.md#2--the-gap-computed)
+
 !!! danger "⚔ The skeptic's box"
 
     - **#AQ is the catalog's canonical vendor-defined metric** — benchmark
