@@ -20,9 +20,11 @@ DATA = yaml.safe_load((HERE / "data.yml").read_text())
 MACHINES = DATA["machines"]
 STATUSES = {"deployed", "prototype", "research", "contested", "announced",
             "retired"}
-NON_MACHINE_PAGES = {"index.md", "metrics.md", "gap.md", "_table.md",
-                     "_gap.md", "_claims.md"}
+NON_MACHINE_PAGES = {"index.md", "metrics.md", "gap.md", "toolkit.md",
+                     "_table.md", "_gap.md", "_claims.md", "_caps.md"}
 CLAIM_STATUSES = {"matched", "reduced", "standing"}
+CAP_KEYS = {"mid_circuit_meas", "feed_forward", "qubit_reuse",
+            "arb_angle_2q", "pulse_access", "open_access"}
 
 
 def _load_figures_module():
@@ -145,10 +147,25 @@ def test_master_table_matches_data():
         "_table.md is stale — run scripts/make_machine_figures.py"
 
 
+def test_caps_typed_and_gate_based_only():
+    seen = 0
+    for m in MACHINES:
+        caps = m.get("caps")
+        if caps is None:
+            continue
+        seen += 1
+        assert m["gate_based"], f"{m['id']}: caps on an analog machine"
+        assert set(caps) == CAP_KEYS, f"{m['id']}: {set(caps) ^ CAP_KEYS}"
+        for k, v in caps.items():
+            assert v is None or isinstance(v, bool), f"{m['id']}.{k}={v!r}"
+    assert seen >= 12  # the matrix must actually cover the field
+
+
 def test_gap_and_claims_tables_match_data():
     mod = _load_figures_module()
     for fname, emit in (("_gap.md", mod.emit_gap_table),
-                        ("_claims.md", mod.emit_claims_table)):
+                        ("_claims.md", mod.emit_claims_table),
+                        ("_caps.md", mod.emit_caps_table)):
         before = (HERE / fname).read_text()
         emit()
         assert (HERE / fname).read_text() == before, \
