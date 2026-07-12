@@ -74,6 +74,14 @@ For calibration: the best superconducting result is *one* below-threshold
 logical qubit. The open questions are operational — logical *algorithms*,
 not logical memories, and the wall-clock cost of all that atom traffic.
 
+**Distance to theory:** by surface-code arithmetic at the 5×10⁻³ physical
+CZ, one 10⁻¹²-grade logical qubit would cost ≈ **10,700 physical atoms** —
+which is precisely why this platform bets on high-rate codes and transport
+instead. The 96 logical qubits are *memories* at ~10⁻³-class logical error,
+not 10⁻¹² compute qubits; the code-rate advantage must survive nine more
+orders of magnitude of suppression to cash out.
+[The gap, computed →](gap.md#2--the-gap-computed)
+
 !!! danger "⚔ The skeptic's box"
 
     - **Aquila's analog results keep getting matched.** The 2023 quantum
