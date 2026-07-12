@@ -20,7 +20,9 @@ DATA = yaml.safe_load((HERE / "data.yml").read_text())
 MACHINES = DATA["machines"]
 STATUSES = {"deployed", "prototype", "research", "contested", "announced",
             "retired"}
-NON_MACHINE_PAGES = {"index.md", "metrics.md", "_table.md"}
+NON_MACHINE_PAGES = {"index.md", "metrics.md", "gap.md", "_table.md",
+                     "_gap.md", "_claims.md"}
+CLAIM_STATUSES = {"matched", "reduced", "standing"}
 
 
 def _load_figures_module():
@@ -143,6 +145,41 @@ def test_master_table_matches_data():
         "_table.md is stale — run scripts/make_machine_figures.py"
 
 
+def test_gap_and_claims_tables_match_data():
+    mod = _load_figures_module()
+    for fname, emit in (("_gap.md", mod.emit_gap_table),
+                        ("_claims.md", mod.emit_claims_table)):
+        before = (HERE / fname).read_text()
+        emit()
+        assert (HERE / fname).read_text() == before, \
+            f"{fname} is stale — run scripts/make_machine_figures.py"
+
+
+def test_gap_arithmetic_sane():
+    mod = _load_figures_module()
+    # cross-check against Gidney 2025: ~1M physical at p=1e-3 for RSA scale
+    per = mod.phys_per_logical(1e-3)
+    assert 700 <= per <= 1100
+    assert 0.5e6 <= 1400 * per <= 1.6e6
+    assert mod.d_needed(2e-2) is None  # above threshold: no distance helps
+    # today's machines all hold zero 10^-12-grade logical qubits
+    for p in mod.scatter_points():
+        assert p["q"] // mod.phys_per_logical(p["e"]) == 0
+
+
+def test_claims_typed_and_linked():
+    for c in DATA["claims"]:
+        assert re.fullmatch(r"20\d\d-\d\d", c["date"]), c["id"]
+        assert c["status"] in CLAIM_STATUSES, c["id"]
+        for key in ("machine", "task", "advertised", "current"):
+            assert c[key].strip(), f"{c['id']}.{key}"
+        assert (HERE / c["page"]).exists(), f"{c['id']} -> {c['page']}"
+        assert isinstance(c["attacks"], list), c["id"]
+        # a dead or wounded claim must name its attacker
+        if c["status"] in ("matched", "reduced"):
+            assert c["attacks"], f"{c['id']}: {c['status']} needs attacks"
+
+
 def test_scatter_points_exclude_analog_and_unsourced():
     mod = _load_figures_module()
     pts = mod.scatter_points()
@@ -157,7 +194,7 @@ def test_scatter_points_exclude_analog_and_unsourced():
 def test_figures_exist_for_both_modes():
     for stem in ("fig-landscape", "fig-timeline", "fig-logical",
                  "fig-depth", "fig-nines", "fig-transmon", "fig-lattices",
-                 "fig-ions", "fig-tweezers", "fig-gbs"):
+                 "fig-ions", "fig-tweezers", "fig-gbs", "fig-gap"):
         assert (HERE / f"{stem}.svg").exists(), stem
         assert (HERE / f"{stem}-dark.svg").exists(), stem
 
