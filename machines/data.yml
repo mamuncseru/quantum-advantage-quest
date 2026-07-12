@@ -664,6 +664,177 @@ history:
   - { year: 2025, qubits: 120,  label: "Nighthawk",     modality: superconducting }
   - { year: 2026, qubits: 448,  label: "QuEra logical", modality: neutral-atom }
 
+# ---------------------------------------------------------------------------
+# The claim ledger: every headline advantage claim, scored against the best
+# classical answer as of `as_of`. Statuses:
+#   matched   — classical methods reproduced the task (claim dead)
+#   reduced   — major parts matched; margin survives only in corners
+#   standing  — no successful classical reproduction yet
+# Attack citations are author/venue strings (arXiv IDs only when verified).
+claims:
+  - id: sycamore-rcs
+    date: "2019-10"
+    machine: "Google Sycamore"
+    page: google.md
+    task: "53q random circuit sampling (XEB)"
+    advertised: "10,000 years on Summit"
+    status: matched
+    current: >-
+      Tensor-network samplers reproduced the task at matched XEB within ~3
+      years; linear XEB itself shown spoofable without full simulation.
+    attacks:
+      - "Pan & Zhang, arXiv:2103.03074"
+      - "Gao et al., arXiv:2112.01657"
+
+  - id: jiuzhang-12-gbs
+    date: "2020-12"
+    machine: "USTC Jiuzhang 1/2"
+    page: jiuzhang.md
+    task: "76/113-photon Gaussian boson sampling"
+    advertised: "10^14-10^24 x classical"
+    status: reduced
+    current: >-
+      Loss-exploiting classical samplers score as well as the experiment on
+      its own validation benchmarks at experimental fidelities.
+    attacks:
+      - "Bulmer et al., Sci. Adv. 2022"
+      - "Oh et al., arXiv:2306.03709"
+
+  - id: zuchongzhi21-rcs
+    date: "2021-10"
+    machine: "USTC Zuchongzhi 2.1"
+    page: zuchongzhi.md
+    task: "60q, 24-cycle random circuit sampling"
+    advertised: "10^7 x harder than Sycamore's task"
+    status: reduced
+    current: >-
+      Swept up by the same tensor-network advances that killed Sycamore's
+      margin; no longer beyond classical reach at claimed scale.
+    attacks:
+      - "Pan, Chen & Zhang lineage, 2021-2022"
+
+  - id: borealis-gbs
+    date: "2022-06"
+    machine: "Xanadu Borealis"
+    page: xanadu.md
+    task: "216-mode time-multiplexed GBS"
+    advertised: "9,000 years on Fugaku"
+    status: reduced
+    current: >-
+      Same GBS spoofing lineage: substantial parts matched by classical
+      samplers exploiting photon loss; machine since retired.
+    attacks:
+      - "Oh et al., arXiv:2306.03709"
+
+  - id: aquila-mis
+    date: "2022-05"
+    machine: "QuEra Aquila (Harvard)"
+    page: quera.md
+    task: "maximum independent set on unit-disk graphs (analog)"
+    advertised: "superlinear speedup over simulated annealing"
+    status: matched
+    current: >-
+      Follow-up classical benchmarking with properly tuned simulated
+      annealing and tailored heuristics matched or beat the hardware on the
+      same instance class.
+    attacks:
+      - "follow-up classical benchmarking, 2023 (multiple groups)"
+
+  - id: ibm-utility
+    date: "2023-06"
+    machine: "IBM Eagle (127q)"
+    page: ibm.md
+    task: "kicked-Ising dynamics, 60 layers (error-mitigated)"
+    advertised: "beyond brute-force classical simulation"
+    status: matched
+    current: >-
+      Matched within weeks on laptops: MPS/belief-propagation tensor
+      networks and sparse Pauli-propagation both reproduced the observables.
+    attacks:
+      - "Tindall et al., arXiv:2306.14887"
+      - "Begusic & Chan, arXiv:2306.16372"
+
+  - id: h2-xeb
+    date: "2024-06"
+    machine: "Quantinuum H2"
+    page: quantinuum.md
+    task: "56q random circuit sampling (XEB)"
+    advertised: "~100x beyond-classical cost estimate"
+    status: standing
+    current: >-
+      Deliberately modest, honestly error-barred claim; not seriously
+      attacked — partly because the margin claimed is small.
+    attacks: []
+
+  - id: willow-rcs
+    date: "2024-12"
+    machine: "Google Willow"
+    page: google.md
+    task: "105q random circuit sampling"
+    advertised: "10^25 years on Frontier"
+    status: standing
+    current: >-
+      No classical reproduction; unverifiable at size by construction, and
+      the two predecessors in this exact benchmark series both fell — priced
+      accordingly.
+    attacks: []
+
+  - id: dwave-spinglass
+    date: "2025-03"
+    machine: "D-Wave Advantage2 prototype"
+    page: dwave.md
+    task: "transverse-field Ising quench dynamics on spin glasses"
+    advertised: "millions of years on Frontier (Science)"
+    status: reduced
+    current: >-
+      EPFL t-VMC and Flatiron PEPS (itself published in Science) matched
+      major regimes within months; D-Wave defends the largest-3D and
+      low-precision corners. Margin survives only in instance subclasses.
+    attacks:
+      - "Mauron & Carleo, arXiv:2503.08247"
+      - "Tindall et al., Science 2025 (adx2728)"
+
+  - id: zuchongzhi3-rcs
+    date: "2025-03"
+    machine: "USTC Zuchongzhi 3.0"
+    page: zuchongzhi.md
+    task: "83q, 32-cycle random circuit sampling"
+    advertised: "10^15 x beyond Frontier (PRL)"
+    status: standing
+    current: >-
+      Not yet reproduced. Prior entries in this series lost >=10 orders of
+      magnitude post-publication; the margin is real today and decaying on
+      historical schedule.
+    attacks: []
+
+  - id: quantum-echoes
+    date: "2025-10"
+    machine: "Google Willow"
+    page: google.md
+    task: "OTOC (quantum echoes) measurement, molecular cross-check"
+    advertised: "13,000x Frontier, 'first verifiable advantage'"
+    status: standing
+    current: >-
+      The rare claim that has SURVIVED a serious attack so far:
+      belief-propagation tensor networks shown unable to reach the regime.
+      Verification is still self-verification, not efficient classical
+      checking — but this one is aging well, and honesty requires saying so.
+    attacks:
+      - "TNBP infeasibility analysis, arXiv:2604.15427 (attack failed)"
+
+  - id: jiuzhang4-gbs
+    date: "2026-05"
+    machine: "USTC Jiuzhang 4.0"
+    page: jiuzhang.md
+    task: "1,024-source, 8,176-mode GBS, 3,050 clicks"
+    advertised: "10^42 years on El Capitan (Nature)"
+    status: standing
+    current: >-
+      Too new to score. Engineered specifically against the known loss
+      attacks (51% system efficiency); the unknown attacks are what history
+      says to wait for.
+    attacks: []
+
 # Logical-qubit demonstrations (for the logical milestones figure).
 logical_milestones:
   - { date: 2023.92, logical: 48, label: "Harvard-QuEra, 280 atoms",      modality: neutral-atom }
