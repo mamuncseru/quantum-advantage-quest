@@ -13,7 +13,11 @@ publish.
     a human at proof level** (deferred batch, per program directive).
     §4 and §6 are complete proofs; **§5 (state preparation) is a
     construction sketch, not a proof** — it is the largest remaining hole.
-    A dedicated adversarial pass is running in parallel. Any statement
+    **Adversarial pass 1 delivered 2026-07-12**
+    ([note](adversarial-pass-1.md)): it found and repaired a false
+    uniqueness step in §4.4, tightened the coherent-use constant (§4
+    remark, §6 companion), and delivered the owed KOW verdict (§8 row 4).
+    The candidate survived the pass. Any statement
     below inherits DQI's own honesty note (§8): there is no
     complexity-theoretic hardness theorem for the underlying optimization
     problem, and "advantage" always means *versus the best classical
@@ -129,9 +133,10 @@ then the following runs in time $O(\mathrm{poly}(m, \log M))$ and outputs
 the pattern $(k_i)_{i \in S}$ exactly:
 
 1. expand $\theta$ in continued fractions (exact rational arithmetic);
-2. for each convergent $h/q$: accept iff $q$ factors squarefree over
-   $\{p_i\}$ with support size $\le \ell$ and the circular distance
-   $|\theta - h/q| \le \eta$;
+2. for each convergent $h/q$ **in order of increasing $q$**: accept iff
+   $q$ factors squarefree over $\{p_i\}$ with support size $\le \ell$ and
+   the circular distance $|\theta - h/q| \le \eta$; **stop at the first
+   accept**;
 3. output $k_i = h\,(q/p_i)^{-1} \bmod p_i$ for $i$ in that support.
 
 *Proof.* Reduce $t/M$ mod 1: with $S$ the support,
@@ -141,10 +146,17 @@ lowest terms:** for $j \in S$, $K \equiv k_j (P_S/p_j) \pmod{p_j}$ and
 neither factor vanishes mod $p_j$, so $p_j \nmid K$; hence
 $\gcd(K, P_S) = 1$. By Legendre's theorem, $|\theta - K/P_S| < 1/(2P_S^2)$
 with $\gcd(K,P_S)=1$ forces $K/P_S$ to be a convergent of $\theta$, so
-step 2 sees it. Uniqueness of the accepted candidate: another accepted
-$K'/P_{S'}$ within $\eta$ would give two weight-$\le\ell$ integers within
-$2\eta M \le M/P_{\max}(2\ell) = d_{\min}(2\ell)$ of each other,
-contradicting Corollary 4.2 (using $P_S P_{S'} \le P_{\max}(2\ell)$).
+step 2 sees and accepts it. Correctness of the *first* accept: no
+spurious $h'/q' \ne K/P_S$ with $q' \le P_S$ can be accepted, since it
+would give $1/(P_S q') \le |K/P_S - h'/q'| \le 2\eta < 1/P_S^2 \le
+1/(P_S q')$ — a contradiction; convergents arrive in increasing
+denominator order, so the first accepted convergent is $K/P_S$.
+**(The stronger claim that the accept is unique is false** — spurious
+accepts at denominators $> P_S$ exist; executable counterexample
+$\theta = 43/323$, $\eta = 1/500$, which accepts both $2/15$ and
+$43/323$: [pass 1](adversarial-pass-1.md), exhibit E1. An earlier
+version of this proof asserted uniqueness via
+$P_SP_{S'} \le P_{\max}(2\ell)$, which fails for overlapping supports.)
 Step 3 inverts the CRT map on the support. Each step is polynomial:
 CF has $O(\log M)$ convergents, trial division is $O(m)$ per convergent.
 $\square$
@@ -155,6 +167,24 @@ condition $\eta < 1/(2P_S^2)$ with $\eta \approx M^{-\kappa}$ reads
 $\ell/m < \kappa/2 + o(1)$ — **exactly** Corollary 4.2's uniqueness
 radius. There is no algorithmic gap to close: wherever uncomputation is
 well-defined, continued fractions decode.
+
+**Remark (coherent use — the uncomputation constant; pass 1).** Step 4
+of §5 runs this decoder with a *single* $\eta$ across every branch of the
+superposition; the per-instance hypothesis is deceptive there — a branch
+with a large support can mis-decode under an $\eta$ that is legal for
+small supports (executable exhibit E2 of
+[pass 1](adversarial-pass-1.md)). The coherent constant is the worst case
+over branches:
+
+$$\eta \;<\; \frac{1}{2\,P_{\max}(\ell)^{2}},$$
+
+which implies the per-branch Legendre condition for every support and
+restores branch-pair separation ($2\eta M < M/(P_SP_{S'})$ for all pairs).
+Same $\ell/m < \kappa/2$ boundary; the edge shifts by a factor
+$1 - O(\ell\log(c_2/c_1)/(m\log\bar p))$, vanishing as $\bar p \to
+\infty$, and the advantage window of §7 is unaffected. Validated
+exhaustively at $m=7$, $\ell=2$: 0/3,880 failures at the corrected
+constant.
 
 **Remark (why lattices fail and Euclid succeeds).** The natural
 coefficient-space lattice attack (Kannan embedding, LLL) *fails at every
@@ -246,6 +276,19 @@ $\ge d_{\min}(2\ell+1)$, decoder collisions at $\ge d_{\min}(2\ell)/2$.
 A Gaussian of width $\sigma_f$ suppresses all of them by
 $\exp(-\Omega((d_{\min}(2\ell+1)/\sigma_f)^2))$. $\square$
 
+**Companion condition (pass 1).** The boxed condition implies the
+corrected coherent-decoder constant ($R \le M/(2P_{\max}(\ell)^2)$, §4
+remark) **iff** $P_{\max}(\ell)^2 \le 2P_{\max}(2\ell{+}1)$ — automatic
+for tightly-balanced moduli ($(c_2/c_1)^{\ell} = O(\bar p)$), not in
+general. Read the master condition as
+
+$$\sigma_f\sqrt{2\ln(8mN_\ell/\varepsilon)} \;\le\;
+\min\!\Big(\tfrac{1}{4}\,d_{\min}(2\ell{+}1),\;
+\tfrac{M}{2P_{\max}(\ell)^{2}}\Big),$$
+
+or strengthen "balanced" accordingly; the asymptotic window is unchanged
+either way. The boxed form alone was not self-contained.
+
 **Corollary 6.2 (the bookkeeping adds no constraint).** The smallest
 window the lemma supports has
 $X \approx \sigma_x \,\mathrm{polylog} = M\,\mathrm{polylog}/(2\pi\sigma_f)
@@ -299,16 +342,18 @@ information-set baseline, the same margin DQI reports for RS-OPI.
 | 1 | Coefficient-space lattice decoder (LLL/Kannan) | **Tried, fails** — and that failure is *explained* (§4 remark), not merely observed |
 | 2 | Noisy-CRT lattice attacks (Bleichenbacher–Nguyen, Shparlinski–Steinfeld) | Solve list-*decoding* (one residue per modulus); CRT-OPI at $\mu\approx1/2$ is large-list list-*recovery* ($\ell_{\rm in} \sim p/2$), where GS-type methods are vacuous and **no classical literature exists** |
 | 3 | "CF empowers the classical attacker too" | CF solves the *Fourier-side* problem given $\theta$; no classical route is known to the high-payoff $\theta$'s without the quantum interference that concentrates amplitude on them. **This is the attack to keep hammering.** |
-| 4 | KOW dequantization of CLZ's SIS$_\infty$ (2510.07515) | The one prior "over $\mathbb{Z}$" claim in this family fell classically. Our window step lives in that neighbourhood — **a dedicated adversarial pass was launched 2026-07-11 but hit the session limit before delivering a verdict; it is OWED, not passed.** No attack has been completed on this document |
+| 4 | KOW dequantization of CLZ's SIS$_\infty$ (2510.07515) | **Verdict delivered ([pass 1](adversarial-pass-1.md), 2026-07-12): does not transfer.** KOW's mechanism (zero-sum linear algebra + coefficient halving + dimension reduction) needs linear solution structure, halving-stable feasible sets, and a feasibility target; CRT-OPI has none of the three ($F_i$ closed under no arithmetic; the claim is a payoff *margin*). Window states are commodity — KOW dequantized the CLZ problems, not Gaussian-state preparation. Residual risk is family-coupling to RS-OPI, tracked in row 3 |
 | 5 | Hardness pedigree | **None claimed.** Same epistemic tier as OPI: no complexity-theoretic hardness in-regime; pedigree = the absence of attacks in 25 years of noisy-CRT literature |
-| 6 | Human proof-level verification | **Owed.** §4, §6 and this document's §5 gap |
+| 6 | Human proof-level verification | **Owed.** §4, §6 and this document's §5 gap. First AI adversarial pass complete (2026-07-12): one false proof step found and repaired in §4.4 — direct evidence this row is load-bearing |
 
 ## 9. What must happen before this is a paper
 
 1. **§5 written as a proof** (shell-state preparation at general $\ell$)
    — the one genuine hole.
 2. **Human verification batch** — §4 (both theorems), §6, §7.
-3. **The adversarial pass** now running must fail to kill it.
+3. **Adversarial passes** must keep failing to kill it. Pass 1
+   (2026-07-12) failed to kill; two repairs applied (§4.4 proof, §6
+   companion). Further passes should target row 3 of §8 and J1.
 4. Deep novelty pass on Theorem 4.4 as a standalone statement (the
    ingredients are textbook; the composite appears unclaimed).
 
