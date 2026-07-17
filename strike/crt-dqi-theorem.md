@@ -10,14 +10,15 @@ publish.
 !!! danger "Epistemic status — read before citing anything here"
 
     Derived and computationally validated by the AI; **not yet verified by
-    a human at proof level** (deferred batch, per program directive).
-    §4 and §6 are complete proofs; **§5 (state preparation) is a
-    construction sketch, not a proof** — it is the largest remaining hole.
-    **Adversarial pass 1 delivered 2026-07-12**
-    ([note](adversarial-pass-1.md)): it found and repaired a false
-    uniqueness step in §4.4, tightened the coherent-use constant (§4
-    remark, §6 companion), and delivered the owed KOW verdict (§8 row 4).
-    The candidate survived the pass. Any statement
+    a human at proof level** (deferred batch, per program directive) —
+    that batch is now the single largest outstanding item. §4, §5 and §6
+    are complete proofs at AI rigor: §5's state preparation, formerly a
+    sketch, was closed 2026-07-12 by Lemma J1
+    ([note](j1-shell-preparation.md)). **Adversarial pass 1 delivered
+    2026-07-12** ([note](adversarial-pass-1.md)): it found and repaired a
+    false uniqueness step in §4.4, tightened the coherent-use constant
+    (§4 remark, §6 companion), and delivered the owed KOW verdict (§8
+    row 4). The candidate survived the pass. Any statement
     below inherits DQI's own honesty note (§8): there is no
     complexity-theoretic hardness theorem for the underlying optimization
     problem, and "advantage" always means *versus the best classical
@@ -207,12 +208,12 @@ $(w_k)_{k \le \ell}$ from DQI's optimal-polynomial prescription:
    state over error patterns, with per-coordinate amplitudes
    $\hat g_i$ the Fourier coefficients of the recentered indicators
    $g_i = (\mathbb{1}_{F_i} - \mu_i)/\sqrt{\mu_i(1-\mu_i)}$.
-   **[JOINT J1 — the one genuine hole.]** The subset part is exactly
-   Hamming-DQI's Dicke-state preparation (alphabet-independent, so it
-   transplants verbatim); the per-coordinate part is $m$ independent
-   state preparations in dimension $p_i \le c_b \bar p$ (poly each). No
-   obstruction is identified, but the mixed-radix composition needs its
-   own written lemma — see §5.1.
+   **[JOINT J1 — closed 2026-07-12.]** Written as a lemma with proof and
+   exact end-to-end validation:
+   [`j1-shell-preparation.md`](j1-shell-preparation.md). The subset part
+   is Hamming-DQI's Dicke scan (alphabet-independent); the per-coordinate
+   part is $m$ independent unit-state preparations; the composition is
+   isometric — see §5.1 for the one subtlety the sketch hid.
 2. **Frequency computation.** Compute
    $t = \sum_{i \in S} (M/p_i) k_i \bmod M$ into a fresh register.
 3. **Window.** Convolve with a discrete Gaussian of frequency width
@@ -228,25 +229,33 @@ $(w_k)_{k \le \ell}$ from DQI's optimal-polynomial prescription:
    $R = \sigma_f\sqrt{2\ln(8 m N_\ell/\varepsilon)}$ with
    $N_\ell \le \binom{m}{\ell}\bar p^{\ell}$ the sparse-frequency count.
 
-**What is proven:** steps 2–5 (Theorems 4.1–4.4 and §6). **What is
-sketched:** step 1 at general $\ell$ (JOINT J1).
+**What is proven:** steps 1–5 — steps 2–5 by Theorems 4.1–4.4 and §6,
+step 1 by Lemma J1 ([note](j1-shell-preparation.md)), all at AI rigor
+with the human batch owed.
 
-### 5.1 JOINT J1 — the shell-state preparation (the one genuine hole)
+### 5.1 JOINT J1 — the shell-state preparation (closed 2026-07-12)
 
-DQI's Dicke-state machinery transplants coordinate-wise and the
-amplitudes are the same combinatorial objects, but the *proof* that the
-CRT shell state is preparable in $\mathrm{poly}(m)$ with the right
-normalization is written nowhere in this repo. Decomposition of the
-obligation: (i) the subset register $\sum_{|S|\le\ell} w_{|S|}|S\rangle$
-is Hamming-DQI's symmetric Dicke preparation, alphabet-independent —
-transplants verbatim; (ii) the per-coordinate registers
-$\sum_{k_i\ne 0}\hat g_i(k_i)|k_i\rangle$ are $m$ independent
-$p_i$-dimensional state preparations, poly each; (iii) the composition
-must reproduce the shell Jacobi weights $w_k$ without cross-normalization
-error. Steps (i)–(ii) are standard; (iii) is the written-lemma debt.
-**Believed routine — it is precisely the part of DQI that is *not*
-problem-specific — but "believed routine" is the phrase that preceded the
-April-2024 LWE bug, so it must be written out before any claim.**
+The written-lemma debt is paid:
+**[`j1-shell-preparation.md`](j1-shell-preparation.md)** — statement,
+proof (count-controlled Dicke scan → controlled unit-state preparations →
+exact uncomputation of mask and count from the pattern), costs
+($O(m\ell + \sum_i p_i)$ rotations, poly in the explicit-list input
+size), and exact validation at $m=3$, $\ell=2$: circuit route equals the
+definition to $5.6\times10^{-17}$, ancillas disentangle with zero
+residual, and the prepared state's payoff equals the Jacobi-pencil top
+eigenvalue to $2.2\times10^{-15}$ — the first end-to-end check that
+preparation, dictionary (§3), and payoff (§7) meet in the middle.
+
+"Believed routine" turned out to hide one real ingredient, now Sub-lemma
+2 of the note: $\|\widehat{g_i}\| = \sqrt{p_i}$ (not 1), and the
+$1/\sqrt{p_i}$ normalization of each prepared coordinate state cancels —
+uniformly in $S$ — the $\sqrt{p_i}$ the inverse QFT emits per coordinate,
+landing the $x$-side exactly on the **unweighted**
+$\sum_k w_k\binom{m}{k}^{-1/2}e_k(g(x))$ that Claim 7.1's semicircle
+analysis assumes. With any other normalization split the $x$-side
+acquires $S$-dependent $\prod_{i\in S}\sqrt{p_i}$ weights and the payoff
+analysis silently breaks for unbalanced moduli. The April-2024 reflex —
+write it out before any claim — earned its keep again.
 
 ## 6. The window lemma (amplitude bookkeeping)
 
@@ -308,7 +317,8 @@ the decoder side) — measured, not fitted. Code:
 
 ## 7. The payoff, and the advantage window
 
-**Claim 7.1 (conditional on §5/J1).** CRT-DQI achieves the finite-size
+**Claim 7.1 (J1 closed 2026-07-12 — conditional now only on the human
+verification batch).** CRT-DQI achieves the finite-size
 DQI payoff $\mathsf{SC}_{m,\ell}(\mu)$ — the top eigenvalue of the
 $(\ell{+}1)$-shell Jacobi form — which tends to the semicircle
 
@@ -348,9 +358,10 @@ information-set baseline, the same margin DQI reports for RS-OPI.
 
 ## 9. What must happen before this is a paper
 
-1. **§5 written as a proof** (shell-state preparation at general $\ell$)
-   — the one genuine hole.
-2. **Human verification batch** — §4 (both theorems), §6, §7.
+1. ~~**§5 written as a proof**~~ **Done 2026-07-12** — Lemma J1
+   ([note](j1-shell-preparation.md)), proof + exact end-to-end validation.
+2. **Human verification batch** — §4 (both theorems), §5/J1, §6, §7.
+   Now the single largest outstanding item.
 3. **Adversarial passes** must keep failing to kill it. Pass 1
    (2026-07-12) failed to kill; two repairs applied (§4.4 proof, §6
    companion). Further passes should target row 3 of §8 and J1.
