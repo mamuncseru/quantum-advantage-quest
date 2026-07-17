@@ -1,5 +1,11 @@
 # T3 — The warm-start face: do trajectories outrun the surrogate?
 
+**RESOLVED 2026-07-17, same day: no — K3 fired, and harder than
+predicted.** The surrogate budget at matched training progress is
+**flat** in $n$ (not merely polynomial): $N^* \le 512$ terms from
+$n=6$ to $n=12$, $\alpha = -0.00$ bits/qubit ($R^2 = 1.00$) at
+$p = 0.9$. See §Resolution.
+
 **Pre-registered and opened 2026-07-17**, ground T, third candidate —
 the door [T2](T2-dichotomy-theorem.md) left open by construction: its
 theorem needs the deep/Haar regime and a poly DLA; **warm starts on
@@ -100,8 +106,42 @@ remaining structurally distinct T-doors after that: nonlinear losses
 (L3's, live), noise (T-slot), and adaptive circuit *growth* (data-
 dependent structure — not covered by any face so far).
 
+## Resolution (2026-07-17): K3 fired — the third face closes
+
+The scan ([`code/t3_k3_scan.py`](code/t3_k3_scan.py), verdict
+thresholds pre-registered in the header; CSV:
+[`t3-k3-scan.csv`](t3-k3-scan.csv)): gradient-descent trajectories from
+$\varepsilon = 0.1$ warm starts at $n = 6..12$, budget measured at
+first crossings of 50%/90%/95% of the initial energy gap, tolerance
+scaled extensively ($0.0125n$):
+
+- $N^*$ at matched progress: **512 terms (occasionally 128) at every
+  $n$** — of Pauli spaces growing from $4^6$ to $4^{12} = 1.7\times
+  10^7$. At $n=12$ the surrogate tracks **0.003%** of the operator
+  space while the trajectory closes 95% of the gap with healthy
+  gradients ($|\nabla| = 1.9$).
+- Fits at $p=0.9$: exponential model $\alpha = -0.00$ bits/qubit
+  ($R^2 = 1.00$); the pre-registered fire condition
+  ($\alpha < 0.5$, poly $\ge$ exp) is met with room to spare.
+
+**Mechanism, stated:** warm-start trainability and truncation
+surrogatability have the same cause — *the optimizer stays where the
+Heisenberg representation of the loss is sparse.* The near-identity
+region that keeps gradients alive is precisely the region where
+backward propagation doesn't branch; descending toward a
+quasi-local ground state never leaves it. Locality is doing here what
+module dimension did in T1 and irrep dimension did in T2.
+
+**Stated limits of the kill:** fixed depth (6 layers) — depth scaling
+with $n$ is a named follow-up; trajectories reach 95% (not the last
+stretch); $n \le 12$; plain GD (adaptive-*structure* methods are
+outside — that door stays open and is the natural T4). One instrument
+bug caught by cross-checks during the build: `np.bitwise_count`
+returns uint8 and silently turns $-1$ into $255$ — pinned by a test as
+a permanent warning.
+
 ## Ledger discipline
 
-Opened with instrument validated, K1 fired at fixed size, K2
-consistent, one instrument artifact found and fixed same-day. K3 is the
-first action of the next T session.
+Opened and closed same day: K1 fired (operational, $n=8$), K2
+consistent, K3 fired (flat budgets, $n \le 12$). Second same-day full
+resolution in ground T; 10 pinning tests across the two instruments.
