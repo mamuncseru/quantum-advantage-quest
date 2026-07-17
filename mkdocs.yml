@@ -130,6 +130,7 @@ nav:
   - Strike:
       - "CRT-DQI · the theorem": strike/crt-dqi-theorem.md
       - "Adversarial pass 1 · survived": strike/adversarial-pass-1.md
+      - "Lemma J1 · shell preparation": strike/j1-shell-preparation.md
   - Hunt:
       - Protocol & candidates: hunt/README.md
       - Verification log: hunt/00-verification-log.md
