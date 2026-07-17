@@ -1,5 +1,9 @@
 # T1 — The module dichotomy: is trainable always surrogatable?
 
+**RESOLVED 2026-07-17, same day: yes, at the free-fermion point, in every
+access model tested — K1, K2 and K4 all fired.** T1 closes as a boundary
+result (an honest negative with a mechanism); see §Resolution at the end.
+
 **Pre-registered 2026-07-17. Opens ground T** — trainable/parametric
 quantum circuits, hunted under the graveyard rule: **no QML-speedup
 claims on classical data, ever** ([ROADMAP](../ROADMAP.md)). Every
@@ -136,17 +140,55 @@ noise as the unknown dynamics); L3 owns the nonlinear-loss flank.
 - **K3** (ad-closure shortcut): **fails to kill** — closure explodes at
   depth 1 (measured); survives only through K2's lightcone at scale,
   which nonlocal boxes evade.
-- **K4** (the decisive scaling kill, OPEN): exponential decay of
-  $\mathrm{Var}_\theta$ vs $n$ at nonlocal depth $c\log n$, $c\in\{1,2\}$,
-  $n=4..10$, fixed protocol as in the code. If it fires, T1 closes as a
-  boundary theorem ("the dichotomy is access-robust"); if not, escalate
-  to an L10-style lower-bound attempt.
-- **K5** (smarter-surrogate sweep, owed before any claim): Pauli-path /
-  sparse-propagation and learned-compression surrogates get one
-  dedicated attack session on the surviving window.
+- **K4** (the decisive scaling kill): **FIRED 2026-07-17** — see
+  §Resolution.
+- **K5** (smarter-surrogate sweep): **moot** — T1 resolved negative; a
+  smarter surrogate can only strengthen the kill.
+
+## Resolution (2026-07-17): the dichotomy is access-robust
+
+The refined K4 scan ([`code/t1_k4_scan.py`](code/t1_k4_scan.py),
+thresholds pre-registered in the file header before running; CSV:
+[`t1-k4-scan.csv`](t1-k4-scan.csv)) splits the training gradient into
+the part a poly adversary tracks (the module block of
+$\mathrm{Ad}_{U_{\rm box}}$) and the **residual** it cannot see, and
+scales $n = 4..9$:
+
+| box depth | Var total | Var block | Var **residual** |
+|---|---:|---:|---:|
+| $\lceil\log_2 n\rceil$ (c=1) | −0.42 bits/qubit (R² .85) | noisy | **−0.65 bits/qubit (R² .94)** |
+| $\lceil 2\log_2 n\rceil$ (c=2) | −0.67 (R² .98) | −0.86 | **−0.68 (R² .99)** |
+| $2n$ (deep control) | −0.80 | −1.97 | −0.77 |
+
+The pre-registered fire condition (residual ≥ 0.5 bits/qubit, R² > 0.9,
+total strictly slower) is met at $c=1$; at $c=2$ trainability itself
+collapses at the residual's rate (no window, trivially). Caveats stated:
+slope separation at $c=1$ is ~2σ with $n \le 9$ and two box seeds — the
+qualitative structure (residual decaying strictly faster than total,
+converging to the deep-control rate) is unambiguous.
+
+**The mechanism, which is the real deliverable:** barren plateaus and
+classical surrogatability are not merely correlated — *they have the
+same cause*. Both are controlled by module mass: an operator component
+that leaves the poly module simultaneously (i) becomes invisible to the
+$\mathfrak{g}$-sim tracker and (ii) has its gradient signal spread over
+exponentially large invariant sectors where the input's per-direction
+moments cannot sustain it. The trainable signal is asymptotically the
+surrogatable signal because they are the *same* signal. Structured boxes
+cannot escape either horn: by the sector-closure structure (exhibit E),
+any leak is a sum of degree sectors — poly-degree leaks are trackable,
+spread leaks are BP-dead.
+
+**What T1's closure leaves open, for the record:** (i) losses nonlinear
+in $\rho$ — [L3](L3-trainability-surrogates.md)'s flank, unaffected;
+(ii) non-free-fermion poly-DLAs — the dichotomy mechanism should
+generalize (module → isotypic decomposition), and *proving* that is a
+theorem target worth a T-slot; (iii) nothing else within linear losses:
+inputs (K1), local boxes (K2), nonlocal boxes (K4) are all closed.
 
 ## Ledger discipline
 
-First review due at the next kill/keep cycle; K4 numerics are the first
-action. 5 pinning tests:
-[`code/test_t1_module_dichotomy.py`](code/test_t1_module_dichotomy.py).
+Closed same-day with three kills fired and a mechanism extracted — the
+fastest full resolution in the program so far. 11 pinning tests across
+[`code/test_t1_module_dichotomy.py`](code/test_t1_module_dichotomy.py)
+and [`code/test_t1_k4_scan.py`](code/test_t1_k4_scan.py).
