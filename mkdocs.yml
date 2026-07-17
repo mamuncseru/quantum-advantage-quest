@@ -152,6 +152,7 @@ nav:
       - "L10 · QUALM gap": hunt/L10-qualm-gap.md
       - "T1 · Module dichotomy (ground T)": hunt/T1-module-dichotomy.md
       - "T2 · The dichotomy theorem": hunt/T2-dichotomy-theorem.md
+      - "T3 · The warm-start face": hunt/T3-warmstart-face.md
       - "Note · CRT-OPI derivation": hunt/notes/A2-crt-opi-derivation.md
       - "Note · CRT-OPI novelty check": hunt/notes/A2-novelty-check.md
       - "Note · C1 atlas results": hunt/notes/C1-atlas-results.md
