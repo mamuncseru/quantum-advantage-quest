@@ -68,6 +68,22 @@ $\rho$. The surrogate therefore pays $\sum_\lambda d_\lambda^2$
 one-time single-copy measurements — **independent of the
 multiplicities**, which may be exponential. $\square$
 
+**Constructibility remark (added by AI pass 2, 2026-07-17 — this was a
+genuine gap in the write-up).** Lemma B as first written *asserted*
+that the surrogate can build the aligned bases classically; the
+argument is: all required objects live in the **Krylov closure of $O$'s
+terms under $\mathrm{ad}_\mathfrak{g}$** — iterated commutators of
+poly-sparse operators with poly-sparse generators stay poly-sparse, the
+iteration count is bounded by the (poly) tracked dimension, and copy
+alignment plus the cross-moment observables $W_{\lambda,m,m'}$ are then
+constructed inside that poly-dim, poly-sparse subspace (Peter–Weyl
+projectors evaluated in the Krylov basis). The validations used
+analytic bases (Majorana monomials; spherical tensors) and did not
+exercise this step — it is flagged for the human pass. Also noted for
+Lemma A: $M_\lambda$ is real in a real operator basis; the complex-basis
+validation is legitimate because both $\mathrm{Var}$ and
+$\|M_\lambda\|_F$ are basis-invariant.
+
 This closes the one structural escape T1's analysis left conceivable:
 exponential multiplicity of a poly-dim irrep makes the *isotypic
 component* exponentially large while leaving gradients unsuppressed —
