@@ -1,5 +1,9 @@
 # T6 — The control window: evaluation hardness with a trainable landscape
 
+**Status after the same-day K4 self-attack: the 1D instance is closed
+by the MPO surrogate (bond 32 suffices at $n=10$); T6 persists only in
+its pre-registered ≥2D/long-range form.** See §K4-t6 below.
+
 **Pre-registered and opened 2026-07-18**, ground T, sixth candidate —
 **and the ground's first survivor of first contact.** The order
 objective closed like every face before it; the heating objective met
@@ -82,6 +86,40 @@ truncated landscape is not a noisy copy of the true one but a
 *different* landscape with different optima. This is the first
 operational separation in ground T, and it is robust across the entire
 ladder that closed all five previous faces.
+
+## K4-t6 delivered (2026-07-18, same day): the MPO attack LANDS at n=10
+
+The pre-registered "most dangerous" attack was built
+([`code/t6_mpo_attack.py`](code/t6_mpo_attack.py), hand-rolled MPO
+machinery validated to $2\times10^{-14}$ at the $n=6$ exactness point,
+5 [tests](code/test_t6_mpo_attack.py); two construction bugs — an FSA
+boundary gate and 0-based leg arithmetic — caught by the dense
+cross-checks before any attack number was produced) and run along the
+exact heating trajectory:
+
+| t | exact $\langle H\rangle$ | MPO error at $\chi$ = 4 / 8 / 16 / **32** / 64 |
+|---:|---:|---|
+| 0 | −11.63 | 0.26 / 0.11 / 0.04 / **0.012** / 0.000 |
+| 10 | +3.56 | 0.49 / 0.58 / 0.06 / **0.043** / 0.007 |
+| 30 | +7.06 | 0.34 / 1.30 / 0.26 / **0.008** / 0.006 |
+
+**At the point where Pauli truncation saturated its whole ladder
+(>8192 terms), a bond-32 MPO — 3% of the exact bond 1024 — evaluates
+the loss to 0.008.** The K3 separation was real but
+Pauli-truncation-specific: the evolved-Hamiltonian objective has a flat
+Pauli coefficient spectrum (magnitude truncation's worst case) and low
+operator entanglement (the MPO's best case). The intermediate
+entanglement barrier did not materialize at this size.
+
+**Verdict: the 1D instance at $n \le 10$ is closed.** T6 survives only
+in its pre-registered narrowed form (written in this brief *before* the
+attack ran): **≥2D or long-range dynamics**, where bond dimension must
+grow with the cut and tensor-network surrogates lose their guarantee —
+which is exactly where the field's Hamiltonian-simulation advantage
+consensus lives. The candidate's fate now matches the field's own map:
+1D dynamics is classical (TN); the window, if it exists, is
+higher-dimensional. Building the 2D instrument (4×4, 4×5 statevector)
+is the continuation gate.
 
 ## ⚔ Standing attacks — owed before this means anything
 
