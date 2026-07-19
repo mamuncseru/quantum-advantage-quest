@@ -155,7 +155,8 @@ nav:
       - "T3 · The warm-start face": hunt/T3-warmstart-face.md
       - "T4 · The adaptive face": hunt/T4-adaptive-face.md
       - "T5 · The noise face": hunt/T5-noise-face.md
-      - "T6 · The control window (survivor)": hunt/T6-control-window.md
+      - "T6 · The control window (closed)": hunt/T6-control-window.md
+      - "T10 · DQI reachability": hunt/T10-dqi-reachability.md
       - "Note · CRT-OPI derivation": hunt/notes/A2-crt-opi-derivation.md
       - "Note · CRT-OPI novelty check": hunt/notes/A2-novelty-check.md
       - "Note · C1 atlas results": hunt/notes/C1-atlas-results.md
