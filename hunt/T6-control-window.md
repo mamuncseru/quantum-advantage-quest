@@ -1,8 +1,12 @@
 # T6 — The control window: evaluation hardness with a trainable landscape
 
-**Status after the same-day K4 self-attack: the 1D instance is closed
-by the MPO surrogate (bond 32 suffices at $n=10$); T6 persists only in
-its pre-registered ≥2D/long-range form.** See §K4-t6 below.
+**Status after the same-day K4 self-attack and 2D continuation: the 1D
+instance is closed by the MPO surrogate (bond 32 suffices at $n=10$);
+the 2D form HARDENS — $\chi^*(t{=}30) > 128$ on a 4×4 lattice with the
+whole surrogate ladder failing while the landscape stays steep. T6-2D
+is the first live window of ground T**, with the width scan, a
+high-χ/PEPS attack, the 2D baseline, and the human gate all owed
+before any stronger word is used. See §2D below.
 
 **Pre-registered and opened 2026-07-18**, ground T, sixth candidate —
 **and the ground's first survivor of first contact.** The order
@@ -120,6 +124,47 @@ consensus lives. The candidate's fate now matches the field's own map:
 1D dynamics is classical (TN); the window, if it exists, is
 higher-dimensional. Building the 2D instrument (4×4, 4×5 statevector)
 is the continuation gate.
+
+## The 2D continuation (2026-07-18, same day): the hardening condition FIRES
+
+The narrowed form was tested immediately: same protocol on a **4×4
+lattice** ($g = 3$, near the 2D critical point; snake-ordered MPO with
+vertical bonds as long-range couplings — the machinery ports because
+the P-sandwich uses only single-site multiplications; gate: exact at
+2×3 to $1.6\times10^{-13}$). Code:
+[`code/t6_2d_scan.py`](code/t6_2d_scan.py), 4
+[tests](code/test_t6_2d_scan.py).
+
+| t | $\langle H\rangle$ (frac of span) | $|\nabla|$ | Pauli $N^*$ | MPO err @ χ=32 / 64 / **128** |
+|---:|---:|---:|---:|---|
+| 0 | −47.5 (0.03) | 4.8 | 2048 | 0.77 / 0.47 / 0.58 |
+| 10 | +8.9 (0.59) | 5.4 | **saturated** | 0.28 / 0.30 / 0.33 |
+| 30 | +9.7 (0.60) | **21.0** | **saturated** | 1.75 / 0.66 / **0.32** |
+
+**$\chi^*(t{=}30) > 128$ — the pre-registered hardening threshold
+(≥128) fires with the whole ladder failing**, robustly under both
+tolerance readings (0.2 = the 0.0125n convention; even at a relaxed
+0.5, $\chi^* = 128$ exactly). The bond-32 surrogate that demolished 1D
+misses by 1.75. Meanwhile the 6-parameter landscape is not merely
+trainable but *steep* ($|\nabla| = 21$ at the heated endpoint).
+
+**The honest nuance the data adds:** $t=0$ is *also* beyond the ladder
+— in 2D at $T = 1.8$ near criticality there are no classically cheap
+regions on this trajectory, trained or not. The "optimizer steers into
+hardness" framing (the 1D question) gives way to the sharper true
+shape of T6: **the evaluation oracle is dynamics-intrinsically hard
+(the BQP pedigree, now visible in the proxies), and the control
+structure contributes what no other T-candidate had — a few-parameter,
+BP-free, non-concentrated, steep landscape sitting on top of that hard
+oracle.**
+
+**Status: T6-2D stands — the first live window of ground T.** Owed
+before the word "advantage" is ever used: the width scan (4×5, 4×6 —
+$\chi^*$ growth with the cut is the real scaling statement); a
+dedicated high-χ/PEPS attack session (128 is 0.2% of the exact 2D
+bond — the ladder is nowhere near exhausted); the random-θ 2D baseline
+(to quantify dynamics-intrinsic vs training-steered hardness); K6 task
+sharpening; and the human gate over everything.
 
 ## ⚔ Standing attacks — owed before this means anything
 
