@@ -1,12 +1,14 @@
 # T6 — The control window: evaluation hardness with a trainable landscape
 
-**Status after the same-day K4 self-attack and 2D continuation: the 1D
-instance is closed by the MPO surrogate (bond 32 suffices at $n=10$);
-the 2D form HARDENS — $\chi^*(t{=}30) > 128$ on a 4×4 lattice with the
-whole surrogate ladder failing while the landscape stays steep. T6-2D
-is the first live window of ground T**, with the width scan, a
-high-χ/PEPS attack, the 2D baseline, and the human gate all owed
-before any stronger word is used. See §2D below.
+**Final status (2026-07-18, after three same-day self-attacks): CLOSED
+as a variational candidate.** K4 killed the 1D instance (bond-32 MPO);
+the 2D form hardened (whole surrogate ladder fails — real, and kept as
+an oracle-cost measurement); then **K6 dissolved the variational
+identity: random search at matched oracle budget beats gradient
+training 0.79 to 0.60** — the landscape is not load-bearing, only the
+(already-known-hard) simulation oracle is. The briefly-claimed "first
+live window of ground T" is retracted in §K6 below; what survives is a
+boundary note and the sharpest form of the ground's meta-lesson.
 
 **Pre-registered and opened 2026-07-18**, ground T, sixth candidate —
 **and the ground's first survivor of first contact.** The order
@@ -165,6 +167,46 @@ dedicated high-χ/PEPS attack session (128 is 0.2% of the exact 2D
 bond — the ladder is nowhere near exhausted); the random-θ 2D baseline
 (to quantify dynamics-intrinsic vs training-steered hardness); K6 task
 sharpening; and the human gate over everything.
+
+## K6-t6 delivered (2026-07-18, same day): the variational identity dissolves
+
+The task-sharpening attack asked whether the *trained landscape* is
+load-bearing, at matched oracle budget (390 calls) on the 4×4 instance:
+
+| strategy | oracle calls | final $\langle H\rangle$ | frac of span |
+|---|---:|---:|---:|
+| gradient descent (the T6 protocol) | 390 | +9.66 | 0.60 |
+| best periodic drive (grid of 40) | 40 | +12.93 | 0.63 |
+| **random search** | **390** | **+28.81** | **0.79** |
+
+**Random search at the same query budget beats gradient training by a
+wide margin.** The landscape is not what earns the pumping — *any*
+oracle-driven strategy does as well or better; gradients are neither
+necessary nor even competitive here. What remains load-bearing is
+exactly one thing: the **evaluation oracle** (2D real-time dynamics,
+whose classical cost the K4/width instruments quantify).
+
+**Verdict: T6's specifically-variational content is dead.** A
+classically-hard simulation oracle inside a classical outer search loop
+is the field's *standard* known advantage shape (quantum simulation as
+subroutine), not a trainability result — and ground T is about
+trainability. What survives of T6 is a boundary note, not a window:
+control-type objectives place their oracles in the classically-hard
+regime (measured: whole surrogate ladders fail in 2D), but nothing
+about *training* is special once you're there. The "first live window
+of ground T" framing is **retracted**; the window belongs to
+Hamiltonian simulation, where the field already keeps it.
+
+**What this means for ground T** — the meta-lesson reaches its final
+shape: across six candidates, *every* mechanism either collapsed into
+its own classical surrogate (T1–T5) or collapsed into the underlying
+non-variational oracle (T6). For linear losses, we found no
+specifically-variational advantage anywhere. The surviving carve-out
+in the whole ground remains [L3](L3-trainability-surrogates.md)'s
+nonlinear-loss window — now genuinely the last door standing.
+
+*(The running width scan retains value as oracle-cost quantification —
+its verdict will be recorded as such, not as a window claim.)*
 
 ## ⚔ Standing attacks — owed before this means anything
 
