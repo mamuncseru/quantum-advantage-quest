@@ -787,6 +787,267 @@
     draw();
   }
 
+  /* =================================================================
+   * I · Simon's promise: inputs are glued into pairs
+   * ================================================================= */
+
+  function animCoset(root) {
+    var n = 4, N = 1 << n;
+    var f = frame(root, "Every input has exactly one partner",
+      "f gives the same answer on x and on x ⊕ s, and on no other " +
+      "pair. So the 16 inputs are glued into 8 couples, and every couple " +
+      "is separated by the same hidden step s. Click any input to see its " +
+      "partner; change s and the whole pairing rewires at once.");
+
+    var sb = [1, 0, 1, 1];
+    var W = 620, Hh = 178, cw = 34, x0 = 28;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var arcs = s("g", {}, svg), cells = [];
+    for (var i = 0; i < N; i++) {
+      (function (i) {
+        var g = s("g", { class: "qq-bitcell" }, svg);
+        g.style.cursor = "pointer";
+        var r = s("rect", { x: x0 + i * cw, y: 26, width: cw - 6, height: 26,
+          rx: 5, class: "qq-bit" }, g);
+        var t = s("text", { x: x0 + i * cw + (cw - 6) / 2, y: 44,
+          class: "qq-t-mid qq-bit-t qq-sm" }, g);
+        t.textContent = intToStr(i, n);
+        t.setAttribute("font-size", "9.5");
+        cells.push({ r: r, t: t });
+        g.addEventListener("click", function () { st.sel = i; draw(); });
+      })(i);
+    }
+    var info = s("text", { x: 28, y: 166, class: "qq-t qq-muted qq-sm" }, svg);
+    var st = { sel: 0 };
+
+    function draw() {
+      var sv = bitsToInt(sb), i;
+      while (arcs.firstChild) arcs.removeChild(arcs.firstChild);
+      if (sv === 0) {
+        info.textContent = "s = 0000 is not allowed: every input would be " +
+          "its own partner and f would be one-to-one.";
+        for (i = 0; i < N; i++) {
+          cells[i].r.setAttribute("class", "qq-bit");
+          cells[i].r.setAttribute("opacity", "0.4");
+        }
+        return;
+      }
+      var partner = st.sel ^ sv;
+      for (i = 0; i < N; i++) {
+        var j = i ^ sv, on = (i === st.sel || i === partner);
+        cells[i].r.setAttribute("opacity", "1");
+        cells[i].r.setAttribute("class", "qq-bit" + (on ? " qq-bit-on" : ""));
+        if (i < j) {                              // one arc per couple
+          var xa = x0 + i * cw + (cw - 6) / 2,
+              xb = x0 + j * cw + (cw - 6) / 2,
+              dep = 26 + Math.min(58, Math.abs(j - i) * 5);
+          s("path", { d: "M" + xa + " 56 Q " + (xa + xb) / 2 + " " +
+            (56 + dep) + " " + xb + " 56",
+            class: "qq-arc" + (on ? " qq-arc-on" : "") }, arcs);
+        }
+      }
+      info.textContent = "s = " + intToStr(sv, n) + "   ·   " +
+        intToStr(st.sel, n) + " ⊕ " + intToStr(sv, n) + " = " +
+        intToStr(partner, n) + "   ·   8 couples, one hidden step";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    bitToggles(ctr, "hidden s =", sb, function () { draw(); });
+    draw();
+  }
+
+  /* =================================================================
+   * J · the centrepiece: measure register 2, then interfere
+   * ================================================================= */
+
+  function animSimonComb(root) {
+    var n = 4, N = 1 << n;
+    var f = frame(root, "Measure the second register first — then it is obvious",
+      null);
+
+    var sb = [1, 0, 1, 1];
+    var st = { act: 0, x0: 6 };
+    var W = 640, Hh = 224, pad = 26, top = 62, base = 178;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var bw = (W - 2 * pad) / N, bars = [], labels = [];
+    for (var i = 0; i < N; i++) {
+      bars.push(s("rect", { x: pad + i * bw + 2.5, width: bw - 5,
+        class: "qq-bar qq-pos" }, svg));
+      var t = s("text", { x: pad + i * bw + bw / 2, y: base + 15,
+        class: "qq-t-mid qq-muted" }, svg);
+      t.setAttribute("font-size", "9");
+      t.textContent = intToStr(i, n);
+      labels.push(t);
+    }
+    s("line", { x1: pad, y1: base, x2: W - pad, y2: base, class: "qq-axis" },
+      svg);
+    var head = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, svg);
+    var sub = s("text", { x: pad, y: 44, class: "qq-t qq-muted qq-sm" }, svg);
+    var foot = s("text", { x: pad, y: Hh - 8, class: "qq-t qq-muted qq-sm" },
+      svg);
+
+    function amps() {
+      var sv = bitsToInt(sb) || 1, a = new Float64Array(N), i;
+      if (st.act === 0) {
+        for (i = 0; i < N; i++) a[i] = 1 / Math.sqrt(N);
+      } else if (st.act === 1) {
+        for (i = 0; i < N; i++) a[i] = 1 / Math.sqrt(N);
+      } else if (st.act === 2) {
+        a[st.x0] = 1 / Math.SQRT2;
+        a[st.x0 ^ sv] = 1 / Math.SQRT2;
+      } else {
+        a[st.x0] = 1 / Math.SQRT2;
+        a[st.x0 ^ sv] = 1 / Math.SQRT2;
+        walsh(a);
+      }
+      return a;
+    }
+
+    function draw() {
+      var sv = bitsToInt(sb) || 1, a = amps(), i, m = 0;
+      for (i = 0; i < N; i++) m = Math.max(m, Math.abs(a[i]));
+      var scale = (base - top) / (m > 1e-9 ? m : 1);
+      for (i = 0; i < N; i++) {
+        var hgt = Math.abs(a[i]) * scale;
+        bars[i].setAttribute("y", base - hgt);
+        bars[i].setAttribute("height", Math.max(hgt, 0.7));
+        var par = popcount(i & sv) & 1;             // y . s
+        var cls = a[i] < -1e-12 ? "qq-neg" : "qq-pos";
+        if (st.act === 3) cls = par ? "qq-neg" : "qq-pos";
+        bars[i].setAttribute("class", "qq-bar " + cls);
+        bars[i].setAttribute("opacity",
+          st.act === 3 && Math.abs(a[i]) < 1e-9 ? "0.18" : "1");
+        labels[i].setAttribute("class", "qq-t-mid " +
+          (st.act === 3 && !par ? "qq-hot" : "qq-muted"));
+      }
+      var texts = [
+        ["register 1: every input at once",
+         "register 2 is still empty; nothing has been asked yet"],
+        ["one oracle call — the registers are now entangled",
+         "each |x⟩ is tied to its answer |f(x)⟩; the second " +
+         "register no longer factors out, unlike autopsies 01 and 02"],
+        ["measure register 2 — you may, and it makes the rest obvious",
+         "seeing one f-value leaves register 1 on exactly the two " +
+         "inputs that share it: x₀ = " + intToStr(st.x0, n) +
+         " and x₀ ⊕ s = " + intToStr(st.x0 ^ sv, n)],
+        ["apply H⊗ⁿ to those two spikes",
+         "the two paths cancel wherever y·s = 1, and reinforce " +
+         "wherever y·s = 0 — every surviving bar is one free equation"]
+      ];
+      head.textContent = texts[st.act][0];
+      sub.textContent = texts[st.act][1];
+      foot.textContent = st.act === 3
+        ? "highlighted labels are the y you can measure — all satisfy " +
+          "y·s = 0.  Half the space is gone, exactly."
+        : "s = " + intToStr(sv, n);
+      slider.value = st.act;
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    var slider = h("input", "qq-range", ctr);
+    slider.type = "range"; slider.min = 0; slider.max = 3; slider.step = 1;
+    slider.value = 0;
+    slider.addEventListener("input", function () {
+      st.act = +slider.value; draw();
+    });
+    btn(ctr, "step ▸", function () { st.act = (st.act + 1) % 4; draw(); });
+    btn(ctr, "different collapse", function () {
+      st.x0 = Math.floor(Math.random() * N); draw();
+    }, "qq-btn-ghost");
+    bitToggles(ctr, "s =", sb, function () { draw(); });
+
+    h("div", "qq-fig-note", f.wrap,
+      "You never actually have to measure register 2 — the maths is the " +
+      "same either way. But you are allowed to, and pretending you did " +
+      "turns a page of algebra into a picture: two spikes, one " +
+      "interference pattern, half the outcomes annihilated. Each run " +
+      "hands you a random y from the surviving half, which is one linear " +
+      "equation about s.");
+    draw();
+  }
+
+  /* =================================================================
+   * K · quantum samples + classical algebra
+   * ================================================================= */
+
+  function animConstraints(root) {
+    var n = 4, N = 1 << n;
+    var f = frame(root, "Each run halves the list of suspects",
+      "The machine never tells you s. It hands you a random y with " +
+      "y·s = 0, which rules out every candidate that disagrees. " +
+      "Three good equations are enough to go from fifteen suspects to " +
+      "one — and this is why the algorithm is quantum sampling plus " +
+      "ordinary linear algebra.");
+
+    var sTrue = 0b1011, st = { alive: [], ys: [] };
+    function reset() {
+      st.alive = [];
+      for (var c = 1; c < N; c++) st.alive.push(c);
+      st.ys = [];
+      draw();
+    }
+
+    var W = 620, Hh = 150;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var chips = [], cw = 38, x0 = 26;
+    for (var c = 1; c < N; c++) {
+      (function (c) {
+        var g = s("g", {}, svg);
+        var r = s("rect", { x: x0 + (c - 1) * cw, y: 30, width: cw - 6,
+          height: 24, rx: 5, class: "qq-bit" }, g);
+        var t = s("text", { x: x0 + (c - 1) * cw + (cw - 6) / 2, y: 46,
+          class: "qq-t-mid qq-bit-t" }, g);
+        t.setAttribute("font-size", "9");
+        t.textContent = intToStr(c, n);
+        chips[c] = { r: r, t: t };
+      })(c);
+    }
+    var eqT = s("text", { x: 26, y: 82, class: "qq-t qq-muted qq-sm" }, svg);
+    var statT = s("text", { x: 26, y: 108, class: "qq-t qq-ink" }, svg);
+    var doneT = s("text", { x: 26, y: 132, class: "qq-t qq-hot qq-sm" }, svg);
+
+    function draw() {
+      for (var c = 1; c < N; c++) {
+        var live = st.alive.indexOf(c) >= 0;
+        chips[c].r.setAttribute("class", "qq-bit" +
+          (live ? (c === sTrue && st.alive.length === 1 ? " qq-bit-on" : "")
+            : ""));
+        chips[c].r.setAttribute("opacity", live ? "1" : "0.16");
+        chips[c].t.setAttribute("opacity", live ? "1" : "0.25");
+      }
+      eqT.textContent = st.ys.length
+        ? "equations so far:  " + st.ys.map(function (y) {
+            return intToStr(y, n) + "·s = 0"; }).join("    ")
+        : "no equations yet — every non-zero string is still a suspect";
+      statT.textContent = st.alive.length + " candidate" +
+        (st.alive.length === 1 ? "" : "s") + " left";
+      doneT.textContent = st.alive.length === 1
+        ? "solved: s = " + intToStr(st.alive[0], n) +
+          "   (" + st.ys.length + " runs, " + st.ys.length + " queries)"
+        : "";
+    }
+
+    function runOnce() {
+      if (st.alive.length <= 1) return;
+      var pool = [];                       // the y with y . sTrue = 0
+      for (var y = 1; y < N; y++) if (!(popcount(y & sTrue) & 1)) pool.push(y);
+      var y2 = pool[Math.floor(Math.random() * pool.length)];
+      st.ys.push(y2);
+      st.alive = st.alive.filter(function (c) {
+        return !(popcount(y2 & c) & 1);
+      });
+      draw();
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    btn(ctr, "run the circuit once", runOnce);
+    btn(ctr, "start over", reset, "qq-btn-ghost");
+    reset();
+  }
+
   /* ---- registry + hydration --------------------------------------- */
 
   var ANIMS = {
@@ -797,7 +1058,10 @@
     interferometer: animInterferometer,
     bvmask: animBvMask,
     spectrum: animSpectrum,
-    orthogonality: animOrthogonality
+    orthogonality: animOrthogonality,
+    coset: animCoset,
+    simoncomb: animSimonComb,
+    constraints: animConstraints
   };
 
   function hydrate(scope) {
