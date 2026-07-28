@@ -1048,10 +1048,401 @@
     reset();
   }
 
+  /* ---- shared number theory + DFT ---------------------------------- */
+
+  function gcd(a, b) { while (b) { var t = a % b; a = b; b = t; } return a; }
+
+  function modpow(a, e, m) {
+    var r = 1;
+    a %= m;
+    while (e > 0) {
+      if (e & 1) r = (r * a) % m;
+      a = (a * a) % m;
+      e >>= 1;
+    }
+    return r;
+  }
+
+  function orderOf(a, N) {
+    var v = a % N, k = 1;
+    while (v !== 1 && k <= N) { v = (v * a) % N; k++; }
+    return v === 1 ? k : null;
+  }
+
+  function dftProbs(re, im) {
+    /* |sum_j psi_j e^{-2pi i jc/M}|^2 / M  — the QFT readout. */
+    var M = re.length, out = new Float64Array(M), c, j;
+    for (c = 0; c < M; c++) {
+      var sr = 0, si = 0;
+      for (j = 0; j < M; j++) {
+        if (re[j] === 0 && im[j] === 0) continue;
+        var ang = -2 * Math.PI * j * c / M,
+            co = Math.cos(ang), sn = Math.sin(ang);
+        sr += re[j] * co - im[j] * sn;
+        si += re[j] * sn + im[j] * co;
+      }
+      out[c] = (sr * sr + si * si) / M;
+    }
+    return out;
+  }
+
+  function convergents(num, den, limit) {
+    /* continued-fraction convergents of num/den */
+    var out = [], a = num, b = den,
+        h0 = 0, h1 = 1, k0 = 1, k1 = 0;
+    while (b && out.length < (limit || 12)) {
+      var q = Math.floor(a / b), t;
+      t = a - q * b; a = b; b = t;
+      t = q * h1 + h0; h0 = h1; h1 = t;
+      t = q * k1 + k0; k0 = k1; k1 = t;
+      out.push({ q: q, num: h1, den: k1 });
+    }
+    return out;
+  }
+
+  /* =================================================================
+   * L · the clock that comes home: order finding, and the reduction
+   * ================================================================= */
+
+  function animModOrder(root) {
+    var f = frame(root, "Multiply, over and over, until you get back to 1",
+      null);
+
+    var st = { N: 15, a: 7 };
+    var W = 660, Hh = 230;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var chain = s("g", {}, svg);
+    var head = s("text", { x: 24, y: 26, class: "qq-t qq-ink" }, svg);
+    var lineR = s("text", { x: 24, y: 132, class: "qq-t qq-ink" }, svg);
+    var step1 = s("text", { x: 24, y: 158, class: "qq-t qq-muted qq-sm" }, svg);
+    var step2 = s("text", { x: 24, y: 180, class: "qq-t qq-muted qq-sm" }, svg);
+    var verdict = s("text", { x: 24, y: 210, class: "qq-t qq-hot" }, svg);
+
+    function draw() {
+      while (chain.firstChild) chain.removeChild(chain.firstChild);
+      var N = st.N, a = st.a, r = orderOf(a, N);
+      head.textContent = "N = " + N + ",  a = " + a +
+        "   —   keep multiplying by " + a + ", mod " + N + ":";
+
+      var vals = [1], v = 1, i;
+      for (i = 0; i < (r || 1); i++) { v = (v * a) % N; vals.push(v); }
+      var bw = Math.min(50, (W - 60) / vals.length);
+      for (i = 0; i < vals.length; i++) {
+        var last = i === vals.length - 1;
+        s("rect", { x: 24 + i * bw, y: 48, width: bw - 8, height: 34, rx: 6,
+          class: "qq-bit" + ((i === 0 || last) ? " qq-bit-on" : "") }, chain);
+        var t = s("text", { x: 24 + i * bw + (bw - 8) / 2, y: 70,
+          class: "qq-t-mid qq-bit-t" }, chain);
+        t.textContent = vals[i];
+        var lab = s("text", { x: 24 + i * bw + (bw - 8) / 2, y: 98,
+          class: "qq-t-mid qq-muted" }, chain);
+        lab.setAttribute("font-size", "9.5");
+        lab.textContent = a + "^" + i;
+        if (i < vals.length - 1) {
+          var ar = s("text", { x: 24 + i * bw + bw - 6, y: 70,
+            class: "qq-t-mid qq-muted" }, chain);
+          ar.setAttribute("font-size", "11");
+          ar.textContent = "›";
+        }
+      }
+      lineR.textContent = "it comes home after r = " + r + " steps   " +
+        "(the ORDER of " + a + " mod " + N + ")";
+
+      if (r % 2 === 1) {
+        step1.textContent = "r is odd, so a^(r/2) is not a whole number.";
+        step2.textContent = "";
+        verdict.textContent = "no factor from this a — pick another " +
+          "(about half of them work)";
+        return;
+      }
+      var x = modpow(a, r / 2, N);
+      step1.textContent = "r is even, so x = " + a + "^" + (r / 2) +
+        " mod " + N + " = " + x + "   — and x² = " +
+        ((x * x) % N) + " mod " + N + ", a square root of 1";
+      if (x === N - 1) {
+        step2.textContent = "but x = N − 1 = −1, which is the boring " +
+          "square root of 1.";
+        verdict.textContent = "no factor from this a — pick another";
+        return;
+      }
+      var g1 = gcd(x - 1, N), g2 = gcd(x + 1, N);
+      step2.textContent = "gcd(" + (x - 1) + ", " + N + ") = " + g1 +
+        "    gcd(" + (x + 1) + ", " + N + ") = " + g2;
+      var good = (g1 > 1 && g1 < N) ? g1 : ((g2 > 1 && g2 < N) ? g2 : null);
+      verdict.textContent = good
+        ? "FACTORED:  " + N + " = " + good + " × " + (N / good)
+        : "no factor from this a — pick another";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    h("span", "qq-bits-l", ctr, "N =");
+    [15, 21, 33, 35].forEach(function (N) {
+      btn(ctr, String(N), function () {
+        st.N = N;
+        var a = 2;
+        while (gcd(a, N) !== 1) a++;
+        st.a = a;
+        draw();
+      }, "qq-btn-ghost");
+    });
+    btn(ctr, "try another a", function () {
+      var a = st.a;
+      do { a = a + 1 > st.N - 1 ? 2 : a + 1; } while (gcd(a, st.N) !== 1);
+      st.a = a;
+      draw();
+    });
+    h("div", "qq-fig-note", f.wrap,
+      "Nothing on this page so far is quantum. Finding r by hand means " +
+      "walking the chain, and the chain can be astronomically long — for " +
+      "an RSA modulus it has more steps than there are atoms in the " +
+      "observable universe. Everything else Shor did is exactly the " +
+      "arithmetic above: get r, halve it, take two gcds, read off the " +
+      "factors.");
+    draw();
+  }
+
+  /* =================================================================
+   * M · Simon, one group over: the comb and its transform
+   * ================================================================= */
+
+  function animShorComb(root) {
+    var t = 6, M = 1 << t;
+    var f = frame(root, "Measure the second register — the first one " +
+      "becomes a comb", null);
+
+    var st = { r: 4, act: 0, j0: 2 };
+    var W = 660, Hh = 228, pad = 26, top = 62, base = 176;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var bw = (W - 2 * pad) / M, bars = [];
+    for (var i = 0; i < M; i++) {
+      bars.push(s("rect", { x: pad + i * bw + 1, width: bw - 2,
+        class: "qq-bar qq-pos" }, svg));
+    }
+    s("line", { x1: pad, y1: base, x2: W - pad, y2: base, class: "qq-axis" },
+      svg);
+    var head = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, svg);
+    var sub = s("text", { x: pad, y: 44, class: "qq-t qq-muted qq-sm" }, svg);
+    var foot = s("text", { x: pad, y: base + 20,
+      class: "qq-t qq-muted qq-sm" }, svg);
+    var foot2 = s("text", { x: pad, y: base + 40,
+      class: "qq-t qq-muted qq-sm" }, svg);
+
+    function probs() {
+      var p = new Float64Array(M), i, k;
+      if (st.act === 0 || st.act === 1) {
+        for (i = 0; i < M; i++) p[i] = 1 / M;
+        return p;
+      }
+      var idx = [];
+      for (i = st.j0 % st.r; i < M; i += st.r) idx.push(i);
+      if (st.act === 2) {
+        for (k = 0; k < idx.length; k++) p[idx[k]] = 1 / idx.length;
+        return p;
+      }
+      var re = new Float64Array(M), im = new Float64Array(M);
+      for (k = 0; k < idx.length; k++) re[idx[k]] = 1 / Math.sqrt(idx.length);
+      return dftProbs(re, im);
+    }
+
+    function draw() {
+      var p = probs(), i, m = 0;
+      for (i = 0; i < M; i++) m = Math.max(m, p[i]);
+      var scale = (base - top) / (m > 1e-12 ? m : 1);
+      for (i = 0; i < M; i++) {
+        var hgt = p[i] * scale;
+        bars[i].setAttribute("y", base - hgt);
+        bars[i].setAttribute("height", Math.max(hgt, 0.6));
+        bars[i].setAttribute("class", "qq-bar " +
+          (st.act === 3 && p[i] > 0.4 * m ? "qq-hotbar" : "qq-pos"));
+      }
+      var peaks = [];
+      for (i = 0; i < st.r; i++) peaks.push(Math.round(i * M / st.r));
+      var texts = [
+        ["counting register: every exponent j at once",
+         "the work register still holds |1⟩; nothing has been asked"],
+        ["compute a^j mod N into the work register",
+         "the two registers are now entangled — exactly Simon's step, " +
+         "one group over"],
+        ["measure the work register",
+         "you see one value of a^j. The exponents that could have " +
+         "produced it are j₀, j₀+r, j₀+2r, … — an evenly spaced COMB " +
+         "of spacing r = " + st.r],
+        ["apply the QFT to the comb",
+         "a comb of spacing r transforms into a comb of spacing " +
+         (M / st.r).toFixed(2) + " = 2^t / r — the peaks sit at " +
+         "multiples of 2^t/r"]
+      ];
+      head.textContent = texts[st.act][0];
+      sub.textContent = texts[st.act][1];
+      foot.textContent = st.act === 3
+        ? "peaks at c ≈ " + peaks.join(", ") +
+          "   —   measure any one, and c/2^t ≈ k/r"
+        : (st.act === 2 ? "spacing r = " + st.r +
+           ", offset j₀ = " + (st.j0 % st.r) + " (random, and harmless)"
+           : "");
+      foot2.textContent = st.act === 3 && (M % st.r)
+        ? "note: r = " + st.r + " does not divide 2^t = " + M +
+          ", so the peaks are smeared rather than razor-sharp — " +
+          "this is why you need spare precision (§5)."
+        : "";
+      slider.value = st.act;
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    var slider = h("input", "qq-range", ctr);
+    slider.type = "range"; slider.min = 0; slider.max = 3; slider.step = 1;
+    slider.value = 0;
+    slider.addEventListener("input", function () {
+      st.act = +slider.value; draw();
+    });
+    btn(ctr, "step ▸", function () { st.act = (st.act + 1) % 4; draw(); });
+    h("span", "qq-bits-l", ctr, "order r =");
+    [2, 3, 4, 5, 6, 8].forEach(function (r) {
+      btn(ctr, String(r), function () {
+        st.r = r; st.j0 = Math.floor(Math.random() * r); draw();
+      }, "qq-btn-ghost");
+    });
+
+    h("div", "qq-fig-note", f.wrap,
+      "Compare autopsy 03. Simon's measurement collapsed register 1 onto " +
+      "a coset {x₀, x₀⊕s} and H⊗ⁿ turned it into the " +
+      "subspace orthogonal to s. Here the collapse gives an arithmetic " +
+      "progression {j₀, j₀+r, …} and the QFT turns it into " +
+      "multiples of 2^t/r. Same machine; XOR has become addition, and a " +
+      "hidden mask has become a hidden period.");
+    draw();
+  }
+
+  /* =================================================================
+   * N · why 2m+1 counting qubits
+   * ================================================================= */
+
+  function animPrecision(root) {
+    var f = frame(root, "How much precision do you actually need?",
+      "The measured c is useless unless c/2^t is close enough to k/r " +
+      "that continued fractions can only land on r. Too few counting " +
+      "qubits and neighbouring fractions blur together; enough, and the " +
+      "recovery becomes essentially certain. That threshold is where " +
+      "the recipe t = 2m+1 comes from.");
+
+    var st = { r: 6, t: 5 };
+    var W = 660, Hh = 190, pad = 26, top = 40, base = 150;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var barsG = s("g", {}, svg);
+    s("line", { x1: pad, y1: base, x2: W - pad, y2: base, class: "qq-axis" },
+      svg);
+    var head = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, svg);
+    var foot = s("text", { x: pad, y: base + 24,
+      class: "qq-t qq-muted qq-sm" }, svg);
+
+    function draw() {
+      while (barsG.firstChild) barsG.removeChild(barsG.firstChild);
+      var M = 1 << st.t, r = st.r, i, k;
+      var re = new Float64Array(M), im = new Float64Array(M);
+      var idx = [];
+      for (i = 0; i < M; i += r) idx.push(i);
+      for (k = 0; k < idx.length; k++) re[idx[k]] = 1 / Math.sqrt(idx.length);
+      var p = dftProbs(re, im), m = 0, good = 0;
+      for (i = 0; i < M; i++) m = Math.max(m, p[i]);
+      var bw = (W - 2 * pad) / M;
+      for (i = 0; i < M; i++) {
+        var hgt = p[i] / (m || 1) * (base - top);
+        // does continued fractions on c/2^t recover r?
+        var cs = convergents(i, M), den = 0;
+        for (k = 0; k < cs.length; k++) if (cs[k].den <= r) den = cs[k].den;
+        var ok = den === r;
+        if (ok) good += p[i];
+        s("rect", { x: pad + i * bw + 0.6, y: base - hgt,
+          width: Math.max(bw - 1.2, 0.8), height: Math.max(hgt, 0.5),
+          class: "qq-bar " + (ok ? "qq-pos" : "qq-neg") }, barsG);
+      }
+      head.textContent = "true order r = " + r + ",  t = " + st.t +
+        " counting qubits (2^t = " + M + ")";
+      foot.textContent = "blue outcomes recover r by continued " +
+        "fractions, amber ones do not  —  success probability ≈ " +
+        good.toFixed(3);
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    h("span", "qq-bits-l", ctr, "counting qubits t");
+    var sl = h("input", "qq-range", ctr);
+    sl.type = "range"; sl.min = 3; sl.max = 8; sl.step = 1; sl.value = 5;
+    sl.addEventListener("input", function () { st.t = +sl.value; draw(); });
+    h("span", "qq-bits-l", ctr, "order r =");
+    [3, 5, 6, 7].forEach(function (r) {
+      btn(ctr, String(r), function () { st.r = r; draw(); }, "qq-btn-ghost");
+    });
+    draw();
+  }
+
+  /* =================================================================
+   * O · continued fractions: the classical finish
+   * ================================================================= */
+
+  function animContFrac(root) {
+    var f = frame(root, "Turning a measured number back into the order",
+      "The machine hands you c. You know 2^t. The order is hiding in " +
+      "c/2^t as the denominator of a nearby simple fraction, and " +
+      "continued fractions find it by building better and better " +
+      "approximations until the denominator would get too large to be " +
+      "an order mod N.");
+
+    var st = { c: 21, t: 6, N: 15 };
+    var W = 660, Hh = 170;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var head = s("text", { x: 24, y: 26, class: "qq-t qq-ink" }, svg);
+    var rowsG = s("g", {}, svg);
+    var verdict = s("text", { x: 24, y: 150, class: "qq-t qq-hot" }, svg);
+
+    function draw() {
+      while (rowsG.firstChild) rowsG.removeChild(rowsG.firstChild);
+      var M = 1 << st.t;
+      head.textContent = "measured c = " + st.c + ",  c / 2^t = " +
+        st.c + "/" + M + " = " + (st.c / M).toFixed(6);
+      var cs = convergents(st.c, M), i, best = null;
+      var hdr = s("text", { x: 24, y: 52, class: "qq-t qq-muted qq-sm" },
+        rowsG);
+      hdr.textContent = "convergents (each one a better simple fraction):";
+      for (i = 0; i < cs.length && i < 6; i++) {
+        var x = 24 + i * 104;
+        var okDen = cs[i].den <= st.N;
+        s("rect", { x: x, y: 66, width: 94, height: 40, rx: 6,
+          class: "qq-bit" + (okDen ? "" : "") }, rowsG);
+        var tx = s("text", { x: x + 47, y: 84, class: "qq-t-mid qq-bit-t" },
+          rowsG);
+        tx.textContent = cs[i].num + " / " + cs[i].den;
+        var tv = s("text", { x: x + 47, y: 99, class: "qq-t-mid qq-muted" },
+          rowsG);
+        tv.setAttribute("font-size", "9.5");
+        tv.textContent = (cs[i].num / cs[i].den).toFixed(5);
+        if (okDen) best = cs[i];
+      }
+      verdict.textContent = best
+        ? "largest denominator below N: r = " + best.den +
+          "   —   now check a^" + best.den + " mod N = 1"
+        : "no usable convergent";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    h("span", "qq-bits-l", ctr, "measured c =");
+    [0, 16, 21, 32, 43, 48].forEach(function (c) {
+      btn(ctr, String(c), function () { st.c = c; draw(); }, "qq-btn-ghost");
+    });
+    draw();
+  }
+
   /* ---- registry + hydration --------------------------------------- */
 
   var ANIMS = {
     oracle: animOracle,
+    modorder: animModOrder,
+    shorcomb: animShorComb,
+    precision: animPrecision,
+    contfrac: animContFrac,
     collapse: animCollapse,
     kickback: animKickback,
     sandwich: animSandwich,
