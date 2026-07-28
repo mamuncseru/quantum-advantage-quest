@@ -54,6 +54,7 @@ extra_css:
 
 extra_javascript:
   - javascripts/katex.js
+  - javascripts/qq-anim.js
   - katex/katex.min.js           # vendored locally (was unpkg CDN)
   - katex/auto-render.min.js
 
