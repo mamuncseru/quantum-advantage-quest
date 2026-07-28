@@ -495,6 +495,298 @@
     draw();
   }
 
+  /* ---- shared: a row of bit toggles -------------------------------- */
+
+  function bitToggles(parent, label, bits, onChange) {
+    var wrap = h("span", "qq-bits", parent);
+    h("span", "qq-bits-l", wrap, label);
+    var btns = [];
+    bits.forEach(function (_, i) {
+      var b = h("button", "qq-chip", wrap, String(bits[i]));
+      b.type = "button";
+      b.addEventListener("click", function () {
+        bits[i] = bits[i] ? 0 : 1;
+        b.textContent = String(bits[i]);
+        b.className = "qq-chip" + (bits[i] ? " qq-chip-on" : "");
+        onChange();
+      });
+      if (bits[i]) b.className = "qq-chip qq-chip-on";
+      btns.push(b);
+    });
+    return { btns: btns, sync: function () {
+      btns.forEach(function (b, i) {
+        b.textContent = String(bits[i]);
+        b.className = "qq-chip" + (bits[i] ? " qq-chip-on" : "");
+      });
+    } };
+  }
+
+  function bitsToInt(bits) {          // bits[0] is the most significant
+    var v = 0, i;
+    for (i = 0; i < bits.length; i++) v = (v << 1) | bits[i];
+    return v;
+  }
+
+  function intToStr(v, n) {
+    var out = "", i;
+    for (i = n - 1; i >= 0; i--) out += (v >> i) & 1;
+    return out;
+  }
+
+  /* =================================================================
+   * F · what the Bernstein-Vazirani box computes: s . x mod 2
+   * ================================================================= */
+
+  function animBvMask(root) {
+    var n = 5;
+    var f = frame(root, "What the box computes: pick, then count",
+      "The secret s selects which of your bits are looked at. Everything " +
+      "else you set is ignored. The box adds up the surviving bits and " +
+      "hands back one bit: even or odd. That single bit is the entire " +
+      "answer to your question — which is why you have to ask n times.");
+
+    var sbits = [1, 0, 1, 1, 0], xbits = [1, 1, 0, 0, 1];
+    var W = 580, Hh = 226;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var cx = [], i;
+    for (i = 0; i < n; i++) cx.push(140 + i * 62);
+
+    function rowLabel(y, txt) {
+      var t = s("text", { x: 126, y: y + 5, class: "qq-t-end qq-muted qq-sm" },
+        svg);
+      t.textContent = txt;
+    }
+    rowLabel(46, "secret  s");
+    rowLabel(108, "your input  x");
+    rowLabel(170, "s AND x");
+
+    var cellS = [], cellX = [], cellP = [];
+    for (i = 0; i < n; i++) {
+      (function (i) {
+        var g1 = s("g", {}, svg);
+        cellS.push({
+          r: s("rect", { x: cx[i] - 16, y: 30, width: 32, height: 32, rx: 6,
+            class: "qq-bit" }, g1),
+          t: s("text", { x: cx[i], y: 52, class: "qq-t-mid qq-bit-t" }, g1)
+        });
+        var g2 = s("g", { class: "qq-bitcell" }, svg);
+        g2.style.cursor = "pointer";
+        cellX.push({
+          r: s("rect", { x: cx[i] - 16, y: 92, width: 32, height: 32, rx: 6,
+            class: "qq-bit qq-bit-in" }, g2),
+          t: s("text", { x: cx[i], y: 114, class: "qq-t-mid qq-bit-t" }, g2)
+        });
+        g2.addEventListener("click", function () {
+          xbits[i] = xbits[i] ? 0 : 1; draw();
+        });
+        var g3 = s("g", {}, svg);
+        cellP.push({
+          r: s("rect", { x: cx[i] - 16, y: 154, width: 32, height: 32, rx: 6,
+            class: "qq-bit" }, g3),
+          t: s("text", { x: cx[i], y: 176, class: "qq-t-mid qq-bit-t" }, g3)
+        });
+      })(i);
+    }
+    var outT = s("text", { x: W - 20, y: 176, class: "qq-t-end qq-ink" }, svg);
+    var noteT = s("text", { x: 140, y: 212, class: "qq-t qq-muted qq-sm" },
+      svg);
+
+    function draw() {
+      var kept = 0, ignored = 0;
+      for (var i = 0; i < n; i++) {
+        var p = sbits[i] & xbits[i];
+        cellS[i].t.textContent = sbits[i];
+        cellS[i].r.setAttribute("class",
+          "qq-bit" + (sbits[i] ? " qq-bit-on" : ""));
+        cellX[i].t.textContent = xbits[i];
+        cellX[i].r.setAttribute("class",
+          "qq-bit qq-bit-in" + (xbits[i] ? " qq-bit-on" : ""));
+        cellP[i].t.textContent = p;
+        cellP[i].r.setAttribute("class",
+          "qq-bit" + (p ? " qq-bit-on" : ""));
+        cellP[i].r.setAttribute("opacity", sbits[i] ? "1" : "0.28");
+        cellX[i].r.setAttribute("opacity", sbits[i] ? "1" : "0.45");
+        kept += p;
+        if (!sbits[i] && xbits[i]) ignored++;
+      }
+      outT.textContent = "f(x) = " + (kept & 1);
+      outT.setAttribute("class", "qq-t-end " + ((kept & 1) ? "qq-hot"
+        : "qq-ink"));
+      noteT.textContent = kept + " surviving 1s → " +
+        ((kept & 1) ? "odd → 1" : "even → 0") +
+        (ignored ? "   (" + ignored + " of your bits ignored entirely)" : "");
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    var tog = bitToggles(ctr, "secret s =", sbits, function () { draw(); });
+    btn(ctr, "new secret", function () {
+      for (var i = 0; i < n; i++) sbits[i] = Math.random() < 0.5 ? 0 : 1;
+      tog.sync(); draw();
+    }, "qq-btn-ghost");
+    draw();
+  }
+
+  /* =================================================================
+   * G · same circuit, different problem — the spectrum switcher
+   * ================================================================= */
+
+  function animSpectrum(root) {
+    var n = 5, N = 1 << n;
+    var f = frame(root, "One circuit, three problems, three spectra", null);
+
+    var sbits = [1, 0, 1, 1, 0];
+    var PROBS = ["constant   f(x) = 0",
+                 "linear (BV)   f(x) = s·x",
+                 "balanced, not linear",
+                 "no promise at all   f = AND"];
+    var st = { prob: PROBS[1] };
+
+    var W = 640, Hh = 214, pad = 24, top = 58, base = 170;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var bw = (W - 2 * pad) / N, bars = [], i;
+    for (i = 0; i < N; i++) {
+      bars.push(s("rect", { x: pad + i * bw + 1.2, width: bw - 2.4,
+        class: "qq-bar qq-pos" }, svg));
+    }
+    s("line", { x1: pad, y1: base, x2: W - pad, y2: base, class: "qq-axis" },
+      svg);
+    var headline = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, svg);
+    var sub = s("text", { x: pad, y: 43, class: "qq-t qq-muted qq-sm" }, svg);
+    var tick = s("text", { x: 0, y: base + 18, class: "qq-t-mid qq-hot qq-sm" },
+      svg);
+
+    function fval(x) {
+      if (st.prob === PROBS[0]) return 0;
+      if (st.prob === PROBS[1]) {
+        var v = 0, sv = bitsToInt(sbits);
+        for (var k = 0; k < n; k++) v ^= ((x >> k) & 1) & ((sv >> k) & 1);
+        return v;
+      }
+      if (st.prob === PROBS[2]) {              // x0 XOR (x1 AND x2)
+        return (((x >> (n - 1)) & 1) ^
+          (((x >> (n - 2)) & 1) & ((x >> (n - 3)) & 1))) & 1;
+      }
+      return (((x >> (n - 1)) & 1) & ((x >> (n - 2)) & 1)) & 1;
+    }
+
+    function draw() {
+      var a = new Float64Array(N), i, m = 0;
+      for (i = 0; i < N; i++) a[i] = (fval(i) & 1 ? -1 : 1) / Math.sqrt(N);
+      walsh(a);
+      for (i = 0; i < N; i++) m = Math.max(m, Math.abs(a[i]));
+      var scale = (base - top) / (m > 1e-9 ? m : 1), peak = 0;
+      for (i = 0; i < N; i++) {
+        var hgt = Math.abs(a[i]) * scale;
+        bars[i].setAttribute("y", base - hgt);
+        bars[i].setAttribute("height", Math.max(hgt, 0.8));
+        bars[i].setAttribute("class", "qq-bar " +
+          (a[i] < -1e-12 ? "qq-neg" : "qq-pos"));
+        if (Math.abs(a[i]) > Math.abs(a[peak])) peak = i;
+      }
+      var spike = a[peak] * a[peak] > 0.999;
+      tick.setAttribute("x", pad + peak * bw + bw / 2);
+      tick.textContent = spike ? intToStr(peak, n) : "";
+      if (st.prob === PROBS[0]) {
+        headline.textContent = "all the mass sits at frequency 0";
+        sub.textContent = "the DJ readout: “did we come home?” — yes, " +
+          "with certainty";
+      } else if (st.prob === PROBS[1]) {
+        headline.textContent = "a single spike, standing exactly on s = " +
+          intToStr(bitsToInt(sbits), n);
+        sub.textContent = "one measurement returns all " + n +
+          " bits of the secret — read the label off the bar";
+      } else if (st.prob === PROBS[2]) {
+        headline.textContent = "balanced, but the mass is spread";
+        sub.textContent = "nothing at frequency 0 (so DJ still says " +
+          "“balanced”) — but no single answer to read off";
+      } else {
+        headline.textContent = "no promise: the spectrum is a mess";
+        sub.textContent = "frequency 0 is non-zero and so is everything " +
+          "else — both questions become meaningless";
+      }
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    var sel = h("select", "qq-sel", ctr);
+    PROBS.forEach(function (p) { var o = h("option", null, sel, p);
+      o.value = p; });
+    sel.value = st.prob;
+    sel.addEventListener("change", function () { st.prob = sel.value; draw(); });
+    bitToggles(ctr, "s =", sbits, function () { draw(); });
+
+    h("div", "qq-fig-note", f.wrap,
+      "The gates never change — this is the identical Hadamard sandwich " +
+      "from autopsy 01, with one oracle call. Only the promise on f " +
+      "changes. What you are looking at is the Fourier spectrum of " +
+      "(−1)^f, and each problem writes its answer in a different " +
+      "place: Deutsch–Jozsa asks only whether the leftmost bar " +
+      "survived; Bernstein–Vazirani reads the position of the spike. " +
+      "The power was never in the circuit.");
+    draw();
+  }
+
+  /* =================================================================
+   * H · why a character's transform is a delta: orthogonality
+   * ================================================================= */
+
+  function animOrthogonality(root) {
+    var n = 4, N = 1 << n;
+    var f = frame(root, "Why the spike is exact: 16 terms that cancel",
+      "The amplitude landing on frequency y is the sum of (−1) raised " +
+      "to (s ⊕ y)·x over every input x. Match y to s and every " +
+      "term is +1, so they pile up. Miss by even one bit and the terms " +
+      "split exactly half and half, cancelling to zero. No approximation " +
+      "anywhere — this is why Bernstein–Vazirani never fails.");
+
+    var sb = [1, 0, 1, 1], yb = [1, 0, 1, 1];
+    var W = 620, Hh = 132;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var tw = 30, x0 = 26, tiles = [];
+    for (var i = 0; i < N; i++) {
+      var g = s("g", {}, svg);
+      tiles.push({
+        r: s("rect", { x: x0 + i * (tw + 6), y: 34, width: tw, height: tw,
+          rx: 5, class: "qq-bit" }, g),
+        t: s("text", { x: x0 + i * (tw + 6) + tw / 2, y: 54,
+          class: "qq-t-mid qq-bit-t" }, g)
+      });
+    }
+    s("text", { x: 26, y: 24, class: "qq-t qq-muted qq-sm" }, svg)
+      .textContent = "one term per input x  →  (−1)^((s⊕y)·x)";
+    var totalT = s("text", { x: 26, y: 104, class: "qq-t qq-ink" }, svg);
+    var verdictT = s("text", { x: W - 26, y: 104, class: "qq-t-end qq-muted" },
+      svg);
+
+    function draw() {
+      var d = bitsToInt(sb) ^ bitsToInt(yb), sum = 0;
+      for (var x = 0; x < N; x++) {
+        var par = 0;
+        for (var k = 0; k < n; k++) par ^= ((d >> k) & 1) & ((x >> k) & 1);
+        var v = par ? -1 : 1;
+        sum += v;
+        tiles[x].t.textContent = par ? "−" : "+";
+        tiles[x].r.setAttribute("class",
+          "qq-bit " + (par ? "qq-tile-neg" : "qq-tile-pos"));
+      }
+      totalT.textContent = "sum = " + sum + "   →   amplitude = " +
+        (sum / N).toFixed(2);
+      var match = d === 0;
+      verdictT.textContent = match
+        ? "y = s : every term agrees"
+        : "y ≠ s : exactly 8 plus, 8 minus";
+      verdictT.setAttribute("class", "qq-t-end " +
+        (match ? "qq-hot" : "qq-muted"));
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    bitToggles(ctr, "secret s =", sb, function () { draw(); });
+    bitToggles(ctr, "test freq y =", yb, function () { draw(); });
+    draw();
+  }
+
   /* ---- registry + hydration --------------------------------------- */
 
   var ANIMS = {
@@ -502,7 +794,10 @@
     collapse: animCollapse,
     kickback: animKickback,
     sandwich: animSandwich,
-    interferometer: animInterferometer
+    interferometer: animInterferometer,
+    bvmask: animBvMask,
+    spectrum: animSpectrum,
+    orthogonality: animOrthogonality
   };
 
   function hydrate(scope) {
