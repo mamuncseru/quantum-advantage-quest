@@ -270,3 +270,16 @@ figcaption {
 }
 .qq-tile-pos { fill: var(--qq-pos); stroke: var(--qq-pos); }
 .qq-tile-neg { fill: var(--qq-neg); stroke: var(--qq-neg); }
+
+/* coset arcs (autopsy 03) */
+.qq-arc {
+  fill: none;
+  stroke: var(--qq-line);
+  stroke-width: 1.1;
+  opacity: 0.55;
+}
+.qq-arc-on {
+  stroke: var(--qq-hot);
+  stroke-width: 2;
+  opacity: 1;
+}
