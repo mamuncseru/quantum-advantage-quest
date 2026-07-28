@@ -241,3 +241,32 @@ figcaption {
 @media (prefers-reduced-motion: reduce) {
   .qq-bar, .qq-port, .qq-mark, .qq-bit { transition: none; }
 }
+
+/* bit toggles + sign tiles (autopsy 02 widgets) */
+.qq-bits { display: inline-flex; align-items: center; gap: 0.22rem; }
+.qq-bits-l {
+  font-size: 0.72rem;
+  color: var(--qq-muted);
+  margin-right: 0.15rem;
+  white-space: nowrap;
+}
+.qq-chip {
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  width: 1.5rem;
+  padding: 0.16rem 0;
+  border-radius: 0.3rem;
+  border: 1px solid var(--md-default-fg-color--lighter);
+  background: var(--md-default-bg-color);
+  color: var(--qq-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.qq-chip-on {
+  background: var(--qq-pos);
+  border-color: var(--qq-pos);
+  color: #fff;
+}
+.qq-tile-pos { fill: var(--qq-pos); stroke: var(--qq-pos); }
+.qq-tile-neg { fill: var(--qq-neg); stroke: var(--qq-neg); }
