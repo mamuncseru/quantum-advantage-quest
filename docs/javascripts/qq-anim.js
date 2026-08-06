@@ -1435,6 +1435,2083 @@
     draw();
   }
 
+  /* =================================================================
+   * DEEP DIVE 01 · the Fourier thread
+   *
+   * Six widgets, in the order the deep dive uses them:
+   *   chardial     orthogonality on Z_N — the terms that cancel
+   *   shifteigen   why THIS basis: characters are the eigenvectors of shift
+   *   spectrumlab  draw your own f, watch its spectrum
+   *   butterfly    the H^(x)n butterfly, one level per qubit
+   *   qftleak      Z_N: the comb leaks, and whose fault that is
+   *   hsprank      hidden-subgroup sampling until the rank is full
+   * ================================================================= */
+
+  function clear(node) {
+    while (node.firstChild) node.removeChild(node.firstChild);
+  }
+
+  function rangeCtl(parent, label, min, max, val, onInput) {
+    h("span", "qq-bits-l", parent, label);
+    var r = h("input", "qq-range", parent);
+    r.type = "range"; r.min = min; r.max = max; r.step = 1; r.value = val;
+    r.addEventListener("input", function () { onInput(+r.value); });
+    return r;
+  }
+
+  /* ---- P · orthogonality on Z_N: the terms that cancel -------------- */
+
+  function animCharDial(root) {
+    var f = frame(root, "The engine: |G| unit vectors that either pile up or cancel",
+      "Every entry of a Fourier transform is a sum of |G| unit vectors, " +
+      "one per group element. Set the two frequencies equal and every " +
+      "vector points the same way, so the sum is the group order. Make " +
+      "them differ by anything at all and the vectors are the N-th roots " +
+      "of unity in some order — they close a polygon and return to zero " +
+      "exactly. No approximation and no large-N limit: this one fact is " +
+      "why a Fourier transform can tell frequencies apart, and everything " +
+      "else on this page is bookkeeping on top of it.");
+
+    var st = { N: 8, k: 3, l: 3 };
+    var W = 660, Hh = 252, ox = 232, oy = 148;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var head = s("text", { x: 24, y: 26, class: "qq-t qq-ink" }, svg);
+    var sub = s("text", { x: 24, y: 46, class: "qq-t qq-muted qq-sm" }, svg);
+    var val = s("text", { x: W - 24, y: 32, class: "qq-t-end qq-hot" }, svg);
+    val.setAttribute("font-size", "17");
+    var verdict = s("text", { x: W - 24, y: 52, class: "qq-t-end qq-muted qq-sm" },
+      svg);
+    var pathG = s("g", {}, svg);
+    var kSl, lSl;
+
+    function draw() {
+      var N = st.N, d = ((st.k - st.l) % N + N) % N, i;
+      var unit = Math.min(27, 300 / N);
+      clear(pathG);
+      s("line", { x1: ox - 120, y1: oy, x2: ox + 320, y2: oy,
+        class: "qq-axis" }, pathG);
+      s("circle", { cx: ox, cy: oy, r: 6, fill: "none",
+        stroke: "currentColor", "stroke-width": 1.2,
+        class: "qq-muted" }, pathG);
+
+      var px = ox, py = oy, pts = [ox + "," + oy];
+      for (i = 0; i < N; i++) {
+        var ang = 2 * Math.PI * d * i / N;
+        px += unit * Math.cos(ang);
+        py -= unit * Math.sin(ang);
+        pts.push(px.toFixed(2) + "," + py.toFixed(2));
+      }
+      s("polyline", { points: pts.join(" "), fill: "none",
+        stroke: "currentColor", "stroke-width": 2,
+        class: d === 0 ? "qq-pos" : "qq-neg",
+        "stroke-linejoin": "round" }, pathG)
+        .setAttribute("style", d === 0
+          ? "stroke: var(--qq-pos)" : "stroke: var(--qq-neg)");
+      for (i = 1; i <= N; i++) {
+        var xy = pts[i].split(",");
+        s("circle", { cx: xy[0], cy: xy[1], r: 2.6,
+          class: d === 0 ? "qq-pos" : "qq-neg" }, pathG);
+      }
+      s("circle", { cx: px, cy: py, r: 7.5, fill: "none",
+        "stroke-width": 2, class: "qq-hotbar",
+        style: "fill:none;stroke:var(--qq-hot)" }, pathG);
+
+      var mag = Math.hypot(px - ox, py - oy) / unit;
+      head.textContent = "Σₓ χ" + st.k + "(x) · χ" + st.l + "(x)*   over " +
+        "all " + N + " elements of Z" + N;
+      sub.textContent = d === 0
+        ? "the two frequencies match: every term is exactly +1"
+        : "the frequencies differ by " + d + ": the terms are the " + N +
+          "-th roots of unity, each used once";
+      val.textContent = "⟨χ" + st.k + ", χ" + st.l + "⟩ / N = " +
+        (mag / N).toFixed(3);
+      verdict.textContent = d === 0
+        ? "the walk never turns — it ends " + N + " steps out"
+        : "the walk closes: distance from the origin " +
+          (mag < 1e-9 ? "0, exactly" : mag.toFixed(3));
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    h("span", "qq-bits-l", ctr, "group Z_N, N =");
+    [6, 8, 12, 16].forEach(function (N) {
+      btn(ctr, String(N), function () {
+        st.N = N;
+        st.k = Math.min(st.k, N - 1); st.l = Math.min(st.l, N - 1);
+        kSl.max = lSl.max = N - 1; kSl.value = st.k; lSl.value = st.l;
+        draw();
+      }, "qq-btn-ghost");
+    });
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    kSl = rangeCtl(ctr2, "k", 0, st.N - 1, st.k,
+      function (v) { st.k = v; draw(); });
+    lSl = rangeCtl(ctr2, "ℓ", 0, st.N - 1, st.l,
+      function (v) { st.l = v; draw(); });
+    draw();
+  }
+
+  /* ---- Q · characters are the eigenvectors of shift ----------------- */
+
+  function animShiftEigen(root) {
+    var n = 4, N = 16;
+    var f = frame(root, "Why this basis and no other: shift a character and " +
+      "nothing moves",
+      "Shifting means relabelling x as x ⊕ a. Do it to a character and the " +
+      "pattern comes back identical, or identical with every sign flipped " +
+      "— one global factor χ_z(a), no change of shape. Do it to anything " +
+      "else and the pattern scrambles. Characters are the eigenvectors of " +
+      "shift, and that is the entire reason hidden periodicity is visible " +
+      "in this basis and invisible in every other one.");
+
+    var st = { a: 5, z: [1, 0, 1, 1], g: null };
+    var W = 660, Hh = 268, tw = 30, gap = 4, x0 = 96, ytop = 60;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var rowsG = s("g", {}, svg);
+    var head = s("text", { x: 24, y: 26, class: "qq-t qq-ink" }, svg);
+    var verdict = s("text", { x: 24, y: 46, class: "qq-t qq-muted qq-sm" }, svg);
+
+    function reshuffle() {
+      st.g = [];
+      for (var x = 0; x < N; x++) st.g.push(Math.random() < 0.5 ? 1 : -1);
+    }
+    reshuffle();
+
+    function row(y, label, vals, ref) {
+      var t = s("text", { x: x0 - 12, y: y + 21,
+        class: "qq-t-end qq-muted qq-sm" }, rowsG);
+      t.textContent = label;
+      for (var x = 0; x < N; x++) {
+        var cx = x0 + x * (tw + gap);
+        var changed = ref && ref[x] !== vals[x];
+        s("rect", { x: cx, y: y, width: tw, height: 30, rx: 5,
+          class: vals[x] > 0 ? "qq-tile-pos" : "qq-tile-neg",
+          opacity: changed ? 1 : 0.42 }, rowsG);
+        var tx = s("text", { x: cx + tw / 2, y: y + 20,
+          class: "qq-t-mid", fill: "#fff" }, rowsG);
+        tx.setAttribute("font-size", "12.5");
+        tx.setAttribute("font-weight", "700");
+        tx.textContent = vals[x] > 0 ? "+" : "−";
+        if (changed) {
+          s("rect", { x: cx - 2, y: y - 2, width: tw + 4, height: 34, rx: 6,
+            class: "qq-mark" }, rowsG);
+        }
+      }
+    }
+
+    function draw() {
+      clear(rowsG);
+      var z = bitsToInt(st.z), a = st.a, x, chi = [], chiS = [], gS = [];
+      for (x = 0; x < N; x++) {
+        chi.push(popcount(x & z) & 1 ? -1 : 1);
+        chiS.push(popcount((x ^ a) & z) & 1 ? -1 : 1);
+        gS.push(st.g[x ^ a]);
+      }
+      var moved = 0;
+      for (x = 0; x < N; x++) if (gS[x] !== st.g[x]) moved++;
+      var flips = 0;
+      for (x = 0; x < N; x++) if (chiS[x] !== chi[x]) flips++;
+
+      row(ytop, "any old g(x)", st.g, null);
+      row(ytop + 42, "g(x ⊕ a)", gS, st.g);
+      row(ytop + 104, "character χ_z(x)", chi, null);
+      row(ytop + 146, "χ_z(x ⊕ a)", chiS, chi);
+
+      head.textContent = "shift a = " + intToStr(a, n) + "   frequency z = " +
+        intToStr(z, n) + "   χ_z(a) = " + (popcount(a & z) & 1 ? "−1" : "+1");
+      verdict.textContent = "g had " + moved + " of 16 signs change — its " +
+        "shape moved.   The character " +
+        (flips === 0 ? "came back identical (χ_z(a) = +1)."
+                     : "came back with all 16 signs flipped — one global " +
+                       "factor χ_z(a) = −1, the same shape.");
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr, "shift a", 0, 15, st.a, function (v) { st.a = v; draw(); });
+    btn(ctr, "new g", function () { reshuffle(); draw(); }, "qq-btn-ghost");
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    bitToggles(ctr2, "frequency z =", st.z, draw);
+    draw();
+  }
+
+  /* ---- R · draw your own f and read the spectrum -------------------- */
+
+  function animSpectrumLab(root) {
+    var n = 4, N = 16;
+    var f = frame(root, "Draw a function, read its spectrum",
+      "The circuit is fixed — the Hadamard sandwich of autopsy 01, one " +
+      "oracle call. What you are editing is the promise. Every bar is one " +
+      "Fourier coefficient of (−1)^f, and one measurement returns a " +
+      "single z with probability given by that bar squared. Try to build " +
+      "a function you could actually learn something about from one " +
+      "sample; then try the bent preset, which is designed so that you " +
+      "cannot.");
+
+    var st = { v: [], sel: "linear" };
+    var W = 660, Hh = 236, pad = 26, base = 150, top = 34;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var bw = (W - 2 * pad) / N;
+    var bars = [], ticks = [], i;
+    for (i = 0; i < N; i++) {
+      bars.push(s("rect", { x: pad + i * bw + 2.5, width: bw - 5,
+        class: "qq-bar qq-pos" }, svg));
+      var t = s("text", { x: pad + i * bw + bw / 2, y: base + 30,
+        class: "qq-t-mid qq-muted qq-sm" }, svg);
+      t.textContent = intToStr(i, n);
+      t.setAttribute("font-size", "9");
+      t.setAttribute("transform", "rotate(-90 " +
+        (pad + i * bw + bw / 2) + " " + (base + 30) + ")");
+      ticks.push(t);
+    }
+    s("line", { x1: pad, y1: base, x2: W - pad, y2: base, class: "qq-axis" },
+      svg);
+    var mark = s("rect", { y: top - 6, width: bw, height: base - top + 12,
+      class: "qq-mark", rx: 4 }, svg);
+    var head = s("text", { x: pad, y: 20, class: "qq-t qq-ink" }, svg);
+    var stats = h("div", "qq-readout", null);
+
+    var PRESETS = {
+      "constant": function () { return 0; },
+      "linear  s·x,  s = 1011": function (x) { return popcount(x & 0xB) & 1; },
+      "balanced, not linear": function (x) {
+        return (((x >> 3) & 1) ^ (((x >> 2) & 1) & ((x >> 1) & 1))) & 1;
+      },
+      "bent  x₀x₁ ⊕ x₂x₃": function (x) {
+        return ((((x >> 3) & 1) & ((x >> 2) & 1)) ^
+                (((x >> 1) & 1) & (x & 1))) & 1;
+      },
+      "AND (no promise)": function (x) { return ((x >> 3) & (x >> 2)) & 1; },
+      "random": function () { return Math.random() < 0.5 ? 1 : 0; }
+    };
+
+    function load(name) {
+      var g = PRESETS[name], x;
+      st.v = [];
+      for (x = 0; x < N; x++) st.v.push(g(x) & 1);
+      st.sel = name;
+    }
+
+    function draw() {
+      var a = new Float64Array(N), x, m = 0, peak = 0, sup = 0, sum2 = 0;
+      for (x = 0; x < N; x++) a[x] = (st.v[x] ? -1 : 1) / 4;   // 1/sqrt(16)
+      walsh(a);
+      for (x = 0; x < N; x++) {
+        m = Math.max(m, Math.abs(a[x]));
+        if (Math.abs(a[x]) > 1e-9) sup++;
+        sum2 += Math.pow(a[x] * a[x], 2);
+        if (Math.abs(a[x]) > Math.abs(a[peak])) peak = x;
+      }
+      var scale = (base - top) / (m > 1e-9 ? m : 1);
+      for (x = 0; x < N; x++) {
+        var hgt = Math.abs(a[x]) * scale;
+        bars[x].setAttribute("y", base - hgt);
+        bars[x].setAttribute("height", Math.max(hgt, 0.9));
+        bars[x].setAttribute("class", "qq-bar " +
+          (x === peak ? "qq-hotbar" : (a[x] < -1e-12 ? "qq-neg" : "qq-pos")));
+      }
+      mark.setAttribute("x", pad);
+      var ones = 0;
+      for (x = 0; x < N; x++) ones += st.v[x];
+      head.textContent = "F̂(0) = mean of (−1)^f = " + a[0].toFixed(3) +
+        "   (f is 1 on " + ones + " of 16 inputs)";
+      var pmax = a[peak] * a[peak], ent = -Math.log(sum2) / Math.LN2;
+      var line1 = "support " + sup + "/16 · largest |F̂| at z = " +
+        intToStr(peak, n) + " · P(that outcome) = " + pmax.toFixed(3) +
+        " · " + ent.toFixed(2) + " bits of spread";
+      var line2;
+      if (sup === 1 && Math.abs(a[0]) > 0.99) {
+        line2 = "constant: all the mass at frequency zero, and " +
+          "Deutsch–Jozsa answers with certainty.";
+      } else if (sup === 1) {
+        line2 = "a single spike at z = " + intToStr(peak, n) +
+          " — one measurement returns all 4 bits. This is " +
+          "Bernstein–Vazirani, and f is linear.";
+      } else if (Math.abs(a[0]) < 1e-9) {
+        line2 = "balanced (F̂(0) = 0): DJ still answers in one query, but " +
+          "no single outcome carries the function.";
+      } else if (pmax < 0.1) {
+        line2 = "flat: every outcome is nearly equally likely, so one " +
+          "sample carries almost nothing. There is no algorithm here.";
+      } else {
+        line2 = "outside the promise: frequency zero is non-zero and so is " +
+          "much else — both DJ's and BV's questions lose their meaning.";
+      }
+      stats.innerHTML = "";
+      h("div", null, stats, line1);
+      h("div", null, stats, line2);
+    }
+
+    var chipRow = h("div", "qq-ctrl", f.body);
+    h("span", "qq-bits-l", chipRow, "f(x) for x = 0000 … 1111:");
+    var chips = [];
+    for (i = 0; i < N; i++) {
+      (function (x) {
+        var b = h("button", "qq-chip", chipRow, "0");
+        b.type = "button";
+        b.title = "x = " + intToStr(x, n);
+        b.addEventListener("click", function () {
+          st.v[x] = st.v[x] ? 0 : 1;
+          syncChips();
+          draw();
+        });
+        chips.push(b);
+      })(i);
+    }
+    function syncChips() {
+      for (var x = 0; x < N; x++) {
+        chips[x].textContent = String(st.v[x]);
+        chips[x].className = "qq-chip" + (st.v[x] ? " qq-chip-on" : "");
+      }
+    }
+    var ctr = h("div", "qq-ctrl", f.body);
+    h("span", "qq-bits-l", ctr, "presets");
+    Object.keys(PRESETS).forEach(function (name) {
+      btn(ctr, name, function () { load(name); syncChips(); draw(); },
+        "qq-btn-ghost");
+    });
+    f.body.appendChild(stats);
+    load("linear  s·x,  s = 1011");
+    syncChips();
+    draw();
+  }
+
+  /* ---- S · the butterfly: one level per qubit ----------------------- */
+
+  function animButterfly(root) {
+    var n = 3, N = 8;
+    var f = frame(root, "The butterfly: one level per qubit, and that is the " +
+      "whole speedup",
+      "The classical fast transform sweeps log N levels over N numbers — " +
+      "N log N arithmetic operations. The quantum circuit runs the very " +
+      "same butterfly, but each level is one Hadamard on one qubit, " +
+      "because the group Z₂ⁿ factorises and so does its transform. Three " +
+      "gates here, twenty-four numeric operations there. Read the caption " +
+      "below the figure before believing this is an FFT speedup — it is " +
+      "not.");
+
+    var st = { stage: 0, input: "linear" };
+    var W = 660, Hh = 300;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var colX = [110, 280, 450, 610], rowY = [];
+    for (var i = 0; i < N; i++) rowY.push(66 + i * 27);
+    var linkG = s("g", {}, svg);
+    var nodeG = s("g", {}, svg);
+    var head = s("text", { x: 24, y: 26, class: "qq-t qq-ink" }, svg);
+    var cost = s("text", { x: 24, y: 46, class: "qq-t qq-muted qq-sm" }, svg);
+
+    var INPUTS = {
+      "linear": function (x) { return popcount(x & 0x5) & 1; },
+      "constant": function () { return 0; },
+      "balanced, not linear": function (x) {
+        return (((x >> 2) & 1) ^ (((x >> 1) & 1) & (x & 1))) & 1;
+      }
+    };
+
+    function stages() {
+      // integer butterfly, most significant qubit first: distances 4, 2, 1.
+      var g = INPUTS[st.input], v = [], out = [], x;
+      for (x = 0; x < N; x++) v.push(g(x) & 1 ? -1 : 1);
+      out.push(v.slice());
+      for (var lvl = 0; lvl < n; lvl++) {
+        var dist = 1 << (n - 1 - lvl), w = v.slice();
+        for (x = 0; x < N; x++) {
+          if ((x & dist) === 0) {
+            w[x] = v[x] + v[x + dist];
+            w[x + dist] = v[x] - v[x + dist];
+          }
+        }
+        v = w;
+        out.push(v.slice());
+      }
+      return out;
+    }
+
+    function draw() {
+      var all = stages(), i, x;
+      clear(linkG);
+      clear(nodeG);
+      for (i = 0; i <= n; i++) {
+        var t = s("text", { x: colX[i], y: 52,
+          class: "qq-t-mid qq-muted qq-sm" }, nodeG);
+        t.textContent = i === 0 ? "(−1)^f" : "H on qubit " + (i - 1);
+        if (i > st.stage) t.setAttribute("opacity", "0.35");
+      }
+      for (i = 0; i < st.stage; i++) {
+        var dist = 1 << (n - 1 - i);
+        for (x = 0; x < N; x++) {
+          if ((x & dist) === 0) {
+            [[x, x], [x, x + dist], [x + dist, x], [x + dist, x + dist]]
+              .forEach(function (pr) {
+                s("line", { x1: colX[i] + 20, y1: rowY[pr[0]],
+                  x2: colX[i + 1] - 20, y2: rowY[pr[1]],
+                  class: "qq-arc" + (i === st.stage - 1 ? " qq-arc-on" : "")
+                }, linkG);
+              });
+          }
+        }
+      }
+      for (i = 0; i <= st.stage; i++) {
+        for (x = 0; x < N; x++) {
+          var v = all[i][x];
+          s("rect", { x: colX[i] - 19, y: rowY[x] - 11, width: 38, height: 22,
+            rx: 5, class: v > 0 ? "qq-tile-pos"
+              : (v < 0 ? "qq-tile-neg" : "qq-bit"),
+            opacity: v === 0 ? 0.45 : 1 }, nodeG);
+          var tv = s("text", { x: colX[i], y: rowY[x] + 4,
+            class: "qq-t-mid" }, nodeG);
+          tv.setAttribute("font-size", "12");
+          tv.setAttribute("font-weight", "700");
+          tv.setAttribute("fill", v === 0 ? "var(--qq-muted)" : "#fff");
+          tv.textContent = String(v);
+        }
+      }
+      for (x = 0; x < N; x++) {
+        var lab = s("text", { x: colX[0] - 30, y: rowY[x] + 4,
+          class: "qq-t-end qq-muted qq-sm" }, nodeG);
+        lab.textContent = intToStr(x, n);
+      }
+      head.textContent = st.stage === 0
+        ? "the phases the oracle left behind, before any transform"
+        : "level " + st.stage + " of " + n + ": pairs " +
+          (1 << (n - st.stage)) + " apart have been added and subtracted";
+      cost.textContent = "quantum gates spent: " + st.stage + "   ·   " +
+        "classical additions and subtractions: " + (st.stage * N) +
+        (st.stage === n ? "   ·   divide by 2ⁿ = 8 for the amplitudes" : "");
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    btn(ctr, "step", function () {
+      st.stage = Math.min(n, st.stage + 1); draw();
+    });
+    btn(ctr, "reset", function () { st.stage = 0; draw(); }, "qq-btn-ghost");
+    h("span", "qq-bits-l", ctr, "input f");
+    Object.keys(INPUTS).forEach(function (k) {
+      btn(ctr, k, function () { st.input = k; st.stage = 0; draw(); },
+        "qq-btn-ghost");
+    });
+    draw();
+  }
+
+  /* ---- T · Z_N: the comb leaks, and whose fault that is ------------- */
+
+  function cfConvergents(num, den, qmax) {
+    var out = [], pp = 1, qp = 0, a, r, x = num, y = den, p, q, np, nq;
+    if (y === 0) return out;
+    a = Math.floor(x / y); p = a; q = 1;
+    if (q <= qmax) out.push([p, q]);
+    r = x - a * y;
+    while (r !== 0) {
+      x = y; y = r;
+      a = Math.floor(x / y);
+      np = a * p + pp; nq = a * q + qp;
+      pp = p; qp = q; p = np; q = nq;
+      if (q > qmax) break;
+      out.push([p, q]);
+      r = x - a * y;
+    }
+    return out;
+  }
+
+  function recoverPeriod(c, N, qmax) {
+    var cs = cfConvergents(c, N, qmax), best = null;
+    for (var i = 0; i < cs.length; i++) if (cs[i][1] > 1) best = cs[i][1];
+    return best;
+  }
+
+  function animQftLeak(root) {
+    var f = frame(root, "Change the group and exactness is the first casualty",
+      "Over Z₂ⁿ every cancellation was exact. Over Z_N the hidden period " +
+      "usually does not divide N, the comb smears into a Dirichlet " +
+      "kernel, and Shor's whole analysis is the bound on that smear. Watch " +
+      "which failures are approximation (mass off the peaks) and which are " +
+      "plain arithmetic: an outcome sitting exactly on a peak still fails " +
+      "when its index shares a factor with r, and no amount of precision " +
+      "fixes that.");
+
+    var st = { N: 64, r: 5, tries: 0, wins: 0, last: null };
+    var W = 660, Hh = 232, pad = 30, base = 158, top = 44;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var barsG = s("g", {}, svg);
+    var head = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, svg);
+    var sub = s("text", { x: pad, y: 40, class: "qq-t qq-muted qq-sm" }, svg);
+    var shot = s("text", { x: pad, y: base + 26, class: "qq-t qq-hot" }, svg);
+    var tally = s("text", { x: pad, y: base + 46,
+      class: "qq-t qq-muted qq-sm" }, svg);
+    s("line", { x1: pad, y1: base, x2: W - pad, y2: base, class: "qq-axis" },
+      svg);
+
+    function dist() {                       // exact |QFT of the comb|^2
+      var N = st.N, r = st.r, m = Math.ceil(N / r), p = [], c;
+      for (c = 0; c < N; c++) {
+        var s1 = Math.sin(Math.PI * c * r * m / N);
+        var s2 = Math.sin(Math.PI * c * r / N);
+        p.push(Math.abs(s2) < 1e-12 ? m / N
+                                    : (s1 * s1) / (s2 * s2) / (m * N));
+      }
+      return p;
+    }
+
+    function draw() {
+      var N = st.N, r = st.r, p = dist(), c, i;
+      var qmax = Math.floor(Math.sqrt(N));
+      var bw = (W - 2 * pad) / N, mx = 0, mass = 0, succ = 0;
+      for (c = 0; c < N; c++) mx = Math.max(mx, p[c]);
+      for (c = 0; c < N; c++) {
+        var d = Infinity;
+        for (i = 0; i < r; i++) {
+          var dd = Math.abs(c - i * N / r);
+          d = Math.min(d, dd, N - dd);
+        }
+        if (d <= 0.5 + 1e-9) mass += p[c];
+        if (recoverPeriod(c, N, qmax) === r) succ += p[c];
+      }
+      clear(barsG);
+      for (i = 0; i < r; i++) {
+        var mxp = pad + (i * N / r) * bw;
+        s("line", { x1: mxp, y1: top - 6, x2: mxp, y2: base,
+          class: "qq-mark" }, barsG);
+      }
+      for (c = 0; c < N; c++) {
+        var hgt = (base - top) * p[c] / (mx > 1e-12 ? mx : 1);
+        var ok = recoverPeriod(c, N, qmax) === r;
+        s("rect", { x: pad + c * bw, y: base - hgt,
+          width: Math.max(bw - 0.6, 1), height: Math.max(hgt, 0.6),
+          class: "qq-bar " + (ok ? "qq-pos" : "qq-neg"),
+          opacity: st.last === c ? 1 : 0.9 }, barsG);
+      }
+      if (st.last !== null) {
+        s("circle", { cx: pad + (st.last + 0.5) * bw, cy: top - 12, r: 5,
+          class: "qq-hotbar", style: "fill:var(--qq-hot)" }, barsG);
+      }
+      head.textContent = "N = " + N + ",  hidden period r = " + r + "   " +
+        (N % r === 0 ? "(divides N — no leakage at all)"
+                     : "(does not divide N — the comb leaks)");
+      sub.textContent = "peak mass " + mass.toFixed(3) +
+        "   ·   recovers r (blue) " + succ.toFixed(3) +
+        "   ·   arithmetic ceiling φ(r)/r = " + (phi(r) / r).toFixed(3);
+      tally.textContent = "convergents bounded by ⌊√N⌋ = " + qmax +
+        (st.tries ? "   ·   measured " + st.tries + " times, recovered r in " +
+          st.wins : "");
+    }
+
+    function phi(m) {
+      var c = 0;
+      for (var j = 1; j <= m; j++) if (gcd(j, m) === 1) c++;
+      return c;
+    }
+
+    function measure() {
+      var p = dist(), u = Math.random(), acc = 0, c;
+      for (c = 0; c < st.N; c++) {
+        acc += p[c];
+        if (u <= acc) break;
+      }
+      c = Math.min(c, st.N - 1);
+      var qmax = Math.floor(Math.sqrt(st.N));
+      var got = recoverPeriod(c, st.N, qmax);
+      st.last = c; st.tries++;
+      if (got === st.r) st.wins++;
+      var cs = cfConvergents(c, st.N, qmax).map(function (pr) {
+        return pr[0] + "/" + pr[1];
+      }).join(", ");
+      draw();
+      shot.textContent = "measured c = " + c + "   →   c/N = " + c + "/" +
+        st.N + "   →   convergents " + (cs || "none") + "   →   r = " +
+        (got === null ? "nothing" : got) +
+        (got === st.r ? "  ✓" : "  ✗");
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    h("span", "qq-bits-l", ctr, "N =");
+    [32, 64, 128].forEach(function (N) {
+      btn(ctr, String(N), function () {
+        st.N = N; st.last = null; st.tries = 0; st.wins = 0;
+        shot.textContent = ""; draw();
+      }, "qq-btn-ghost");
+    });
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr2, "period r", 2, 20, st.r, function (v) {
+      st.r = v; st.last = null; st.tries = 0; st.wins = 0;
+      shot.textContent = ""; draw();
+    });
+    btn(ctr2, "measure once", measure);
+    draw();
+  }
+
+  /* ---- U · sampling a hidden subgroup until the rank is full -------- */
+
+  function animHspRank(root) {
+    var n = 4, N = 16;
+    var f = frame(root, "One sample is one equation: the hidden-subgroup " +
+      "mechanism in full",
+      "The oracle hides a period s. Measuring after the transform returns " +
+      "a uniformly random z from the annihilator — every z with z·s = 0, " +
+      "and nothing else, ever. So each shot is one linear equation about " +
+      "s, and the algorithm is finished when n − 1 of them are " +
+      "independent. Notice what is *not* happening: no amplitude is being " +
+      "read, no coefficient estimated. The quantum part supplies random " +
+      "elements of a subgroup, and linear algebra does the rest.");
+
+    var st = { s: [1, 0, 1, 1], rows: [], flags: [] };
+    var W = 660, Hh = 256;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var head = s("text", { x: 24, y: 26, class: "qq-t qq-ink" }, svg);
+    var rowsG = s("g", {}, svg);
+    var verdict = s("text", { x: 24, y: 240, class: "qq-t qq-hot" }, svg);
+
+    function rank(rows) {
+      var basis = [], i, j;
+      for (i = 0; i < rows.length; i++) {
+        var v = rows[i];
+        for (j = 0; j < basis.length; j++) {
+          var hb = 31 - Math.clz32(basis[j]);
+          if ((v >> hb) & 1) v ^= basis[j];
+        }
+        if (v) basis.push(v);
+        basis.sort(function (a, b) { return b - a; });
+      }
+      return basis.length;
+    }
+
+    function sample() {
+      var sv = bitsToInt(st.s) || 1, z = 0, b;
+      var piv = 31 - Math.clz32(sv & -sv);          // lowest set bit of s
+      for (b = 0; b < n; b++) {
+        if (b === piv) continue;
+        if (Math.random() < 0.5) {
+          z ^= (1 << b) | (((sv >> b) & 1) ? (1 << piv) : 0);
+        }
+      }
+      return z;
+    }
+
+    function solve() {
+      var cands = [], v, i;
+      for (v = 1; v < N; v++) {
+        var ok = true;
+        for (i = 0; i < st.rows.length; i++) {
+          if (popcount(v & st.rows[i]) & 1) { ok = false; break; }
+        }
+        if (ok) cands.push(v);
+      }
+      return cands;
+    }
+
+    function draw() {
+      clear(rowsG);
+      var sv = bitsToInt(st.s) || 1, i;
+      head.textContent = "hidden s = " + intToStr(sv, n) +
+        "   ·   equations collected: " + st.rows.length +
+        "   ·   independent: " + rank(st.rows) + " of " + (n - 1) + " needed";
+      for (i = 0; i < Math.min(st.rows.length, 8); i++) {
+        var y = 58 + i * 18;
+        var t = s("text", { x: 30, y: y, class: "qq-t qq-ink" }, rowsG);
+        t.setAttribute("font-size", "12.5");
+        t.setAttribute("font-family", "ui-monospace, monospace");
+        t.textContent = "z = " + intToStr(st.rows[i], n) + "   ·   z · s = 0";
+        var v = s("text", { x: 230, y: y, class: "qq-t" }, rowsG);
+        v.setAttribute("font-size", "12.5");
+        v.setAttribute("fill", st.flags[i] ? "var(--qq-pos)" : "var(--qq-neg)");
+        v.textContent = st.flags[i] ? "new information"
+                                    : "already implied — wasted shot";
+      }
+      if (st.rows.length > 8) {
+        var more = s("text", { x: 30, y: 58 + 8 * 18,
+          class: "qq-t qq-muted qq-sm" }, rowsG);
+        more.textContent = "… " + (st.rows.length - 8) + " more";
+      }
+      var cands = solve();
+      if (rank(st.rows) === n - 1 && cands.length === 1) {
+        verdict.textContent = "solved: the only nonzero string orthogonal to " +
+          "every sample is " + intToStr(cands[0], n) +
+          (cands[0] === sv ? "  ✓  that is s" : "");
+      } else if (st.rows.length === 0) {
+        verdict.textContent = "no samples yet — s could be any of the 15 " +
+          "nonzero strings";
+      } else {
+        verdict.textContent = "still " + cands.length + " candidates for s: " +
+          cands.slice(0, 8).map(function (v) { return intToStr(v, n); })
+            .join(" ") + (cands.length > 8 ? " …" : "");
+      }
+    }
+
+    function shoot(k) {
+      for (var i = 0; i < k; i++) {
+        var before = rank(st.rows), z = sample();
+        st.rows.push(z);
+        st.flags.push(rank(st.rows) > before);
+      }
+      draw();
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    btn(ctr, "measure", function () { shoot(1); });
+    btn(ctr, "measure ×3", function () { shoot(3); }, "qq-btn-ghost");
+    btn(ctr, "reset", function () {
+      st.rows = []; st.flags = []; draw();
+    }, "qq-btn-ghost");
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    var chips = bitToggles(ctr2, "hidden s =", st.s, function () {
+      if (bitsToInt(st.s) === 0) { st.s[n - 1] = 1; chips.sync(); }
+      st.rows = []; st.flags = []; draw();
+    });
+    draw();
+  }
+
+  /* =================================================================
+   * PREREQUISITE · Fourier from scratch
+   *
+   *   tuner      the radio dial: multiply, average, sweep
+   *   harmonics  build a square wave one harmonic at a time (and Gibbs)
+   *   twovalues  the bridge: a group of order 2 leaves a wave only +-1
+   * ================================================================= */
+
+  /* ---- V · the radio dial ------------------------------------------ */
+
+  function animTuner(root) {
+    var f = frame(root, "Tuning a dial: the only measurement in Fourier analysis",
+      "Multiply the signal by a probe wave point by point, then average. " +
+      "When the probe matches something in the signal the products stay " +
+      "positive and the average is large; when it does not, the products " +
+      "spend as much time below zero as above and cancel. Sweep the dial " +
+      "across every frequency and the collected answers are the spectrum. " +
+      "That is the whole idea — everything else is bookkeeping about which " +
+      "waves you sweep.");
+
+    var st = { k: 3, hidden: [[3, 1.0], [7, 0.55]] };
+    var W = 660, Hh = 300, pad = 34;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var M = 240;                       // points used to draw the curves
+    var topMid = 74, prodMid = 168, specBase = 268, specTop = 208;
+
+    function sig(t) {
+      var v = 0;
+      for (var i = 0; i < st.hidden.length; i++) {
+        v += st.hidden[i][1] * Math.cos(2 * Math.PI * st.hidden[i][0] * t);
+      }
+      return v;
+    }
+    function probe(t) { return Math.cos(2 * Math.PI * st.k * t); }
+
+    function pathOf(fn, mid, amp) {
+      var d = "", i, t, x, y;
+      for (i = 0; i <= M; i++) {
+        t = i / M;
+        x = pad + t * (W - 2 * pad);
+        y = mid - amp * fn(t);
+        d += (i ? "L" : "M") + x.toFixed(1) + "," + y.toFixed(1);
+      }
+      return d;
+    }
+
+    var lblSig = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, svg);
+    var lblProd = s("text", { x: pad, y: 118, class: "qq-t qq-muted qq-sm" },
+      svg);
+    var fillG = s("g", {}, svg);
+    var sigP = s("path", { fill: "none", "stroke-width": 2,
+      style: "stroke: var(--qq-ink)" }, svg);
+    var probeP = s("path", { fill: "none", "stroke-width": 1.6,
+      "stroke-dasharray": "5 3", style: "stroke: var(--qq-hot)" }, svg);
+    var prodP = s("path", { fill: "none", "stroke-width": 1.6,
+      style: "stroke: var(--qq-pos)" }, svg);
+    s("line", { x1: pad, y1: topMid, x2: W - pad, y2: topMid,
+      class: "qq-axis" }, svg);
+    s("line", { x1: pad, y1: prodMid, x2: W - pad, y2: prodMid,
+      class: "qq-axis" }, svg);
+    s("line", { x1: pad, y1: specBase, x2: W - pad, y2: specBase,
+      class: "qq-axis" }, svg);
+    var barsG = s("g", {}, svg);
+    var readout = s("text", { x: W - pad, y: 118, class: "qq-t-end qq-hot" },
+      svg);
+
+    function draw() {
+      var i, t, KMAX = 14;
+      sigP.setAttribute("d", pathOf(sig, topMid, 26));
+      probeP.setAttribute("d", pathOf(probe, topMid, 26));
+      prodP.setAttribute("d", pathOf(function (t) {
+        return sig(t) * probe(t);
+      }, prodMid, 20));
+
+      // shade the product: blue above the line, amber below
+      clear(fillG);
+      var segs = 120, acc = 0;
+      for (i = 0; i < segs; i++) {
+        t = (i + 0.5) / segs;
+        var v = sig(t) * probe(t);
+        acc += v / segs;
+        var x = pad + (i / segs) * (W - 2 * pad);
+        var w = (W - 2 * pad) / segs;
+        var hgt = v * 20;
+        s("rect", { x: x, y: hgt >= 0 ? prodMid - hgt : prodMid,
+          width: w + 0.4, height: Math.abs(hgt),
+          class: hgt >= 0 ? "qq-pos" : "qq-neg", opacity: 0.42 }, fillG);
+      }
+
+      clear(barsG);
+      var bw = (W - 2 * pad) / (KMAX + 1);
+      for (i = 0; i <= KMAX; i++) {
+        var a = 0;
+        for (var j = 0; j < st.hidden.length; j++) {
+          if (st.hidden[j][0] === i) a = st.hidden[j][1];
+        }
+        var hh = (a / 2) * (specBase - specTop) / 0.6;   // a/2 = the average
+        s("rect", { x: pad + i * bw + bw * 0.18, y: specBase - hh,
+          width: bw * 0.64, height: Math.max(hh, 0.8),
+          class: i === st.k ? "qq-hotbar" : "qq-bar qq-pos",
+          opacity: i === st.k ? 1 : 0.45 }, barsG);
+        var tx = s("text", { x: pad + i * bw + bw / 2, y: specBase + 15,
+          class: "qq-t-mid qq-muted qq-sm" }, barsG);
+        tx.textContent = String(i);
+      }
+
+      lblSig.textContent = "the signal (solid) and your probe wave at k = " +
+        st.k + " (dashed)";
+      lblProd.textContent = "their product, point by point";
+      readout.textContent = "average = " + acc.toFixed(3) +
+        (Math.abs(acc) < 0.02 ? "   →   nothing at this frequency"
+                              : "   →   found it");
+      var t2 = s("text", { x: pad, y: specTop - 8,
+        class: "qq-t qq-muted qq-sm" }, barsG);
+      t2.textContent = "the spectrum: one bar per dial position, each the " +
+        "average you would read there";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr, "probe frequency k", 0, 14, st.k,
+      function (v) { st.k = v; draw(); });
+    h("span", "qq-bits-l", ctr, "hidden signal");
+    [["two tones", [[3, 1.0], [7, 0.55]]],
+     ["one tone", [[5, 1.0]]],
+     ["three tones", [[2, 0.8], [6, 0.6], [11, 0.4]]]].forEach(function (p) {
+      btn(ctr, p[0], function () { st.hidden = p[1]; draw(); }, "qq-btn-ghost");
+    });
+    draw();
+  }
+
+  /* ---- W · building a square wave out of harmonics ------------------ */
+
+  function animHarmonics(root) {
+    var f = frame(root, "Building a shape out of waves, one harmonic at a time",
+      "A square wave is the sum of odd harmonics with amplitudes 4/πk. Add " +
+      "them one at a time and the sum crawls toward the shape — but look at " +
+      "the corners. The overshoot settles at about 9% of the jump and never " +
+      "goes away; more terms only make it narrower. A finite recipe cannot " +
+      "make a sharp edge, and that same fact is why a period that does not " +
+      "divide the register leaks in Shor's algorithm.");
+
+    var st = { terms: 3 };
+    var W = 660, Hh = 250, pad = 36, mid = 128, amp = 74;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var head = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, svg);
+    var note = s("text", { x: pad, y: 44, class: "qq-t qq-muted qq-sm" }, svg);
+    s("line", { x1: pad, y1: mid, x2: W - pad, y2: mid, class: "qq-axis" },
+      svg);
+    var target = s("path", { fill: "none", "stroke-width": 1.4,
+      "stroke-dasharray": "4 4", style: "stroke: var(--qq-muted)" }, svg);
+    var sum = s("path", { fill: "none", "stroke-width": 2.2,
+      style: "stroke: var(--qq-pos)" }, svg);
+    var partsG = s("g", {}, svg);
+    var over = s("line", { class: "qq-mark" }, svg);
+
+    function series(t, terms) {
+      var v = 0;
+      for (var j = 0; j < terms; j++) {
+        var k = 2 * j + 1;
+        v += (4 / (Math.PI * k)) * Math.sin(2 * Math.PI * k * t);
+      }
+      return v;
+    }
+
+    function pathOf(fn) {
+      var d = "", i, M = 900;
+      for (i = 0; i <= M; i++) {
+        var t = i / M;
+        var x = pad + t * (W - 2 * pad);
+        var y = mid - amp * fn(t);
+        d += (i ? "L" : "M") + x.toFixed(1) + "," + y.toFixed(1);
+      }
+      return d;
+    }
+
+    function draw() {
+      target.setAttribute("d", pathOf(function (t) {
+        return t < 0.5 ? 1 : -1;
+      }));
+      sum.setAttribute("d", pathOf(function (t) {
+        return series(t, st.terms);
+      }));
+      clear(partsG);
+      for (var j = 0; j < Math.min(st.terms, 6); j++) {
+        var k = 2 * j + 1;
+        s("path", { d: pathOf(function (t) {
+          return (4 / (Math.PI * k)) * Math.sin(2 * Math.PI * k * t);
+        }), fill: "none", "stroke-width": 1,
+          style: "stroke: var(--qq-neg)", opacity: 0.4 }, partsG);
+      }
+      // measured peak of the partial sum, scanned near the jump
+      var kmax = 2 * st.terms - 1, peak = 0;
+      for (var i = 0; i <= 600; i++) {
+        var t = (i / 600) * (3 / (2 * kmax));
+        peak = Math.max(peak, series(t, st.terms));
+      }
+      over.setAttribute("x1", pad);
+      over.setAttribute("x2", W - pad);
+      over.setAttribute("y1", mid - amp * peak);
+      over.setAttribute("y2", mid - amp * peak);
+      head.textContent = st.terms + " harmonic" + (st.terms > 1 ? "s" : "") +
+        "  (k = 1, 3, 5, … " + kmax + ")";
+      note.textContent = "peak of the sum " + peak.toFixed(4) +
+        "   ·   overshoot " + (100 * (peak - 1) / 2).toFixed(2) +
+        "% of the jump   ·   the limit is 8.95%, forever";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr, "harmonics", 1, 60, st.terms,
+      function (v) { st.terms = v; draw(); });
+    draw();
+  }
+
+  /* ---- X · the bridge: a group of order two ------------------------ */
+
+  function animTwoValues(root) {
+    var f = frame(root, "The bridge: what a wave becomes when there are only " +
+      "two positions",
+      "A wave in Fourier analysis is a point running around the unit circle. " +
+      "How far it steps each time depends on the group. On the integers mod " +
+      "N it can stop anywhere on the circle. On bit strings under XOR, " +
+      "doing anything twice returns you to the start — so the only stopping " +
+      "points are +1 and −1, and a wave collapses into a pattern of signs. " +
+      "Those sign patterns are exactly the rows of the Hadamard layer.");
+
+    var st = { N: 8, k: 1 };
+    var W = 660, Hh = 268;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var head = s("text", { x: 24, y: 24, class: "qq-t qq-ink" }, svg);
+    var g = s("g", {}, svg);
+    var note = s("text", { x: 24, y: Hh - 14, class: "qq-t qq-muted qq-sm" },
+      svg);
+
+    function draw() {
+      clear(g);
+      var N = st.N, k = st.k, i, cx = 128, cy = 136, R = 74;
+      s("circle", { cx: cx, cy: cy, r: R, fill: "none",
+        style: "stroke: var(--qq-line)", "stroke-width": 1.2 }, g);
+      var prev = null;
+      for (i = 0; i < N; i++) {
+        var ang = 2 * Math.PI * k * i / N;
+        var px = cx + R * Math.cos(ang), py = cy - R * Math.sin(ang);
+        if (prev) {
+          s("line", { x1: prev[0], y1: prev[1], x2: px, y2: py,
+            style: "stroke: var(--qq-neg)", "stroke-width": 1.3,
+            opacity: 0.75 }, g);
+        }
+        s("circle", { cx: px, cy: py, r: 5, class: "qq-pos" }, g);
+        prev = [px, py];
+      }
+      var t1 = s("text", { x: cx, y: cy + R + 26, class: "qq-t-mid qq-muted qq-sm" },
+        g);
+      t1.textContent = N === 2 ? "only two stopping points: +1 and −1"
+                               : N + " stopping points on the circle";
+
+      // the sampled wave, drawn as bars
+      var x0 = 268, bw = (W - x0 - 30) / 16, base = 136, h0 = 52;
+      for (i = 0; i < 16; i++) {
+        var a = 2 * Math.PI * k * i / N;
+        var re = Math.cos(a);
+        s("rect", { x: x0 + i * bw + 2, y: re >= 0 ? base - re * h0 : base,
+          width: bw - 4, height: Math.max(Math.abs(re) * h0, 1),
+          class: re >= 0 ? "qq-pos" : "qq-neg" }, g);
+      }
+      s("line", { x1: x0, y1: base, x2: W - 26, y2: base, class: "qq-axis" },
+        g);
+      var t2 = s("text", { x: x0, y: base - h0 - 16, class: "qq-t qq-muted qq-sm" },
+        g);
+      t2.textContent = "the wave, sampled: cos(2π·" + k + "·x / " + N + ")";
+      var t3 = s("text", { x: x0, y: base + 76, class: "qq-t qq-ink" }, g);
+      t3.setAttribute("font-size", "12.5");
+      var vals = "";
+      for (i = 0; i < 8; i++) {
+        var v = Math.cos(2 * Math.PI * k * i / N);
+        vals += (Math.abs(v - 1) < 1e-9 ? " +1"
+          : Math.abs(v + 1) < 1e-9 ? " −1" : " " + v.toFixed(2));
+      }
+      t3.textContent = "values:" + vals + " …";
+
+      head.textContent = "group ℤ" + N + ",  frequency k = " + k;
+      note.textContent = N === 2
+        ? "every value is ±1 — this row is exactly a row of H, and stacking "
+          + "all of them for n bits gives H⊗ⁿ"
+        : "values are spread around the circle; only when N = 2 does the "
+          + "wave become a pure sign pattern";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    h("span", "qq-bits-l", ctr, "group size N =");
+    [2, 4, 8, 16].forEach(function (N) {
+      btn(ctr, String(N), function () {
+        st.N = N; st.k = Math.min(st.k, N - 1); draw();
+      }, "qq-btn-ghost");
+    });
+    rangeCtl(ctr, "k", 0, 7, st.k, function (v) {
+      st.k = Math.min(v, st.N - 1); draw();
+    });
+    draw();
+  }
+
+  /* =================================================================
+   * AUTOPSY 05 · the hidden subgroup problem, and where structure ends
+   *
+   *   hspmachine  one quantum step, three algorithms: swap only the tail
+   *   dihedral    D_N: the label says one bit, the phase says the rest
+   *   colourwl    what colour refinement already does to graph isomorphism
+   * ================================================================= */
+
+  /* ---- Y · one machine, three algorithms --------------------------- */
+
+  function animHspMachine(root) {
+    var f = frame(root, "One quantum step, three algorithms",
+      "The machine never changes: build the superposition, call the " +
+      "function once, measure the output register so the input collapses " +
+      "to a coset, Fourier transform, measure. Every sample lands on the " +
+      "annihilator H⊥ and nowhere else. What changes between " +
+      "Bernstein–Vazirani, Simon and Shor is only the classical line at " +
+      "the end that reads the labels — which is why one theorem closed " +
+      "three problems at once.");
+
+    var n = 4, N = 16;
+    var st = { mode: "simon", labels: [] };
+    var W = 660, Hh = 232, pad = 30, base = 150, top = 44;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var barsG = s("g", {}, svg);
+    var head = s("text", { x: pad, y: 22, class: "qq-t qq-ink" }, svg);
+    var sub = s("text", { x: pad, y: 40, class: "qq-t qq-muted qq-sm" }, svg);
+    var tail = s("text", { x: pad, y: base + 42, class: "qq-t qq-hot" }, svg);
+    s("line", { x1: pad, y1: base, x2: W - pad, y2: base, class: "qq-axis" },
+      svg);
+
+    var MODES = {
+      bv: { name: "Bernstein–Vazirani", s: 0xB,
+        group: "G = ℤ₂⁴,  H = the hyperplane s·x = 0",
+        tail: "classical tail: read the one nonzero label — it IS s" },
+      simon: { name: "Simon", s: 0xD,
+        group: "G = ℤ₂⁴,  H = {0, s}",
+        tail: "classical tail: collect n−1 independent labels, solve over GF(2)" },
+      shor: { name: "Shor, order-finding", r: 4,
+        group: "G = ℤ₁₆,  H = rℤ",
+        tail: "classical tail: gcd of the labels gives N/r, hence r" }
+    };
+
+    function support() {
+      // H-perp, computed the same way the Python does it
+      var out = [], z;
+      if (st.mode === "bv") {
+        out = [0, MODES.bv.s];                    // {0, s}
+      } else if (st.mode === "simon") {
+        for (z = 0; z < N; z++) {
+          if (popcount(z & MODES.simon.s) % 2 === 0) out.push(z);
+        }
+      } else {
+        for (z = 0; z < N; z++) {
+          if (z % (N / MODES.shor.r) === 0) out.push(z);
+        }
+      }
+      return out;
+    }
+
+    function draw() {
+      var sup = support(), i, bw = (W - 2 * pad) / N;
+      var p = 1 / sup.length, mx = p;
+      clear(barsG);
+      for (i = 0; i < N; i++) {
+        var inSup = sup.indexOf(i) >= 0;
+        var hgt = inSup ? (base - top) * p / mx : 0;
+        s("rect", { x: pad + i * bw + 3, y: base - Math.max(hgt, 1),
+          width: bw - 6, height: Math.max(hgt, 1),
+          class: "qq-bar " + (inSup ? "qq-pos" : "qq-neg"),
+          opacity: st.labels.indexOf(i) >= 0 ? 1 : 0.55 }, barsG);
+        var t = s("text", { x: pad + i * bw + bw / 2, y: base + 16,
+          class: "qq-t-mid qq-muted qq-sm" }, barsG);
+        t.setAttribute("font-size", "8.5");
+        t.textContent = st.mode === "shor" ? String(i) : intToStr(i, n);
+      }
+      st.labels.forEach(function (z) {
+        s("circle", { cx: pad + z * bw + bw / 2, cy: top - 12, r: 4,
+          style: "fill: var(--qq-hot)" }, barsG);
+      });
+      var m = MODES[st.mode];
+      head.textContent = m.name + "   ·   " + m.group;
+      sub.textContent = "the samples land on H⊥ — " + sup.length +
+        " of " + N + " labels are even possible" +
+        (st.labels.length ? ("   ·   drawn so far: " + st.labels.length) : "");
+      tail.textContent = m.tail;
+    }
+
+    function shoot(k) {
+      var sup = support();
+      for (var i = 0; i < k; i++) {
+        st.labels.push(sup[Math.floor(Math.random() * sup.length)]);
+      }
+      draw();
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    h("span", "qq-bits-l", ctr, "problem");
+    [["bv", "Bernstein–Vazirani"], ["simon", "Simon"],
+     ["shor", "Shor order-finding"]].forEach(function (p) {
+      btn(ctr, p[1], function () {
+        st.mode = p[0]; st.labels = []; draw();
+      }, "qq-btn-ghost");
+    });
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    btn(ctr2, "measure", function () { shoot(1); });
+    btn(ctr2, "measure ×3", function () { shoot(3); }, "qq-btn-ghost");
+    btn(ctr2, "clear", function () { st.labels = []; draw(); }, "qq-btn-ghost");
+    draw();
+  }
+
+  /* ---- Z · the dihedral group: one bit, then a phase --------------- */
+
+  function animDihedral(root) {
+    var f = frame(root, "Barely non-abelian, and it costs everything",
+      "The dihedral group is a circle of rotations plus a flip — one step " +
+      "away from abelian. Hide a reflection in it and Fourier sampling " +
+      "still returns a label, but the two-dimensional labels come out with " +
+      "exactly the same probabilities whatever the secret is. Only the " +
+      "one-dimensional labels move, and they reveal a single bit: whether " +
+      "the offset is even or odd. Everything else survives as a relative " +
+      "phase inside a two-dimensional block, which one measurement cannot " +
+      "read. That gap is where lattice cryptography lives.");
+
+    var st = { N: 8, d: 3 };
+    var W = 660, Hh = 264;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+    var head = s("text", { x: 24, y: 24, class: "qq-t qq-ink" }, svg);
+    var note = s("text", { x: 24, y: Hh - 12, class: "qq-t qq-muted qq-sm" },
+      svg);
+
+    function draw() {
+      clear(g);
+      var N = st.N, d = st.d, i;
+
+      // left: the group as a circle of rotations plus the hidden reflection
+      var cx = 118, cy = 132, R = 74;
+      s("circle", { cx: cx, cy: cy, r: R, fill: "none",
+        style: "stroke: var(--qq-line)", "stroke-width": 1.2 }, g);
+      for (i = 0; i < N; i++) {
+        var a = 2 * Math.PI * i / N;
+        s("circle", { cx: cx + R * Math.cos(a), cy: cy - R * Math.sin(a),
+          r: 4, class: "qq-pos" }, g);
+      }
+      var ad = 2 * Math.PI * d / N;
+      s("line", { x1: cx - R * Math.cos(ad / 2), y1: cy + R * Math.sin(ad / 2),
+        x2: cx + R * Math.cos(ad / 2), y2: cy - R * Math.sin(ad / 2),
+        style: "stroke: var(--qq-hot)", "stroke-width": 2,
+        "stroke-dasharray": "5 3" }, g);
+      var lab = s("text", { x: cx, y: cy + R + 26,
+        class: "qq-t-mid qq-muted qq-sm" }, g);
+      lab.textContent = "hidden reflection at offset d = " + d;
+
+      // right: the label distribution
+      var x0 = 250, bw = 46, base = 176, hmax = 92;
+      var names = ["trivial", "sign", "alt", "alt-sign", "ρ₁", "ρ₂", "ρ₃"];
+      var even = d % 2 === 0;
+      var vals = [0.125, 0, even ? 0.125 : 0, even ? 0 : 0.125,
+                  0.25, 0.25, 0.25];
+      for (i = 0; i < names.length; i++) {
+        var hgt = vals[i] * hmax / 0.25 * 0.92;
+        s("rect", { x: x0 + i * bw + 5, y: base - hgt, width: bw - 12,
+          height: Math.max(hgt, 1.2),
+          class: "qq-bar " + (i < 4 ? "qq-hotbar" : "qq-pos") }, g);
+        var t = s("text", { x: x0 + i * bw + bw / 2 - 3, y: base + 16,
+          class: "qq-t-mid qq-muted qq-sm" }, g);
+        t.setAttribute("font-size", "9");
+        t.textContent = names[i];
+      }
+      s("line", { x1: x0, y1: base, x2: x0 + names.length * bw, y2: base,
+        class: "qq-axis" }, g);
+      var t2 = s("text", { x: x0, y: 62, class: "qq-t qq-muted qq-sm" }, g);
+      t2.textContent = "1-dimensional labels (amber): move with the parity";
+      var t3 = s("text", { x: x0, y: 78, class: "qq-t qq-muted qq-sm" }, g);
+      t3.textContent = "2-dimensional labels (blue): identical for every d";
+
+      // the phase that holds the rest
+      var px = x0, py = 216;
+      var t4 = s("text", { x: px, y: py, class: "qq-t qq-ink" }, g);
+      t4.setAttribute("font-size", "12.5");
+      t4.textContent = "inside block ρ₁ the state is (|0⟩ + e^(2πi·" + d +
+        "/" + N + ")|1⟩)/√2";
+
+      head.textContent = "D" + N + ": " + (2 * N) + " elements, " +
+        "hidden subgroup {1, s·r^" + d + "}";
+      note.textContent = "the label told you d is " + (even ? "even" : "odd") +
+        " — one bit out of log₂ " + N + " = " + Math.log2(N) +
+        ". The remaining " + (Math.log2(N) - 1) + " bits are in that phase, " +
+        "and one copy is not enough to read it.";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    h("span", "qq-bits-l", ctr, "N =");
+    [8, 16].forEach(function (N) {
+      btn(ctr, String(N), function () {
+        st.N = N; st.d = st.d % N; draw();
+      }, "qq-btn-ghost");
+    });
+    rangeCtl(ctr, "hidden offset d", 0, 15, st.d, function (v) {
+      st.d = v % st.N; draw();
+    });
+    draw();
+  }
+
+  /* ---- AA · colour refinement, the baseline GI was measured against - */
+
+  function animColourWl(root) {
+    var f = frame(root, "What the classical baseline was already doing",
+      "Colour refinement: colour every vertex by its degree, then keep " +
+      "recolouring by the multiset of neighbouring colours until nothing " +
+      "changes. Two graphs whose colour multisets differ cannot be " +
+      "isomorphic. On a random graph it separates every vertex within a " +
+      "few rounds, which settles the isomorphism question outright — this " +
+      "is the algorithm from 1968 that the thirty-year quantum programme " +
+      "was implicitly racing.");
+
+    var st = { kind: "random", round: 0, adj: null, n: 12 };
+    var W = 660, Hh = 288;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+    var head = s("text", { x: 24, y: 24, class: "qq-t qq-ink" }, svg);
+    var note = s("text", { x: 24, y: Hh - 12, class: "qq-t qq-muted qq-sm" },
+      svg);
+    var PALETTE = ["#2a78d6", "#eda100", "#1baf7a", "#e34948", "#8a63d2",
+                   "#00a3a3", "#c2185b", "#7cb342", "#5c6bc0", "#f4511e",
+                   "#795548", "#00838f"];
+
+    function makeRandom(n) {
+      var a = [], i, j;
+      for (i = 0; i < n; i++) { a.push([]); for (j = 0; j < n; j++) a[i].push(0); }
+      for (i = 0; i < n; i++) {
+        for (j = i + 1; j < n; j++) {
+          var e = Math.random() < 0.35 ? 1 : 0;
+          a[i][j] = a[j][i] = e;
+        }
+      }
+      return a;
+    }
+
+    function makeRook() {           // 4x4 rook's graph: strongly regular
+      var n = 16, a = [], i, j;
+      for (i = 0; i < n; i++) { a.push([]); for (j = 0; j < n; j++) a[i].push(0); }
+      for (i = 0; i < 16; i++) {
+        for (j = 0; j < 16; j++) {
+          if (i === j) continue;
+          if ((i >> 2) === (j >> 2) || (i & 3) === (j & 3)) a[i][j] = 1;
+        }
+      }
+      return a;
+    }
+
+    function refine(adj, rounds) {
+      var n = adj.length, colors = [], i, r;
+      for (i = 0; i < n; i++) colors.push(0);
+      for (r = 0; r < rounds; r++) {
+        var sigs = [];
+        for (i = 0; i < n; i++) {
+          var nb = [];
+          for (var j = 0; j < n; j++) if (adj[i][j]) nb.push(colors[j]);
+          nb.sort(function (a, b) { return a - b; });
+          sigs.push(colors[i] + "|" + nb.join(","));
+        }
+        var uniq = sigs.slice().sort().filter(function (v, k, arr) {
+          return k === 0 || v !== arr[k - 1];
+        });
+        var next = sigs.map(function (sig) { return uniq.indexOf(sig); });
+        var before = colors.slice().sort().filter(function (v, k, arr) {
+          return k === 0 || v !== arr[k - 1];
+        }).length;
+        colors = next;
+        if (uniq.length === before) break;
+      }
+      return colors;
+    }
+
+    function reset() {
+      st.round = 0;
+      st.adj = st.kind === "random" ? makeRandom(st.n) : makeRook();
+      draw();
+    }
+
+    function draw() {
+      clear(g);
+      var adj = st.adj, n = adj.length, i, j;
+      var colors = refine(adj, st.round);
+      var cx = 190, cy = 148, R = 108;
+      var pos = [];
+      for (i = 0; i < n; i++) {
+        var a = 2 * Math.PI * i / n - Math.PI / 2;
+        pos.push([cx + R * Math.cos(a), cy + R * Math.sin(a)]);
+      }
+      for (i = 0; i < n; i++) {
+        for (j = i + 1; j < n; j++) {
+          if (adj[i][j]) {
+            s("line", { x1: pos[i][0], y1: pos[i][1],
+              x2: pos[j][0], y2: pos[j][1],
+              style: "stroke: var(--qq-line)", "stroke-width": 1,
+              opacity: 0.55 }, g);
+          }
+        }
+      }
+      for (i = 0; i < n; i++) {
+        s("circle", { cx: pos[i][0], cy: pos[i][1], r: 9,
+          style: "fill: " + PALETTE[colors[i] % PALETTE.length] }, g);
+      }
+      var distinct = colors.slice().sort(function (a, b) { return a - b; })
+        .filter(function (v, k, arr) { return k === 0 || v !== arr[k - 1]; })
+        .length;
+
+      // the colour histogram
+      var x0 = 360, bw = 22, base = 214;
+      var counts = {};
+      colors.forEach(function (c) { counts[c] = (counts[c] || 0) + 1; });
+      var keys = Object.keys(counts).sort(function (a, b) { return a - b; });
+      for (i = 0; i < keys.length && i < 13; i++) {
+        var hgt = counts[keys[i]] * 15;
+        s("rect", { x: x0 + i * bw, y: base - hgt, width: bw - 5,
+          height: hgt, style: "fill: " +
+            PALETTE[keys[i] % PALETTE.length] }, g);
+      }
+      s("line", { x1: x0, y1: base, x2: W - 24, y2: base, class: "qq-axis" },
+        g);
+      var t = s("text", { x: x0, y: base + 20, class: "qq-t qq-muted qq-sm" },
+        g);
+      t.textContent = "colour classes: " + distinct + " of " + n + " vertices";
+
+      head.textContent = "round " + st.round + "   ·   " +
+        (st.kind === "random" ? "a random graph on " + n + " vertices"
+                              : "the 4×4 rook's graph (strongly regular)");
+      note.textContent = st.kind === "random"
+        ? (distinct === n
+            ? "every vertex has its own colour — the graph is canonically "
+              + "labelled and isomorphism against it is now trivial"
+            : "keep stepping: on a random graph this reaches all-distinct "
+              + "in a handful of rounds")
+        : "every vertex keeps the same colour forever. This is the thin "
+          + "adversarial family where refinement is blind — and where one "
+          + "more invariant (the shape of a neighbourhood) walks straight "
+          + "past it.";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    btn(ctr, "step", function () { st.round++; draw(); });
+    btn(ctr, "reset", reset, "qq-btn-ghost");
+    h("span", "qq-bits-l", ctr, "graph");
+    [["random", "random"], ["rook", "strongly regular"]].forEach(function (p) {
+      btn(ctr, p[1], function () { st.kind = p[0]; reset(); }, "qq-btn-ghost");
+    });
+    reset();
+  }
+
+  /* =================================================================
+   * AUTOPSY 06 · Grover, amplitude amplification, the BBBV ceiling
+   *
+   *   groverspin  the rotation, and the souffle: more can be worse
+   *   attention   the hybrid argument: T units spread over N items
+   *   groverwall  depth, parallelism, and where the quadratic pays
+   * ================================================================= */
+
+  /* ---- AB · the rotation, and knowing when to stop ------------------ */
+
+  function animGroverSpin(root) {
+    var f = frame(root, "A rotation you have to stop on time",
+      "The state never leaves the plane spanned by “the marked item” and " +
+      "“everything else”, and each iteration turns it by the same small " +
+      "angle. That is the entire algorithm. Notice what it means: Grover " +
+      "is not a search that improves until you stop it — run it too long " +
+      "and the state sails past the target and back out again. Every " +
+      "application therefore has to know the size of the haystack before " +
+      "it starts.");
+
+    var st = { n: 10, t: 0 };
+    var W = 660, Hh = 300;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+    var head = s("text", { x: 24, y: 24, class: "qq-t qq-ink" }, svg);
+    var note = s("text", { x: 24, y: Hh - 12, class: "qq-t qq-muted qq-sm" },
+      svg);
+
+    function theta() { return Math.asin(Math.pow(2, -st.n / 2)); }
+    function prob(t) { return Math.pow(Math.sin((2 * t + 1) * theta()), 2); }
+    function topt() { return Math.round(Math.PI / (4 * theta()) - 0.5); }
+
+    function draw() {
+      clear(g);
+      var cx = 150, cy = 168, R = 104, i;
+
+      // the plane: |rest> horizontal, |marked> vertical
+      s("line", { x1: cx - R - 16, y1: cy, x2: cx + R + 16, y2: cy,
+        class: "qq-axis" }, g);
+      s("line", { x1: cx, y1: cy + R + 16, x2: cx, y2: cy - R - 16,
+        class: "qq-axis" }, g);
+      s("path", { d: "M " + (cx + R) + " " + cy + " A " + R + " " + R +
+        " 0 0 0 " + cx + " " + (cy - R), fill: "none",
+        style: "stroke: var(--qq-line)", "stroke-width": 1.1 }, g);
+      var lx = s("text", { x: cx + R + 22, y: cy + 4,
+        class: "qq-t qq-muted qq-sm" }, g);
+      lx.textContent = "everything else";
+      var ly = s("text", { x: cx + 6, y: cy - R - 22,
+        class: "qq-t qq-muted qq-sm" }, g);
+      ly.textContent = "the marked item";
+
+      // every step so far, faded; the current one solid
+      for (i = 0; i <= st.t; i++) {
+        var a = (2 * i + 1) * theta();
+        var px = cx + R * Math.cos(a), py = cy - R * Math.sin(a);
+        s("line", { x1: cx, y1: cy, x2: px, y2: py,
+          style: "stroke: var(--qq-" + (i === st.t ? "hot" : "pos") + ")",
+          "stroke-width": i === st.t ? 2.6 : 1.1,
+          opacity: i === st.t ? 1 : 0.28 }, g);
+        if (i === st.t) {
+          s("circle", { cx: px, cy: py, r: 5,
+            style: "fill: var(--qq-hot)" }, g);
+        }
+      }
+
+      // the probability curve
+      var x0 = 316, base = 250, top = 62, wid = W - x0 - 30;
+      var tmax = Math.max(4 * topt(), 8);
+      s("line", { x1: x0, y1: base, x2: x0 + wid, y2: base,
+        class: "qq-axis" }, g);
+      var d = "", k;
+      for (k = 0; k <= tmax; k++) {
+        var xx = x0 + (k / tmax) * wid;
+        var yy = base - prob(k) * (base - top);
+        d += (k ? "L" : "M") + xx.toFixed(1) + "," + yy.toFixed(1);
+      }
+      s("path", { d: d, fill: "none", style: "stroke: var(--qq-pos)",
+        "stroke-width": 2 }, g);
+      var ox = x0 + (topt() / tmax) * wid;
+      s("line", { x1: ox, y1: top - 6, x2: ox, y2: base, class: "qq-mark" }, g);
+      var cxp = x0 + (st.t / tmax) * wid;
+      s("circle", { cx: cxp, cy: base - prob(st.t) * (base - top), r: 5,
+        style: "fill: var(--qq-hot)" }, g);
+      var t1 = s("text", { x: x0, y: top - 14, class: "qq-t qq-muted qq-sm" },
+        g);
+      t1.textContent = "success probability vs iterations (dashed = stop here)";
+
+      head.textContent = "N = " + (1 << st.n) + "   ·   iteration t = " +
+        st.t + " of the optimal " + topt() + "   ·   P(success) = " +
+        prob(st.t).toFixed(4);
+      note.textContent = st.t === 0
+        ? "before any iteration the state is uniform: P = 1/N."
+        : st.t < topt()
+          ? "still climbing — each iteration turns the state by the same angle."
+          : st.t === topt()
+            ? "this is the stopping point. One more query makes it worse."
+            : "past the target: the rotation has overshot, and P is falling. " +
+              "More queries, worse answer.";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    btn(ctr, "iterate", function () {
+      st.t = Math.min(st.t + 1, 4 * topt()); draw();
+    });
+    btn(ctr, "jump to optimum", function () { st.t = topt(); draw(); },
+      "qq-btn-ghost");
+    btn(ctr, "reset", function () { st.t = 0; draw(); }, "qq-btn-ghost");
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr2, "log₂ N", 4, 14, st.n, function (v) {
+      st.n = v; st.t = 0; draw();
+    });
+    draw();
+  }
+
+  /* ---- AC · the hybrid argument: T units of attention --------------- */
+
+  function animAttention(root) {
+    var f = frame(root, "Why no algorithm can do better",
+      "Run any search algorithm on an oracle that marks nothing, and " +
+      "record how much amplitude sits on each item at each query. The " +
+      "total across all items is exactly T, the number of queries — " +
+      "whatever the algorithm does in between. Spread T units over N " +
+      "items and something must receive at most T/N. Marking *that* item " +
+      "barely changes the run, so the algorithm cannot notice it unless T " +
+      "is large. That is the whole of BBBV, and it was proved before " +
+      "Grover's algorithm existed.");
+
+    var st = { n: 8, T: 6, strategy: "grover" };
+    var W = 660, Hh = 250, pad = 34, base = 168, top = 56;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var barsG = s("g", {}, svg);
+    var head = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, svg);
+    var sub = s("text", { x: pad, y: 42, class: "qq-t qq-muted qq-sm" }, svg);
+    var verdict = s("text", { x: pad, y: base + 40, class: "qq-t qq-hot" },
+      svg);
+
+    function profile() {
+      var N = 1 << st.n, out = [], i;
+      if (st.strategy === "grover") {
+        for (i = 0; i < N; i++) out.push(st.T / N);      // uniform
+      } else if (st.strategy === "checker") {
+        for (i = 0; i < N; i++) out.push(i < st.T ? 1 : 0);
+      } else {                                           // a biased mixture
+        var tot = 0;
+        for (i = 0; i < N; i++) { out.push(Math.exp(-i / (N / 12))); tot += out[i]; }
+        for (i = 0; i < N; i++) out[i] = out[i] * st.T / tot;
+      }
+      return out;
+    }
+
+    function draw() {
+      var N = 1 << st.n, p = profile(), i, sum = 0, mn = Infinity, mx = 0;
+      for (i = 0; i < N; i++) {
+        sum += p[i];
+        mn = Math.min(mn, p[i]);
+        mx = Math.max(mx, p[i]);
+      }
+      clear(barsG);
+      var bw = (W - 2 * pad) / N;
+      for (i = 0; i < N; i++) {
+        var hgt = mx > 1e-12 ? (base - top) * p[i] / mx : 0;
+        s("rect", { x: pad + i * bw, y: base - hgt,
+          width: Math.max(bw - 0.5, 0.8), height: Math.max(hgt, 0.7),
+          class: "qq-bar " + (p[i] <= st.T / N + 1e-12 ? "qq-neg" : "qq-pos")
+        }, barsG);
+      }
+      var ty = base - (base - top) * (st.T / N) / (mx > 1e-12 ? mx : 1);
+      s("line", { x1: pad, y1: ty, x2: W - pad, y2: ty, class: "qq-mark" },
+        barsG);
+      var tl = s("text", { x: W - pad, y: ty - 6,
+        class: "qq-t-end qq-muted qq-sm" }, barsG);
+      tl.textContent = "T/N = " + (st.T / N).toFixed(4);
+
+      head.textContent = "N = " + N + ",  T = " + st.T + " queries   ·   " +
+        "total attention = " + sum.toFixed(3) + "  (= T, always)";
+      sub.textContent = "amber bars receive at most T/N — marking any one of " +
+        "them is what the algorithm cannot see";
+      var dev = 2 * st.T / Math.sqrt(N);
+      verdict.textContent = "least-attended item gets " + mn.toFixed(5) +
+        "   →   marking it moves the output by at most 2T/√N = " +
+        dev.toFixed(3) +
+        (dev < 1 ? "  →  too small to notice: T is not enough"
+                 : "  →  finally large enough, and T ≈ √N");
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    h("span", "qq-bits-l", ctr, "how the algorithm spends its queries");
+    [["grover", "Grover (uniform)"], ["checker", "check T items"],
+     ["biased", "biased"]].forEach(function (p) {
+      btn(ctr, p[1], function () { st.strategy = p[0]; draw(); },
+        "qq-btn-ghost");
+    });
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr2, "log₂ N", 5, 10, st.n, function (v) { st.n = v; draw(); });
+    rangeCtl(ctr2, "queries T", 1, 40, st.T, function (v) {
+      st.T = v; draw();
+    });
+    draw();
+  }
+
+  /* ---- AD · what the quadratic is worth in wall-clock time --------- */
+
+  function animGroverWall(root) {
+    var f = frame(root, "A quadratic speedup, priced",
+      "Grover's iterations are strictly sequential: iteration t+1 cannot " +
+      "start until iteration t has finished, however many qubits you own. " +
+      "So the cost is depth, and depth is the one resource money cannot " +
+      "parallelise away — buying k quantum machines buys √k, while buying " +
+      "k classical cores buys k. Slide the search space and watch which " +
+      "side the arithmetic favours.");
+
+    var st = { bits: 64, ops: 13, cores: 0 };   // ops, cores as powers of two
+    var W = 660, Hh = 230;
+    var LOGICAL = 25e-6, CLASSICAL = 0.3e-9, YEAR = 365.25 * 24 * 3600;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+
+    function fmtYears(y) {
+      if (y < 1 / 365) return (y * 365 * 24).toFixed(1) + " hours";
+      if (y < 1) return (y * 365).toFixed(1) + " days";
+      if (y < 1e6) return y.toFixed(0) + " years";
+      return y.toExponential(1) + " years";
+    }
+
+    function draw() {
+      clear(g);
+      var iters = (Math.PI / 4) * Math.pow(2, st.bits / 2);
+      var qs = iters * Math.pow(2, st.ops) * LOGICAL;
+      var cs = Math.pow(2, st.bits - 1) * CLASSICAL / Math.pow(2, st.cores);
+      var qy = qs / YEAR, cy = cs / YEAR;
+
+      var rows = [
+        ["search space", "2^" + st.bits + " = " +
+          Math.pow(2, st.bits).toExponential(1)],
+        ["Grover iterations (sequential)", iters.toExponential(2)],
+        ["logical ops per iteration", "2^" + st.ops],
+        ["quantum wall clock", fmtYears(qy)],
+        ["classical cores", "2^" + st.cores],
+        ["classical wall clock", fmtYears(cy)]
+      ];
+      for (var i = 0; i < rows.length; i++) {
+        var y = 34 + i * 24;
+        var a = s("text", { x: 30, y: y, class: "qq-t qq-muted qq-sm" }, g);
+        a.textContent = rows[i][0];
+        var b = s("text", { x: 330, y: y, class: "qq-t qq-ink" }, g);
+        b.setAttribute("font-size", "13");
+        b.setAttribute("font-family", "ui-monospace, monospace");
+        b.textContent = rows[i][1];
+        if (i === 3 || i === 5) {
+          b.setAttribute("fill", (i === 3) === (qy < cy)
+            ? "var(--qq-pos)" : "var(--qq-neg)");
+        }
+      }
+      var v = s("text", { x: 30, y: 196, class: "qq-t qq-hot" }, g);
+      v.setAttribute("font-size", "13.5");
+      v.textContent = qy < cy
+        ? "quantum wins by " + (cy / qy).toExponential(1) + "×"
+        : "classical wins by " + (qy / cy).toExponential(1) + "×";
+      var w = s("text", { x: 30, y: 216, class: "qq-t qq-muted qq-sm" }, g);
+      w.textContent = (qy < 1e3 || cy < 1e3)
+        ? "…and at least one side finishes in a human lifetime."
+        : "…but both are far past the age of the universe, so nobody wins.";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr, "log₂ N", 20, 128, st.bits, function (v) {
+      st.bits = v; draw();
+    });
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr2, "log₂ ops/iteration", 0, 16, st.ops, function (v) {
+      st.ops = v; draw();
+    });
+    rangeCtl(ctr2, "log₂ classical cores", 0, 30, st.cores, function (v) {
+      st.cores = v; draw();
+    });
+    draw();
+  }
+
+  /* =================================================================
+   * AUTOPSIES 07-08 · quantum walks
+   *
+   *   walkrace   a ballistic front against a diffusive blob
+   *   disorder   what one imperfect graph does to the exponential
+   *   szegedygap phase gap = Theta(sqrt(spectral gap)), on real chains
+   * ================================================================= */
+
+  /* --- small dense-matrix helpers, enough for a tridiagonal chain --- */
+
+  function jacobiEigh(Ain, sweeps) {
+    /* Symmetric eigendecomposition by cyclic Jacobi rotations. Slow in
+       general, fine for the ~60x60 chains these widgets use, and it keeps
+       the file dependency-free (house rule: nothing loads from a CDN). */
+    var n = Ain.length, i, j, k, p, q;
+    var A = [], V = [];
+    for (i = 0; i < n; i++) {
+      A.push(Ain[i].slice());
+      V.push([]);
+      for (j = 0; j < n; j++) V[i].push(i === j ? 1 : 0);
+    }
+    sweeps = sweeps || 12;
+    for (k = 0; k < sweeps; k++) {
+      var off = 0;
+      for (p = 0; p < n - 1; p++) {
+        for (q = p + 1; q < n; q++) off += A[p][q] * A[p][q];
+      }
+      if (off < 1e-18) break;
+      for (p = 0; p < n - 1; p++) {
+        for (q = p + 1; q < n; q++) {
+          if (Math.abs(A[p][q]) < 1e-14) continue;
+          var theta = (A[q][q] - A[p][p]) / (2 * A[p][q]);
+          var t = (theta >= 0 ? 1 : -1) /
+            (Math.abs(theta) + Math.sqrt(theta * theta + 1));
+          var c = 1 / Math.sqrt(t * t + 1), s2 = t * c;
+          for (i = 0; i < n; i++) {
+            var aip = A[i][p], aiq = A[i][q];
+            A[i][p] = c * aip - s2 * aiq;
+            A[i][q] = s2 * aip + c * aiq;
+          }
+          for (i = 0; i < n; i++) {
+            var api = A[p][i], aqi = A[q][i];
+            A[p][i] = c * api - s2 * aqi;
+            A[q][i] = s2 * api + c * aqi;
+          }
+          for (i = 0; i < n; i++) {
+            var vip = V[i][p], viq = V[i][q];
+            V[i][p] = c * vip - s2 * viq;
+            V[i][q] = s2 * vip + c * viq;
+          }
+        }
+      }
+    }
+    var lam = [];
+    for (i = 0; i < n; i++) lam.push(A[i][i]);
+    return { values: lam, vectors: V };
+  }
+
+  function evolveChain(eig, start, t) {
+    /* |psi(t)|^2 for exp(-iAt)|start>, given the eigendecomposition. */
+    var n = start.length, i, j, coeff = [], re = [], im = [], out = [];
+    for (j = 0; j < n; j++) {
+      var c = 0;
+      for (i = 0; i < n; i++) c += eig.vectors[i][j] * start[i];
+      coeff.push(c);
+    }
+    for (i = 0; i < n; i++) { re.push(0); im.push(0); }
+    for (j = 0; j < n; j++) {
+      var ph = -eig.values[j] * t;
+      var cr = Math.cos(ph) * coeff[j], ci = Math.sin(ph) * coeff[j];
+      for (i = 0; i < n; i++) {
+        re[i] += eig.vectors[i][j] * cr;
+        im[i] += eig.vectors[i][j] * ci;
+      }
+    }
+    for (i = 0; i < n; i++) out.push(re[i] * re[i] + im[i] * im[i]);
+    return out;
+  }
+
+  /* ---- AE · ballistic against diffusive ---------------------------- */
+
+  function animWalkRace(root) {
+    var f = frame(root, "A front against a blob",
+      "Both walkers start at the same place on the same line. The " +
+      "classical one piles up where it began and spreads as √t; the " +
+      "quantum one throws its weight into two fronts that keep moving, so " +
+      "it spreads as t. That single change of exponent is the whole of " +
+      "this autopsy: on the glued-trees graph the classical walker drifts " +
+      "into an exponentially fat middle and never comes out, while the " +
+      "quantum front sails across in time proportional to the depth.");
+
+    var N = 61, mid = 30;
+    var st = { t: 0, playing: false, timer: null };
+    var W = 660, Hh = 250, pad = 34, base = 190, top = 44;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var barsG = s("g", {}, svg);
+    var head = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, svg);
+    var note = s("text", { x: pad, y: 42, class: "qq-t qq-muted qq-sm" }, svg);
+    s("line", { x1: pad, y1: base, x2: W - pad, y2: base, class: "qq-axis" },
+      svg);
+
+    var A = [], i, j;
+    for (i = 0; i < N; i++) {
+      A.push([]);
+      for (j = 0; j < N; j++) A[i].push(Math.abs(i - j) === 1 ? 1 : 0);
+    }
+    var eig = jacobiEigh(A, 14);
+    var start = [];
+    for (i = 0; i < N; i++) start.push(i === mid ? 1 : 0);
+
+    function classicalDist(steps) {
+      var d = [], nd, k;
+      for (i = 0; i < N; i++) d.push(i === mid ? 1 : 0);
+      for (k = 0; k < steps; k++) {
+        nd = [];
+        for (i = 0; i < N; i++) nd.push(0);
+        for (i = 0; i < N; i++) {
+          if (d[i] === 0) continue;
+          var nb = [];
+          if (i > 0) nb.push(i - 1);
+          if (i < N - 1) nb.push(i + 1);
+          for (j = 0; j < nb.length; j++) nd[nb[j]] += d[i] / nb.length;
+        }
+        d = nd;
+      }
+      return d;
+    }
+
+    function spread(p) {
+      var m = 0;
+      for (i = 0; i < N; i++) m += (i - mid) * (i - mid) * p[i];
+      return m;
+    }
+
+    function draw() {
+      var q = evolveChain(eig, start, st.t);
+      var c = classicalDist(Math.round(st.t));
+      var bw = (W - 2 * pad) / N, mx = 0;
+      for (i = 0; i < N; i++) mx = Math.max(mx, q[i], c[i]);
+      mx = Math.max(mx, 0.05);
+      clear(barsG);
+      for (i = 0; i < N; i++) {
+        var hq = (base - top) * q[i] / mx, hc = (base - top) * c[i] / mx;
+        s("rect", { x: pad + i * bw + 1, y: base - hq,
+          width: bw - 2, height: Math.max(hq, 0.6),
+          class: "qq-bar qq-pos", opacity: 0.85 }, barsG);
+        s("rect", { x: pad + i * bw + bw * 0.3, y: base - hc,
+          width: bw * 0.4, height: Math.max(hc, 0.6),
+          class: "qq-bar qq-neg", opacity: 0.9 }, barsG);
+      }
+      head.textContent = "t = " + st.t.toFixed(0) +
+        "   ·   quantum ⟨x²⟩ = " + spread(q).toFixed(1) +
+        "   ·   classical ⟨x²⟩ = " + spread(c).toFixed(1);
+      note.textContent = "blue: the quantum walk (fronts).  amber: the " +
+        "classical walk (a blob that never leaves).";
+    }
+
+    function stop() {
+      if (st.timer) { clearInterval(st.timer); st.timer = null; }
+      st.playing = false;
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    btn(ctr, "play", function () {
+      if (st.playing) { stop(); return; }
+      st.playing = true;
+      st.timer = setInterval(function () {
+        st.t += 1;
+        if (st.t > 26) { st.t = 0; }
+        draw();
+      }, reduced() ? 400 : 160);
+    });
+    btn(ctr, "step", function () { stop(); st.t += 1; draw(); },
+      "qq-btn-ghost");
+    btn(ctr, "reset", function () { stop(); st.t = 0; draw(); },
+      "qq-btn-ghost");
+    draw();
+  }
+
+  /* ---- AF · what disorder does to the exponential ------------------ */
+
+  function animDisorderWalk(root) {
+    var f = frame(root, "The advantage needs a perfect graph",
+      "The glued-trees speedup exists because the reduced chain is exactly " +
+      "uniform — the graph is engineered that way. Add a little randomness " +
+      "to the site energies, as any real defect would, and one dimension " +
+      "does what one dimension always does: the eigenstates localise and " +
+      "transport stops. Watch the packet fail to arrive. The uncomfortable " +
+      "part is the scaling: the tolerable imperfection shrinks as the " +
+      "problem grows.");
+
+    var st = { d: 12, W: 0, seed: 7 };
+    var Wd = 660, Hh = 250, pad = 34, base = 186, top = 48;
+    var svg = s("svg", { viewBox: "0 0 " + Wd + " " + Hh, class: "qq-svg" },
+      f.body);
+    var barsG = s("g", {}, svg);
+    var head = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, svg);
+    var note = s("text", { x: pad, y: 42, class: "qq-t qq-muted qq-sm" }, svg);
+    var verdict = s("text", { x: pad, y: base + 36, class: "qq-t qq-hot" },
+      svg);
+
+    function rand(seed) {          // deterministic, so the figure is stable
+      var x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+    }
+
+    function build() {
+      var L = 2 * st.d + 2, A = [], i, j;
+      for (i = 0; i < L; i++) {
+        A.push([]);
+        for (j = 0; j < L; j++) A[i].push(0);
+      }
+      for (j = 0; j < L - 1; j++) {
+        var w = (j === st.d) ? 2 : Math.SQRT2;
+        A[j][j + 1] = A[j + 1][j] = w;
+      }
+      for (i = 0; i < L; i++) {
+        A[i][i] = st.W * (rand(st.seed + i * 7.13) - 0.5);
+      }
+      return A;
+    }
+
+    function draw() {
+      var A = build(), L = A.length, i;
+      var eig = jacobiEigh(A, 16);
+      var start = [];
+      for (i = 0; i < L; i++) start.push(i === 0 ? 1 : 0);
+      var best = 0, bestT = 0, tt;
+      for (tt = 0; tt <= 4 * st.d; tt += 0.1) {
+        var p = evolveChain(eig, start, tt);
+        if (p[L - 1] > best) { best = p[L - 1]; bestT = tt; }
+      }
+      var shown = evolveChain(eig, start, bestT);
+      var bw = (Wd - 2 * pad) / L, mx = 0;
+      for (i = 0; i < L; i++) mx = Math.max(mx, shown[i]);
+      clear(barsG);
+      for (i = 0; i < L; i++) {
+        var hgt = (base - top) * shown[i] / (mx > 1e-9 ? mx : 1);
+        s("rect", { x: pad + i * bw + 1, y: base - hgt,
+          width: Math.max(bw - 2, 1), height: Math.max(hgt, 0.7),
+          class: "qq-bar " + (i === L - 1 ? "qq-hotbar"
+            : (i === 0 ? "qq-neg" : "qq-pos")) }, barsG);
+      }
+      s("line", { x1: pad, y1: base, x2: Wd - pad, y2: base,
+        class: "qq-axis" }, barsG);
+      var t1 = s("text", { x: pad, y: base + 16,
+        class: "qq-t qq-muted qq-sm" }, barsG);
+      t1.textContent = "entrance";
+      var t2 = s("text", { x: Wd - pad, y: base + 16,
+        class: "qq-t-end qq-muted qq-sm" }, barsG);
+      t2.textContent = "exit";
+
+      head.textContent = "depth d = " + st.d + "  (graph has ~2^" +
+        (st.d + 2) + " vertices)   ·   disorder W = " + st.W.toFixed(2);
+      note.textContent = "amplitude at the best possible measurement time, " +
+        "t* = " + bestT.toFixed(1);
+      verdict.textContent = "exit probability " + best.toFixed(4) +
+        (st.W === 0 ? "   —   the clean, engineered graph"
+          : best > 0.05 ? "   —   still crossing, but weaker"
+            : "   —   the packet no longer arrives: localised");
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr, "depth d", 6, 24, st.d, function (v) { st.d = v; draw(); });
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    var wsl = h("input", "qq-range", ctr2);
+    h("span", "qq-bits-l", ctr2, "");
+    wsl.type = "range"; wsl.min = 0; wsl.max = 40; wsl.step = 1; wsl.value = 0;
+    wsl.addEventListener("input", function () {
+      st.W = (+wsl.value) / 10; draw();
+    });
+    ctr2.insertBefore(h("span", "qq-bits-l", null, "disorder W"), wsl);
+    btn(ctr2, "new defects", function () {
+      st.seed = 1 + Math.random() * 500; draw();
+    }, "qq-btn-ghost");
+    draw();
+  }
+
+  /* ---- AG · Szegedy: the square root, on real chains --------------- */
+
+  function animSzegedyGap(root) {
+    var f = frame(root, "Every systematic walk speedup is a square root",
+      "Szegedy's construction turns any reversible Markov chain into a " +
+      "quantum walk, and the walk's phase gap is the arccos of the chain's " +
+      "spectrum — which for a small classical gap δ is about 2√2·√δ. So " +
+      "hitting and search cost 1/√δ where classical costs 1/δ. Quadratic, " +
+      "systematically, for every chain. The glued-trees exponential is not " +
+      "of this family, and that is exactly why it needed a hand-built " +
+      "graph.");
+
+    var st = { kind: "cycle", n: 12 };
+    var W = 660, Hh = 236;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+    var head = s("text", { x: 24, y: 24, class: "qq-t qq-ink" }, svg);
+
+    function chain() {
+      var n = st.n, P = [], i, j;
+      for (i = 0; i < n; i++) {
+        P.push([]);
+        for (j = 0; j < n; j++) P[i].push(0);
+      }
+      if (st.kind === "cycle") {
+        for (i = 0; i < n; i++) {
+          P[i][(i + 1) % n] += 0.5;
+          P[i][(i + n - 1) % n] += 0.5;
+        }
+      } else if (st.kind === "path") {
+        for (i = 0; i < n; i++) {
+          var nb = [];
+          if (i > 0) nb.push(i - 1);
+          if (i < n - 1) nb.push(i + 1);
+          for (j = 0; j < nb.length; j++) P[i][nb[j]] = 1 / nb.length;
+        }
+      } else if (st.kind === "complete") {
+        for (i = 0; i < n; i++) {
+          for (j = 0; j < n; j++) if (i !== j) P[i][j] = 1 / (n - 1);
+        }
+      } else {                                   // barbell
+        var half = n >> 1;
+        for (i = 0; i < n; i++) {
+          for (j = 0; j < n; j++) {
+            var same = (i < half) === (j < half);
+            if (i !== j && same) P[i][j] = 1;
+          }
+        }
+        P[half - 1][half] = 1; P[half][half - 1] = 1;
+        for (i = 0; i < n; i++) {
+          var tot = 0;
+          for (j = 0; j < n; j++) tot += P[i][j];
+          for (j = 0; j < n; j++) P[i][j] /= tot;
+        }
+      }
+      // laziness: stay put with probability 1/2 (kills the -1 eigenvalue)
+      for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) P[i][j] *= 0.5;
+        P[i][i] += 0.5;
+      }
+      return P;
+    }
+
+    function draw() {
+      clear(g);
+      var P = chain(), n = P.length, i, j;
+      // The discriminant D_xy = sqrt(P_xy P_yx). For a reversible chain it
+      // is symmetric and has exactly the chain's spectrum — which averaging
+      // (P + P^T)/2 does NOT, as soon as the vertices have unequal degrees.
+      var D = [];
+      for (i = 0; i < n; i++) {
+        D.push([]);
+        for (j = 0; j < n; j++) D[i].push(Math.sqrt(P[i][j] * P[j][i]));
+      }
+      var eig = jacobiEigh(D, 16);
+      var vals = eig.values.slice().sort(function (a, b) {
+        return Math.abs(b) - Math.abs(a);
+      });
+      var delta = 1 - Math.abs(vals[1]);
+      var pgap = 2 * Math.acos(Math.min(1, Math.abs(vals[1])));
+
+      // the spectrum, drawn
+      var x0 = 34, wid = W - 2 * x0, base = 120;
+      s("line", { x1: x0, y1: base, x2: x0 + wid, y2: base,
+        class: "qq-axis" }, g);
+      for (i = 0; i < n; i++) {
+        var xx = x0 + (vals[i] + 1) / 2 * wid;
+        s("circle", { cx: xx, cy: base, r: 5,
+          class: i === 0 ? "qq-hotbar" : "qq-pos", opacity: 0.85 }, g);
+      }
+      var lt = s("text", { x: x0, y: base + 20, class: "qq-t qq-muted qq-sm" },
+        g);
+      lt.textContent = "−1";
+      var rt = s("text", { x: x0 + wid, y: base + 20,
+        class: "qq-t-end qq-muted qq-sm" }, g);
+      rt.textContent = "+1   ← eigenvalues of the chain";
+
+      var rows = [
+        ["classical spectral gap  δ", delta.toFixed(5)],
+        ["quantum phase gap  2·arccos(λ₂)", pgap.toFixed(5)],
+        ["ratio to √δ", (pgap / Math.sqrt(delta)).toFixed(4) + "   (2√2 = " +
+          (2 * Math.SQRT2).toFixed(4) + ")"],
+        ["classical cost ~ 1/δ", (1 / delta).toFixed(1)],
+        ["quantum cost ~ 1/√δ", (1 / Math.sqrt(delta)).toFixed(1)],
+        ["speedup", (Math.sqrt(1 / delta)).toFixed(1) + "×"]
+      ];
+      for (i = 0; i < rows.length; i++) {
+        var y = 152 + i * 15;
+        if (y > Hh - 6) break;
+        var a = s("text", { x: 34, y: y, class: "qq-t qq-muted qq-sm" }, g);
+        a.textContent = rows[i][0];
+        var b = s("text", { x: 330, y: y, class: "qq-t qq-ink" }, g);
+        b.setAttribute("font-size", "12");
+        b.setAttribute("font-family", "ui-monospace, monospace");
+        b.textContent = rows[i][1];
+      }
+      head.textContent = st.kind + " on " + n + " vertices (lazy)";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    h("span", "qq-bits-l", ctr, "chain");
+    [["cycle", "cycle"], ["path", "path"], ["complete", "complete"],
+     ["barbell", "barbell"]].forEach(function (p) {
+      btn(ctr, p[1], function () { st.kind = p[0]; draw(); }, "qq-btn-ghost");
+    });
+    rangeCtl(ctr, "size", 6, 20, st.n, function (v) {
+      st.n = v % 2 ? v + 1 : v; draw();
+    });
+    draw();
+  }
+
   /* ---- registry + hydration --------------------------------------- */
 
   var ANIMS = {
@@ -1452,7 +3529,25 @@
     orthogonality: animOrthogonality,
     coset: animCoset,
     simoncomb: animSimonComb,
-    constraints: animConstraints
+    constraints: animConstraints,
+    chardial: animCharDial,
+    shifteigen: animShiftEigen,
+    spectrumlab: animSpectrumLab,
+    butterfly: animButterfly,
+    qftleak: animQftLeak,
+    hsprank: animHspRank,
+    tuner: animTuner,
+    harmonics: animHarmonics,
+    twovalues: animTwoValues,
+    hspmachine: animHspMachine,
+    dihedral: animDihedral,
+    colourwl: animColourWl,
+    groverspin: animGroverSpin,
+    attention: animAttention,
+    groverwall: animGroverWall,
+    walkrace: animWalkRace,
+    disorderwalk: animDisorderWalk,
+    szegedygap: animSzegedyGap
   };
 
   function hydrate(scope) {
