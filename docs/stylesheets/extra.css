@@ -271,6 +271,10 @@ figcaption {
 .qq-tile-pos { fill: var(--qq-pos); stroke: var(--qq-pos); }
 .qq-tile-neg { fill: var(--qq-neg); stroke: var(--qq-neg); }
 
+/* two-line readouts (deep dive 01 widgets) */
+.qq-readout div { margin-top: 0.4rem; line-height: 1.5; }
+.qq-readout div:first-child { font-variant-numeric: tabular-nums; }
+
 /* coset arcs (autopsy 03) */
 .qq-arc {
   fill: none;
