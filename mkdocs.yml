@@ -100,6 +100,10 @@ nav:
       - "11 · HHL & Tang": predecessors/10-hhl-tang/notes.md
       - "12 · Decoded Quantum Interferometry": predecessors/11-dqi/notes.md
       - "13 · Quantum Gibbs sampling": predecessors/12-gibbs-lindblad/notes.md
+  - Deep dives:
+      - The menu: study-deep-dive/index.md
+      - "00 · Pre-requisite (optional) · Fourier from scratch": study-deep-dive/00-fourier-primer/notes.md
+      - "01 · The Fourier thread": study-deep-dive/01-fourier-thread/notes.md
   - Frontier:
       - Problem-Shape Catalog: frontier/problem-shapes.md
       - Literature sweep 2026 H1: frontier/lit-sweep-2026H1.md
