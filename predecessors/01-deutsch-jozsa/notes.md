@@ -397,6 +397,15 @@ And here is the same thing measured on our own simulator, at $n = 10$:
     never the mechanism. Learn this once and twelve autopsies become
     variations.
 
+    **Want this properly?**
+    [Deep dive 01 — the Fourier thread](../../study-deep-dive/01-fourier-thread/notes.md)
+    is this box taken seriously: why the Fourier basis is the eigenbasis of
+    *shift*, why $H$ is literally a character table, which spectral shapes
+    are readable and which are not, where exactness dies when the group
+    changes, and the classical theorem (Kushilevitz–Mansour) that stands
+    exactly where you hoped to plant a flag. With live widgets and code you
+    can run.
+
 ---
 
 ## 6. What actually happens in a laboratory
