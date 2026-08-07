@@ -3512,6 +3512,303 @@
     draw();
   }
 
+  /* =================================================================
+   * AUTOPSY 09 · Hamiltonian simulation
+   *
+   *   trotterslice  slicing time, and the commutator that survives
+   *   entwall       entanglement growth and what a tensor network must store
+   *   simcost       Trotter against qubitization, and the knob between them
+   * ================================================================= */
+
+  /* ---- AH · why slicing works, and what it costs -------------------- */
+
+  function animTrotterSlice(root) {
+    var f = frame(root, "Slicing time, and the commutator that will not slice",
+      "e^{-i(A+B)t} is not e^{-iAt}e^{-iBt}, because A and B do not commute. " +
+      "Cut the time into r slices and alternate, and the error falls — as " +
+      "1/r for the naive ordering, as 1/r² if you symmetrise the slice. The " +
+      "quantity that sets the size of the error is the commutator ‖[A,B]‖, " +
+      "not ‖A‖‖B‖, and on a local chain that difference is the whole reason " +
+      "product formulas are competitive at all.");
+
+    var st = { r: 4, order: 2, t: 1.0 };
+    var W = 660, Hh = 246, pad = 40, base = 176, top = 46;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+    var head = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, svg);
+    var note = s("text", { x: pad, y: Hh - 10, class: "qq-t qq-muted qq-sm" },
+      svg);
+
+    /* Model: error(r) = C t^(k+1) / r^k with k the order. C is fixed from
+       the measured first-order constant of the 6-site chain in trotter.py,
+       so the curve the widget draws is the one the module measures. */
+    var C = 14.0;                       // ||[A,B]|| at n = 6, from trotter.py
+    function err(r, order) {
+      var k = order;
+      return (C / (2 * Math.pow(3, order - 1))) *
+        Math.pow(st.t, k + 1) / Math.pow(r, k);
+    }
+
+    function draw() {
+      clear(g);
+      var i;
+      // the time axis, sliced
+      var y0 = 74, x0 = pad, wid = W - 2 * pad;
+      s("line", { x1: x0, y1: y0, x2: x0 + wid, y2: y0, class: "qq-axis" }, g);
+      for (i = 0; i <= st.r; i++) {
+        var x = x0 + (i / st.r) * wid;
+        s("line", { x1: x, y1: y0 - 12, x2: x, y2: y0 + 12,
+          style: "stroke: var(--qq-line)", "stroke-width": 1.2 }, g);
+      }
+      for (i = 0; i < st.r; i++) {
+        var xa = x0 + (i / st.r) * wid, w = wid / st.r;
+        if (st.order === 1) {
+          s("rect", { x: xa, y: y0 - 10, width: w / 2, height: 20,
+            class: "qq-tile-pos", opacity: 0.85 }, g);
+          s("rect", { x: xa + w / 2, y: y0 - 10, width: w / 2, height: 20,
+            class: "qq-tile-neg", opacity: 0.85 }, g);
+        } else {
+          s("rect", { x: xa, y: y0 - 10, width: w / 4, height: 20,
+            class: "qq-tile-pos", opacity: 0.85 }, g);
+          s("rect", { x: xa + w / 4, y: y0 - 10, width: w / 2, height: 20,
+            class: "qq-tile-neg", opacity: 0.85 }, g);
+          s("rect", { x: xa + 3 * w / 4, y: y0 - 10, width: w / 4, height: 20,
+            class: "qq-tile-pos", opacity: 0.85 }, g);
+        }
+      }
+      var lg = s("text", { x: x0, y: y0 - 22, class: "qq-t qq-muted qq-sm" }, g);
+      lg.textContent = st.order === 1
+        ? "each slice: e^{-iA dt} then e^{-iB dt}"
+        : "each slice: half of A, all of B, half of A  (symmetric)";
+
+      // the error curve
+      var cx0 = pad, cw = W - 2 * pad;
+      s("line", { x1: cx0, y1: base, x2: cx0 + cw, y2: base,
+        class: "qq-axis" }, g);
+      var rmax = 64, lo = Math.log(err(rmax, 2)), hi = Math.log(err(1, 1));
+      function ypos(v) {
+        return base - (base - top) * (Math.log(v) - lo) / (hi - lo);
+      }
+      [1, 2].forEach(function (ord) {
+        var d = "", rr;
+        for (rr = 1; rr <= rmax; rr++) {
+          var x = cx0 + (Math.log(rr) / Math.log(rmax)) * cw;
+          d += (rr === 1 ? "M" : "L") + x.toFixed(1) + "," +
+            ypos(err(rr, ord)).toFixed(1);
+        }
+        s("path", { d: d, fill: "none",
+          style: "stroke: var(--qq-" + (ord === st.order ? "hot" : "line") +
+            ")", "stroke-width": ord === st.order ? 2.4 : 1.4 }, g);
+      });
+      var mx = cx0 + (Math.log(st.r) / Math.log(rmax)) * cw;
+      s("circle", { cx: mx, cy: ypos(err(st.r, st.order)), r: 5,
+        style: "fill: var(--qq-hot)" }, g);
+      var t2 = s("text", { x: cx0, y: top - 8, class: "qq-t qq-muted qq-sm" },
+        g);
+      t2.textContent = "error against slice count (both axes logarithmic)";
+
+      head.textContent = "order " + st.order + ",  r = " + st.r +
+        " slices   ·   error ≈ " + err(st.r, st.order).toExponential(2);
+      note.textContent = "halving the slice width divides the error by " +
+        (st.order === 1 ? "2" : "4") + " — slope −" + st.order +
+        " on this plot. Doubling the order is worth far more than doubling r.";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr, "slices r", 1, 64, st.r, function (v) { st.r = v; draw(); });
+    h("span", "qq-bits-l", ctr, "order");
+    [1, 2].forEach(function (o) {
+      btn(ctr, String(o), function () { st.order = o; draw(); },
+        "qq-btn-ghost");
+    });
+    draw();
+  }
+
+  /* ---- AI · the entanglement wall ---------------------------------- */
+
+  function animEntWall(root) {
+    var f = frame(root, "Why the classical methods die — and when they do not",
+      "A matrix-product state stores a wavefunction in bond dimension χ, " +
+      "and it needs χ ≈ 2^S where S is the entanglement entropy across a " +
+      "cut. Under a quench, S grows linearly in time, so χ grows " +
+      "exponentially in time and the classical cost explodes. Ground states " +
+      "are the opposite story: gapped ones obey an area law and stay cheap " +
+      "forever, critical ones grow only logarithmically. Two thirds of " +
+      "“classical methods fail” is not true, and knowing which third you " +
+      "are in is the whole argument.");
+
+    var st = { regime: "quench", x: 4 };
+    var W = 660, Hh = 250, pad = 40, base = 186, top = 52;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+    var head = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, svg);
+    var note = s("text", { x: pad, y: Hh - 10, class: "qq-t qq-muted qq-sm" },
+      svg);
+
+    /* Fitted from entanglement_wall.py on a 14-site critical chain:
+       quench S = 0.94 t;  critical ground state S = 0.097 log2 n + 0.24;
+       gapped ground state S = 0.128 (flat). */
+    function entropy(x) {
+      if (st.regime === "quench") return 0.94 * x;
+      if (st.regime === "critical") return 0.097 * Math.log(x) / Math.LN2 + 0.24;
+      return 0.128;
+    }
+
+    function draw() {
+      clear(g);
+      var i, xmax = 32;
+      s("line", { x1: pad, y1: base, x2: W - pad, y2: base, class: "qq-axis" },
+        g);
+      var smax = 30;
+      function ypos(v) { return base - (base - top) * Math.min(v, smax) / smax; }
+      var d = "";
+      for (i = 1; i <= xmax; i++) {
+        var x = pad + ((i - 1) / (xmax - 1)) * (W - 2 * pad);
+        d += (i === 1 ? "M" : "L") + x.toFixed(1) + "," +
+          ypos(entropy(i)).toFixed(1);
+      }
+      s("path", { d: d, fill: "none", style: "stroke: var(--qq-hot)",
+        "stroke-width": 2.4 }, g);
+      var cx = pad + ((st.x - 1) / (xmax - 1)) * (W - 2 * pad);
+      s("circle", { cx: cx, cy: ypos(entropy(st.x)), r: 6,
+        style: "fill: var(--qq-hot)" }, g);
+
+      var S = entropy(st.x), chi = Math.pow(2, S);
+      var bytes = 50 * chi * chi * 32;
+      var rows = [
+        ["entanglement entropy S", S.toFixed(2) + " bits"],
+        ["bond dimension χ ≈ 2^S", chi < 1e6 ? chi.toFixed(0)
+          : chi.toExponential(2)],
+        ["MPS memory (50 sites)", bytes < 1e9 ? (bytes / 1e6).toFixed(1) + " MB"
+          : bytes < 1e15 ? (bytes / 1e9).toFixed(1) + " GB"
+            : bytes.toExponential(1) + " bytes"]
+      ];
+      for (i = 0; i < rows.length; i++) {
+        var a = s("text", { x: W - pad - 250, y: top + 4 + i * 16,
+          class: "qq-t qq-muted qq-sm" }, g);
+        a.textContent = rows[i][0];
+        var b = s("text", { x: W - pad, y: top + 4 + i * 16,
+          class: "qq-t-end qq-ink" }, g);
+        b.setAttribute("font-size", "12.5");
+        b.setAttribute("font-family", "ui-monospace, monospace");
+        b.textContent = rows[i][1];
+      }
+
+      head.textContent = st.regime === "quench"
+        ? "quench dynamics — horizontal axis is TIME t"
+        : "ground state — horizontal axis is SYSTEM SIZE n";
+      note.textContent = st.regime === "quench"
+        ? "S grows linearly in time, so the memory doubles every ~1.1 units "
+          + "of t. This is the wall, and it is a property of the dynamics."
+        : st.regime === "critical"
+          ? "logarithmic in n: bond dimension only polynomial. Harder than "
+            + "gapped, but not a wall — DMRG still copes."
+          : "flat: the area law. Constant bond dimension at any size, which "
+            + "is why DMRG has eaten these since 1992.";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    h("span", "qq-bits-l", ctr, "regime");
+    [["quench", "quench dynamics"], ["critical", "critical ground state"],
+     ["gapped", "gapped ground state"]].forEach(function (p) {
+      btn(ctr, p[1], function () { st.regime = p[0]; draw(); }, "qq-btn-ghost");
+    });
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr2, "t  or  n", 1, 32, st.x, function (v) { st.x = v; draw(); });
+    draw();
+  }
+
+  /* ---- AJ · Trotter against qubitization --------------------------- */
+
+  function animSimCost(root) {
+    var f = frame(root, "Optimal is not the same as cheaper",
+      "Qubitization is asymptotically optimal: its cost is αt + log(1/ε), " +
+      "exponentially better in the precision than any product formula. But " +
+      "α — the sum of the Hamiltonian's coefficients — is paid linearly and " +
+      "grows with the system, while Trotter pays only a root of the " +
+      "commutator norm. Slide the ratio and watch the winner change. This " +
+      "is the number applied papers spend their whole effort shrinking, and " +
+      "it is the one the optimality theorem does not mention.");
+
+    var st = { ratio: 1, epsExp: 4, terms: 36, t: 10 };
+    var W = 660, Hh = 236;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+    var STAGES = { 2: 2, 4: 5, 6: 11 };
+
+    function costs() {
+      var eps = Math.pow(10, -st.epsExp);
+      var alpha = 14.0;                       // fixed; the ratio moves comm
+      var comm = alpha / st.ratio;
+      var best = Infinity, bestOrder = 2;
+      [2, 4, 6].forEach(function (o) {
+        var k = o / 2;
+        var r = Math.max(1, Math.ceil(Math.pow(
+          comm * Math.pow(st.t, 2 * k + 1) / eps, 1 / (2 * k))));
+        var c = r * st.terms * STAGES[o];
+        if (c < best) { best = c; bestOrder = o; }
+      });
+      var q = (alpha * st.t + Math.log(1 / eps) / Math.LN2) * st.terms * 2;
+      return { trotter: best, order: bestOrder, qub: q, alpha: alpha,
+        comm: comm, eps: eps };
+    }
+
+    function draw() {
+      clear(g);
+      var c = costs(), i;
+      var x0 = 40, wid = W - 2 * x0, base = 150, top = 46;
+      var mx = Math.max(c.trotter, c.qub) * 1.15;
+      var bars = [["best product formula (order " + c.order + ")", c.trotter,
+        c.trotter < c.qub ? "qq-pos" : "qq-neg"],
+      ["qubitization", c.qub, c.qub <= c.trotter ? "qq-pos" : "qq-neg"]];
+      for (i = 0; i < bars.length; i++) {
+        var wpx = (wid - 220) * bars[i][1] / mx;
+        s("rect", { x: x0 + 220, y: top + i * 42, width: Math.max(wpx, 2),
+          height: 28, class: "qq-bar " + bars[i][2] }, g);
+        var lab = s("text", { x: x0 + 212, y: top + i * 42 + 19,
+          class: "qq-t-end qq-muted qq-sm" }, g);
+        lab.textContent = bars[i][0];
+        var val = s("text", { x: x0 + 228 + Math.max(wpx, 2),
+          y: top + i * 42 + 19, class: "qq-t qq-ink" }, g);
+        val.setAttribute("font-size", "12");
+        val.setAttribute("font-family", "ui-monospace, monospace");
+        val.textContent = Math.round(bars[i][1]).toLocaleString();
+      }
+      s("line", { x1: x0, y1: base, x2: W - x0, y2: base, class: "qq-axis" },
+        g);
+
+      var head = s("text", { x: x0, y: 24, class: "qq-t qq-ink" }, g);
+      head.textContent = "α = " + c.alpha.toFixed(1) + ",  ‖[A,B]‖ = " +
+        c.comm.toFixed(2) + ",  ratio = " + st.ratio +
+        ",  ε = 1e-" + st.epsExp + ",  t = " + st.t;
+      var v = s("text", { x: x0, y: base + 26, class: "qq-t qq-hot" }, g);
+      v.setAttribute("font-size", "13.5");
+      v.textContent = c.trotter < c.qub
+        ? "Trotter wins by " + (c.qub / c.trotter).toFixed(2) + "×"
+        : "qubitization wins by " + (c.trotter / c.qub).toFixed(2) + "×";
+      var w = s("text", { x: x0, y: base + 46, class: "qq-t qq-muted qq-sm" },
+        g);
+      w.textContent = st.ratio > 8
+        ? "a Hamiltonian dominated by a commuting block — Trotter's home ground"
+        : "α and the commutator are comparable — the optimal method is also "
+          + "the cheaper one";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr, "α / ‖[A,B]‖", 1, 60, st.ratio, function (v) {
+      st.ratio = v; draw();
+    });
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr2, "precision 1e−", 1, 12, st.epsExp, function (v) {
+      st.epsExp = v; draw();
+    });
+    rangeCtl(ctr2, "time t", 1, 40, st.t, function (v) { st.t = v; draw(); });
+    draw();
+  }
+
   /* ---- registry + hydration --------------------------------------- */
 
   var ANIMS = {
@@ -3547,7 +3844,10 @@
     groverwall: animGroverWall,
     walkrace: animWalkRace,
     disorderwalk: animDisorderWalk,
-    szegedygap: animSzegedyGap
+    szegedygap: animSzegedyGap,
+    trotterslice: animTrotterSlice,
+    entwall: animEntWall,
+    simcost: animSimCost
   };
 
   function hydrate(scope) {
