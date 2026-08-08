@@ -4583,6 +4583,288 @@
     draw();
   }
 
+  /* =================================================================
+   * AUTOPSY 13 · quantum Gibbs sampling
+   *
+   *   signcost   the sign problem, and what actually causes it
+   *   gibbswin   break the dequantizer, keep the mixer
+   *   detbalance why "just do Metropolis" took forty years
+   * ================================================================= */
+
+  /* ---- AT · the sign problem, and what causes it ------------------- */
+
+  function animSignCost(root) {
+    var f = frame(root, "The sign problem is made of frustration, not of " +
+      "non-commutativity",
+      "Quantum Monte Carlo pays an overhead of 1/⟨sign⟩², and ⟨sign⟩ decays " +
+      "exponentially in the inverse temperature — but only for some " +
+      "Hamiltonians, and the rule is not the one most people carry. A " +
+      "Heisenberg chain is thoroughly non-commuting and has no sign problem " +
+      "at all, because it is bipartite and the Marshall sign rule gauges it " +
+      "away. Close the chain into an odd cycle and the problem appears at " +
+      "once. Frustration is the cause; non-commutativity is not.");
+
+    var st = { model: "chain", beta: 30 };            // beta in tenths
+    var W = 660, Hh = 240, pad = 44, base = 168, top = 44;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+
+    /* Fitted from gibbs_gap.py, which computes Z/Z_abs exactly at n = 3-4.
+       The chain and the stoquastic model sit at exactly 1; the frustrated
+       ones decay as exp(a - b*beta), fitted over beta = 1..5 and matching
+       the measured values to three digits across that range. */
+    var MODELS = {
+      ising: ["transverse Ising (stoquastic)", function () { return 1; }],
+      chain: ["Heisenberg chain (bipartite)", function () { return 1; }],
+      triangle: ["triangle AFM (frustrated)",
+        function (b) { return Math.exp(0.691 - 1.999 * b); }],
+      allpairs: ["all-pairs AFM, n = 4",
+        function (b) { return Math.exp(0.727 - 4.009 * b); }]
+    };
+
+    function draw() {
+      clear(g);
+      var i, name = MODELS[st.model][0], fn = MODELS[st.model][1];
+      var bmax = 6;
+      s("line", { x1: pad, y1: base, x2: W - pad, y2: base, class: "qq-axis" },
+        g);
+      // log-scale curve of <sign> against beta
+      function ypos(v) {
+        var lo = -8, hi = 0.2;
+        var lv = Math.max(Math.log(v) / Math.LN10, lo);
+        return base - (base - top) * (lv - lo) / (hi - lo);
+      }
+      var keys = Object.keys(MODELS), d;
+      for (i = 0; i < keys.length; i++) {
+        d = "";
+        for (var k = 0; k <= 120; k++) {
+          var b = bmax * k / 120;
+          var x = pad + (b / bmax) * (W - 2 * pad);
+          d += (k ? "L" : "M") + x.toFixed(1) + "," +
+            ypos(Math.max(MODELS[keys[i]][1](b), 1e-9)).toFixed(1);
+        }
+        s("path", { d: d, fill: "none",
+          style: "stroke: var(--qq-" +
+            (keys[i] === st.model ? "hot" : "line") + ")",
+          "stroke-width": keys[i] === st.model ? 2.6 : 1.2,
+          opacity: keys[i] === st.model ? 1 : 0.5 }, g);
+      }
+      var beta = st.beta / 10;
+      var sign = Math.max(fn(beta), 1e-9);
+      var cx = pad + (beta / bmax) * (W - 2 * pad);
+      s("circle", { cx: cx, cy: ypos(sign), r: 6,
+        style: "fill: var(--qq-hot)" }, g);
+
+      var head = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, g);
+      head.textContent = name + "   ·   β = " + beta.toFixed(1);
+      var v = s("text", { x: pad, y: base + 26, class: "qq-t qq-hot" }, g);
+      v.setAttribute("font-size", "13");
+      v.textContent = sign > 0.99
+        ? "⟨sign⟩ = 1.000  →  no sign problem at all: Monte Carlo is fine here"
+        : "⟨sign⟩ = " + sign.toExponential(2) + "  →  QMC overhead ×" +
+          (1 / (sign * sign)).toExponential(1);
+      var w = s("text", { x: pad, y: base + 48,
+        class: "qq-t qq-muted qq-sm" }, g);
+      w.textContent = (st.model === "chain")
+        ? "non-commuting, and still free — bipartite, so Marshall's rule " +
+          "removes the signs"
+        : (st.model === "ising"
+          ? "stoquastic: off-diagonals are already negative"
+          : "frustrated: an odd cycle, and no basis change removes it");
+      var t2 = s("text", { x: W - pad, y: top - 8,
+        class: "qq-t-end qq-muted qq-sm" }, g);
+      t2.textContent = "⟨sign⟩, log scale, 10⁰ down to 10⁻⁸";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    h("span", "qq-bits-l", ctr, "model");
+    [["ising", "stoquastic"], ["chain", "chain"], ["triangle", "triangle"],
+     ["allpairs", "all-pairs"]].forEach(function (p) {
+      btn(ctr, p[1], function () { st.model = p[0]; draw(); }, "qq-btn-ghost");
+    });
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr2, "β ×10", 2, 60, st.beta, function (v) {
+      st.beta = v; draw();
+    });
+    draw();
+  }
+
+  /* ---- AU · break the dequantizer, keep the mixer ------------------ */
+
+  function animGibbsWindow(root) {
+    var f = frame(root, "The recipe: break the dequantizer, keep the mixer",
+      "This is the template result of the ground, and it is a conjunction. " +
+      "Turn a knob that makes the classical method expensive; check that the " +
+      "quantum Lindbladian still mixes. Neither half alone is worth " +
+      "anything — a hard problem where the sampler also stalls is just a " +
+      "hard problem, and a fast sampler on an easy instance is a demo. " +
+      "Here the knob is frustration, and it moves the classical cost by four " +
+      "orders of magnitude while leaving the mixing time flat.");
+
+    var st = { lam: 0, beta: 30 };
+    var W = 660, Hh = 244, pad = 44;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+
+    /* Calibrated against dequantizer_window.py at n = 3. */
+    function qmcOverhead(lam, beta) {
+      if (lam <= 0) return 1;
+      // the frustrated fit above, with the knob weighting the closing bond
+      var s0 = Math.min(1, Math.exp(0.691 - 1.999 * beta * lam * lam));
+      return 1 / (s0 * s0);
+    }
+    function gapOf(lam, beta) {
+      return 1.0 + 0.18 * lam - 0.02 * Math.min(beta, 6) * (1 - lam);
+    }
+
+    function draw() {
+      clear(g);
+      var lam = st.lam / 100, beta = st.beta / 10, i;
+      var qmc = qmcOverhead(lam, beta), gap = Math.max(gapOf(lam, beta), 0.05);
+      var mixing = Math.log(1000) / gap;
+      var rows = [
+        ["frustration λ", lam.toFixed(2)],
+        ["inverse temperature β", beta.toFixed(1)],
+        ["classical: QMC overhead", qmc < 1e6 ? "×" + qmc.toFixed(0)
+          : "×" + qmc.toExponential(1)],
+        ["quantum: Davies gap", gap.toFixed(3)],
+        ["quantum: mixing time", mixing.toFixed(2)]
+      ];
+      for (i = 0; i < rows.length; i++) {
+        var y = 36 + i * 26;
+        var a = s("text", { x: pad, y: y, class: "qq-t qq-muted qq-sm" }, g);
+        a.textContent = rows[i][0];
+        var b2 = s("text", { x: 380, y: y, class: "qq-t qq-ink" }, g);
+        b2.setAttribute("font-size", "13");
+        b2.setAttribute("font-family", "ui-monospace, monospace");
+        b2.textContent = rows[i][1];
+        if (i === 2) b2.setAttribute("fill", "var(--qq-neg)");
+        if (i === 4) b2.setAttribute("fill", "var(--qq-pos)");
+      }
+      var inWindow = qmc >= 100 && gap >= 0.25;
+      s("rect", { x: pad, y: 176, width: W - 2 * pad, height: 34, rx: 8,
+        class: inWindow ? "qq-tile-pos" : "qq-tile-neg", opacity: 0.9 }, g);
+      var v = s("text", { x: W / 2, y: 198, class: "qq-t-mid" }, g);
+      v.setAttribute("fill", "#fff");
+      v.setAttribute("font-weight", "700");
+      v.setAttribute("font-size", "13");
+      v.textContent = inWindow
+        ? "IN THE WINDOW — classical cost up, mixing time unchanged"
+        : (qmc < 100 ? "classical side is still comfortable — turn λ or β up"
+          : "the sampler has stalled: a hard problem, not an advantage");
+      var w = s("text", { x: pad, y: 230, class: "qq-t qq-muted qq-sm" }, g);
+      w.textContent = "Both halves have to be measured before either is " +
+        "claimed. n = 3 says nothing about n = 300 — proving the gap is " +
+        "still the frontier.";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr, "frustration λ (%)", 0, 100, st.lam, function (v) {
+      st.lam = v; draw();
+    });
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr2, "β ×10", 2, 60, st.beta, function (v) {
+      st.beta = v; draw();
+    });
+    draw();
+  }
+
+  /* ---- AV · why "just do Metropolis" took forty years -------------- */
+
+  function animDetBalance(root) {
+    var f = frame(root, "Why “just do Metropolis” took forty years",
+      "Classical Metropolis needs two things: detailed balance and " +
+      "ergodicity. Both are easy to arrange when a state is a list of " +
+      "numbers you may inspect. Quantum mechanically, every step of the " +
+      "recipe hits an obstruction — and the three generations of sampler on " +
+      "this page are three different prices paid for the same fix.");
+
+    var STAGES = [
+      ["classical Metropolis (1953)",
+       "propose a move, compare energies, accept with probability " +
+       "min(1, e^{−βΔE})",
+       "works — the state is a list of numbers, and looking at it is free",
+       true],
+      ["the obstruction",
+       "measuring the energy of a quantum state destroys its coherences",
+       "so 'compare energies and maybe undo' is not an operation you have",
+       false],
+      ["Davies generator (1970s)",
+       "split each coupling into exact Bohr-frequency components A(ω)",
+       "fixes the Gibbs state EXACTLY — but resolving every Bohr frequency " +
+       "is an oracle, not an algorithm",
+       false],
+      ["quantum Metropolis (2011)",
+       "phase-estimate the energy, accept or reject, rewind on reject",
+       "rewinding a rejected move is awkward and only approximate",
+       false],
+      ["CKG samplers (2023 →)",
+       "Gaussian-filtered jumps + an explicit coherent correction term",
+       "finite energy resolution AND exact detailed balance, at Hamiltonian-" +
+       "simulation cost. Mixing time: not guaranteed",
+       true]
+    ];
+    var st = { i: 0 };
+    var W = 660, Hh = 232;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+
+    function wrap(text, x, y, width, size, cls) {
+      var words = text.split(" "), line = "", out = [], i;
+      for (i = 0; i < words.length; i++) {
+        if ((line + words[i]).length * size * 0.52 > width) {
+          out.push(line); line = "";
+        }
+        line += words[i] + " ";
+      }
+      out.push(line);
+      out.forEach(function (ln, k) {
+        var t = s("text", { x: x, y: y + k * (size + 4), class: cls }, g);
+        t.setAttribute("font-size", String(size));
+        t.textContent = ln;
+      });
+    }
+
+    function draw() {
+      clear(g);
+      var c = STAGES[st.i], i;
+      // the timeline
+      for (i = 0; i < STAGES.length; i++) {
+        var x = 60 + i * 135;
+        s("circle", { cx: x, cy: 40, r: i === st.i ? 9 : 6,
+          class: STAGES[i][3] ? "qq-pos" : "qq-neg",
+          opacity: i === st.i ? 1 : 0.4 }, g);
+        if (i < STAGES.length - 1) {
+          s("line", { x1: x + 9, y1: 40, x2: x + 126, y2: 40,
+            class: "qq-axis" }, g);
+        }
+      }
+      var head = s("text", { x: 30, y: 82, class: "qq-t qq-ink" }, g);
+      head.setAttribute("font-size", "15");
+      head.textContent = c[0];
+      wrap(c[1], 30, 108, W - 60, 12.5, "qq-t qq-ink");
+      wrap(c[2], 30, 152, W - 60, 11.5, "qq-t qq-muted");
+      var v = s("text", { x: 30, y: 212, class: "qq-t qq-hot" }, g);
+      v.setAttribute("font-size", "12");
+      v.textContent = st.i === STAGES.length - 1
+        ? "exact fixed point, efficient generator — and the mixing time is " +
+          "where the science now lives"
+        : (c[3] ? "" : "the price not yet paid");
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    btn(ctr, "next", function () {
+      st.i = (st.i + 1) % STAGES.length; draw();
+    });
+    btn(ctr, "back", function () {
+      st.i = (st.i + STAGES.length - 1) % STAGES.length; draw();
+    }, "qq-btn-ghost");
+    draw();
+  }
+
   /* ---- registry + hydration --------------------------------------- */
 
   var ANIMS = {
@@ -4630,7 +4912,10 @@
     accessrule: animAccessRule,
     dqichain: animDqiChain,
     semicircle: animSemicircle,
-    codereach: animCodeReach
+    codereach: animCodeReach,
+    signcost: animSignCost,
+    gibbswin: animGibbsWindow,
+    detbalance: animDetBalance
   };
 
   function hydrate(scope) {
