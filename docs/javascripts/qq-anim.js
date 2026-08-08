@@ -4343,6 +4343,246 @@
     draw();
   }
 
+  /* =================================================================
+   * AUTOPSY 12 · Decoded Quantum Interferometry
+   *
+   *   dqichain    objective -> code -> decoder -> samples
+   *   semicircle  the law, and the baseline it has to clear
+   *   codereach   which codes have a decoder that reaches far enough
+   * ================================================================= */
+
+  /* ---- AQ · the reduction, one link at a time ---------------------- */
+
+  function animDqiChain(root) {
+    var f = frame(root, "Optimisation becomes decoding",
+      "DQI's architecture is a chain of four reductions, and only the third " +
+      "is quantum. The objective's Fourier spectrum sits on low-weight " +
+      "combinations of the constraint vectors — words of a code. So " +
+      "preparing a polynomial of the objective means preparing low-weight " +
+      "error patterns and uncomputing them from their syndrome, which is " +
+      "syndrome decoding. Step through it: the decoding radius the last " +
+      "step can afford is the polynomial degree the first step gets, and " +
+      "that degree is the answer's quality.");
+
+    var st = { step: 0 };
+    var W = 660, Hh = 250;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+
+    var STEPS = [
+      ["the objective", "f(x) = how many constraints x satisfies",
+        "s(x) = 2f(x) − m = Σᵢ (−1)^(bᵢ + aᵢ·x) — a sum of m characters"],
+      ["its Fourier support", "a code appears, unbidden",
+        "P(s) of degree ℓ has all its weight on XORs of ≤ ℓ constraint " +
+        "vectors — the low-weight words of the code the aᵢ generate"],
+      ["the quantum step", "prepare weight-≤ℓ error patterns",
+        "build the state on the Fourier side: Σ over error patterns y with " +
+        "|y| ≤ ℓ, amplitudes wₖ chosen to maximise the objective"],
+      ["the decoder", "uncompute y from its syndrome",
+        "this is SYNDROME DECODING of the dual code — a sixty-year-old " +
+        "classical toolbox, borrowed"],
+      ["measure", "samples concentrate on high-objective x",
+        "satisfied fraction = ½ + √(d(1−d)) with d = ℓ/m. A better decoder " +
+        "is literally a better optimiser."]
+    ];
+
+    function draw() {
+      clear(g);
+      var i, y0 = 34;
+      for (i = 0; i < STEPS.length; i++) {
+        var on = i <= st.step;
+        var y = y0 + i * 40;
+        s("rect", { x: 26, y: y, width: 176, height: 30, rx: 6,
+          class: on ? (i === 3 ? "qq-tile-neg" : "qq-tile-pos") : "qq-bit",
+          opacity: on ? 0.92 : 0.3 }, g);
+        var t1 = s("text", { x: 114, y: y + 20, class: "qq-t-mid" }, g);
+        t1.setAttribute("fill", on ? "#fff" : "var(--qq-muted)");
+        t1.setAttribute("font-size", "12");
+        t1.setAttribute("font-weight", "700");
+        t1.textContent = STEPS[i][0];
+        var t2 = s("text", { x: 214, y: y + 13, class: "qq-t qq-ink" }, g);
+        t2.setAttribute("font-size", "11.5");
+        t2.setAttribute("opacity", on ? "1" : "0.35");
+        t2.textContent = STEPS[i][1];
+        if (i === st.step) {
+          var t3 = s("text", { x: 214, y: y + 27, class: "qq-t qq-muted" }, g);
+          t3.setAttribute("font-size", "10.5");
+          t3.textContent = STEPS[i][2].length > 74
+            ? STEPS[i][2].slice(0, 74) + "…" : STEPS[i][2];
+        }
+        if (i < STEPS.length - 1) {
+          s("line", { x1: 114, y1: y + 30, x2: 114, y2: y + 40,
+            class: "qq-axis" }, g);
+        }
+      }
+      var note = s("text", { x: 26, y: Hh - 12, class: "qq-t qq-hot" }, g);
+      note.setAttribute("font-size", "12.5");
+      note.textContent = st.step >= 3
+        ? "amber = the classical decoder: the step that decides everything"
+        : "step " + (st.step + 1) + " of " + STEPS.length;
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    btn(ctr, "next step", function () {
+      st.step = (st.step + 1) % STEPS.length; draw();
+    });
+    btn(ctr, "reset", function () { st.step = 0; draw(); }, "qq-btn-ghost");
+    draw();
+  }
+
+  /* ---- AR · the semicircle against the baseline -------------------- */
+
+  function animSemicircle(root) {
+    var f = frame(root, "The law, and the line it has to clear",
+      "DQI's satisfied fraction is ½ + √(d(1−d)) where d is the decoding " +
+      "radius as a fraction of the constraints. The classical baseline — " +
+      "Prange's information-set decoding — solves n constraints exactly and " +
+      "gets the rest at chance, for ½ + n/2m. Move the sliders and read off " +
+      "the radius a decoder must reach before there is anything to claim. " +
+      "That number is a specification handed to coding theory, not to " +
+      "physics.");
+
+    var st = { d: 10, ratio: 40 };        // percent
+    var W = 660, Hh = 260, pad = 46, base = 190, top = 40;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+
+    function frac(d) { return 0.5 + Math.sqrt(d * (1 - d)); }
+
+    function draw() {
+      clear(g);
+      var i, d = st.d / 100, nOverM = st.ratio / 100;
+      var prange = 0.5 + nOverM / 2;
+      var ymin = 0.45, ymax = 1.05;
+      function ypos(v) {
+        return base - (base - top) * (v - ymin) / (ymax - ymin);
+      }
+      s("line", { x1: pad, y1: base, x2: W - pad, y2: base, class: "qq-axis" },
+        g);
+      // the semicircle
+      var dd = "";
+      for (i = 0; i <= 200; i++) {
+        var x = 0.5 * i / 200;
+        dd += (i ? "L" : "M") + (pad + (x / 0.5) * (W - 2 * pad)).toFixed(1) +
+          "," + ypos(frac(x)).toFixed(1);
+      }
+      s("path", { d: dd, fill: "none", style: "stroke: var(--qq-pos)",
+        "stroke-width": 2.4 }, g);
+      // the Prange line
+      s("line", { x1: pad, y1: ypos(prange), x2: W - pad, y2: ypos(prange),
+        style: "stroke: var(--qq-neg)", "stroke-width": 2,
+        "stroke-dasharray": "6 4" }, g);
+      // the current radius
+      var cx = pad + (d / 0.5) * (W - 2 * pad);
+      s("line", { x1: cx, y1: top - 6, x2: cx, y2: base, class: "qq-mark" }, g);
+      s("circle", { cx: cx, cy: ypos(frac(d)), r: 6,
+        style: "fill: var(--qq-hot)" }, g);
+
+      // the radius needed
+      var need = null;
+      for (i = 1; i <= 500; i++) {
+        var dv = 0.5 * i / 500;
+        if (frac(dv) > prange) { need = dv; break; }
+      }
+      var lab = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, g);
+      lab.textContent = "d = " + d.toFixed(2) + " → DQI " +
+        frac(d).toFixed(4) + "   ·   n/m = " + nOverM.toFixed(2) +
+        " → Prange " + prange.toFixed(4);
+      var v = s("text", { x: pad, y: base + 26, class: "qq-t qq-hot" }, g);
+      v.setAttribute("font-size", "13");
+      v.textContent = frac(d) > prange
+        ? "DQI ahead by " + (frac(d) - prange).toFixed(4) +
+          "  —  a decoder reaching d = " + d.toFixed(2) + " suffices"
+        : "DQI behind: this decoder is not deep enough" +
+          (need ? "  —  it needs d ≥ " + need.toFixed(3) : "");
+      var w = s("text", { x: pad, y: base + 48, class: "qq-t qq-muted qq-sm" },
+        g);
+      w.textContent = "green: ½ + √(d(1−d)).   dashed: ½ + n/2m.   " +
+        "The crossing is the whole specification.";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr, "decoding radius d (%)", 1, 50, st.d, function (v) {
+      st.d = v; draw();
+    });
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr2, "baseline n/m (%)", 5, 95, st.ratio, function (v) {
+      st.ratio = v; draw();
+    });
+    draw();
+  }
+
+  /* ---- AS · which codes reach far enough --------------------------- */
+
+  function animCodeReach(root) {
+    var f = frame(root, "Structure survived; randomness fell",
+      "The 2026 ledger says random sparse instances were killed and " +
+      "Reed–Solomon ones still stand. The mechanism is one line of coding " +
+      "theory: an efficient decoder that reaches a constant fraction of the " +
+      "constraints exists for algebraic codes and does not exist for random " +
+      "ones. On a random code, DQI would be asking a decoder to beat " +
+      "Prange — using Prange. The advantage cancels, and no amount of " +
+      "quantum hardware changes it.");
+
+    var st = { k: 50, m: 200 };
+    var W = 660, Hh = 240, pad = 40;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+
+    function draw() {
+      clear(g);
+      var m = st.m, k = st.k, i;
+      var listR = m - Math.floor(Math.sqrt(m * k));
+      var uniqueR = Math.floor((m - k) / 2);
+      var rows = [
+        ["Reed–Solomon, list decoding", listR, "qq-tile-pos",
+          "Guruswami–Sudan: m − √(mk)"],
+        ["Reed–Solomon, unique decoding", uniqueR, "qq-tile-pos",
+          "(m − k)/2"],
+        ["random linear code", 0, "qq-tile-neg",
+          "no efficient decoder known past information-set — the attacker's " +
+          "own algorithm"]
+      ];
+      var maxR = m / 2;
+      for (i = 0; i < rows.length; i++) {
+        var y = 46 + i * 50;
+        var d = Math.min(rows[i][1], m) / m;
+        var wpx = (W - pad - 250) * Math.min(d / 0.9, 1);
+        s("rect", { x: 250, y: y, width: Math.max(wpx, 3), height: 26, rx: 4,
+          class: rows[i][2], opacity: 0.9 }, g);
+        var a = s("text", { x: 242, y: y + 18,
+          class: "qq-t-end qq-muted qq-sm" }, g);
+        a.textContent = rows[i][0];
+        var b2 = s("text", { x: 258 + Math.max(wpx, 3), y: y + 12,
+          class: "qq-t qq-ink" }, g);
+        b2.setAttribute("font-size", "12");
+        b2.setAttribute("font-family", "ui-monospace, monospace");
+        b2.textContent = rows[i][1] > 0 ? "d = " + d.toFixed(3) : "d = —";
+        var b3 = s("text", { x: 258 + Math.max(wpx, 3), y: y + 25,
+          class: "qq-t qq-muted" }, g);
+        b3.setAttribute("font-size", "9.5");
+        b3.textContent = rows[i][3].length > 46
+          ? rows[i][3].slice(0, 46) + "…" : rows[i][3];
+      }
+      var head = s("text", { x: pad, y: 26, class: "qq-t qq-ink" }, g);
+      head.textContent = "m = " + m + " constraints,  code dimension k = " + k;
+      var v = s("text", { x: pad, y: 214, class: "qq-t qq-hot" }, g);
+      v.setAttribute("font-size", "12.5");
+      v.textContent = "DQI at the list-decoding radius: satisfied fraction " +
+        (0.5 + Math.sqrt(Math.min(listR / m, 0.5) *
+          (1 - Math.min(listR / m, 0.5)))).toFixed(4);
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr, "code dimension k", 10, 180, st.k, function (v) {
+      st.k = v; draw();
+    });
+    draw();
+  }
+
   /* ---- registry + hydration --------------------------------------- */
 
   var ANIMS = {
@@ -4387,7 +4627,10 @@
     twofactor: animTwoFactor,
     readout: animReadout,
     sqsample: animSqSample,
-    accessrule: animAccessRule
+    accessrule: animAccessRule,
+    dqichain: animDqiChain,
+    semicircle: animSemicircle,
+    codereach: animCodeReach
   };
 
   function hydrate(scope) {
