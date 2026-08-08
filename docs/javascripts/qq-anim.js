@@ -4083,6 +4083,266 @@
     draw();
   }
 
+  /* =================================================================
+   * AUTOPSY 11 · HHL and Tang
+   *
+   *   readout    the output toll: a state is not a vector
+   *   sqsample   length-squared sampling, and what a sketch recovers
+   *   accessrule the access-model symmetry, applied to a claim
+   * ================================================================= */
+
+  /* ---- AN · the output toll ---------------------------------------- */
+
+  function animReadout(root) {
+    var f = frame(root, "The answer is a state, and a state is not a vector",
+      "HHL prepares a quantum state proportional to the solution in time " +
+      "polylogarithmic in the dimension. That is true, and it is not the " +
+      "same as solving the system. Reading one component costs a number of " +
+      "repetitions that does not depend on the dimension — genuinely cheap. " +
+      "Reading the whole vector costs one such batch per component, which " +
+      "puts the dimension straight back into the bill it was supposed to " +
+      "have removed.");
+
+    var st = { dimExp: 6, epsExp: 2, want: "one" };
+    var W = 660, Hh = 232, pad = 40;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+
+    function fmt(x) {
+      if (x < 1e4) return Math.round(x).toLocaleString();
+      return x.toExponential(2);
+    }
+
+    function draw() {
+      clear(g);
+      var dim = Math.pow(10, st.dimExp), eps = Math.pow(10, -st.epsExp);
+      var one = Math.log(2 / 0.05) / (2 * eps * eps);
+      var all = dim * Math.log(2 * dim / 0.05) / (2 * eps * eps);
+      // one state preparation: 4 * kappa * log(1/eps) * log2(dim), the same
+      // model hhl_tolls.py uses (kappa fixed at 100 here)
+      var prep = 4 * 100 * Math.log(1 / eps) * Math.log(dim) / Math.LN2;
+      var rows = [
+        ["dimension", dim.toExponential(0)],
+        ["one state preparation (κ = 100)", fmt(prep) + " gates"],
+        ["repetitions for ONE amplitude", fmt(one)],
+        ["repetitions for the WHOLE vector", fmt(all)],
+        ["total, for the whole vector", fmt(prep * all) + " gates"],
+        ["conjugate gradients, for comparison", fmt(4 * dim * 10 * 7) +
+          " gates"]
+      ];
+      for (var i = 0; i < rows.length; i++) {
+        var y = 34 + i * 26;
+        var a = s("text", { x: pad, y: y, class: "qq-t qq-muted qq-sm" }, g);
+        a.textContent = rows[i][0];
+        var b = s("text", { x: W - pad, y: y, class: "qq-t-end qq-ink" }, g);
+        b.setAttribute("font-size", "13");
+        b.setAttribute("font-family", "ui-monospace, monospace");
+        b.textContent = rows[i][1];
+        if (i === 4 || i === 5) {
+          b.setAttribute("fill", i === 4 ? "var(--qq-neg)" : "var(--qq-pos)");
+        }
+      }
+      var v = s("text", { x: pad, y: 208, class: "qq-t qq-hot" }, g);
+      v.setAttribute("font-size", "13");
+      var ratio = (prep * all) / (4 * dim * 10 * 7);
+      v.textContent = "matched outputs: the quantum route costs " +
+        ratio.toExponential(1) + "× more than conjugate gradients";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr, "dimension 10^", 2, 12, st.dimExp, function (v) {
+      st.dimExp = v; draw();
+    });
+    rangeCtl(ctr, "precision 1e−", 1, 6, st.epsExp, function (v) {
+      st.epsExp = v; draw();
+    });
+    draw();
+  }
+
+  /* ---- AO · length-squared sampling -------------------------------- */
+
+  function animSqSample(root) {
+    var f = frame(root, "What the classical side is allowed to do",
+      "Tang's argument is not about algorithms, it is about what each side " +
+      "is given. If the quantum algorithm may prepare a state whose " +
+      "amplitudes are the data, the honest classical analogue is " +
+      "length-squared sampling: draw a row with probability proportional to " +
+      "its squared norm. Rows carrying more weight are drawn more often, " +
+      "which is exactly the distribution a measurement of the prepared " +
+      "state would give — and with it, a handful of rows reconstructs what " +
+      "the quantum algorithm was going to compute.");
+
+    var st = { rows: 12, seedShift: 0 };
+    var W = 660, Hh = 252, pad = 34;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+    var N = 40;
+
+    /* A synthetic matrix's row norms: a few heavy rows and a long tail —
+       the shape real low-rank data has. */
+    function norms() {
+      var out = [], i;
+      for (i = 0; i < N; i++) {
+        var base = Math.exp(-i / 7) + 0.05;
+        var jitter = 0.6 + 0.8 * Math.abs(Math.sin(i * 12.9898 +
+          st.seedShift * 7.13));
+        out.push(base * jitter);
+      }
+      return out;
+    }
+
+    function draw() {
+      clear(g);
+      var nm = norms(), i, tot2 = 0;
+      for (i = 0; i < N; i++) tot2 += nm[i] * nm[i];
+      var p = nm.map(function (v) { return v * v / tot2; });
+
+      // draw the rows, height = norm, opacity = sampling probability
+      var bw = (W - 2 * pad) / N, base = 150, top = 40;
+      var mx = Math.max.apply(null, nm);
+      // deterministic "sampling": take the r largest by probability, plus a
+      // couple of tail draws, so the picture is stable across redraws
+      var order = p.map(function (v, k) { return [v, k]; })
+        .sort(function (a, b) { return b[0] - a[0]; });
+      var chosen = {};
+      for (i = 0; i < Math.min(st.rows, N); i++) chosen[order[i][1]] = true;
+
+      for (i = 0; i < N; i++) {
+        var hgt = (base - top) * nm[i] / mx;
+        s("rect", { x: pad + i * bw + 1, y: base - hgt,
+          width: Math.max(bw - 2, 1), height: Math.max(hgt, 1),
+          class: "qq-bar " + (chosen[i] ? "qq-hotbar" : "qq-pos"),
+          opacity: chosen[i] ? 1 : 0.35 }, g);
+      }
+      s("line", { x1: pad, y1: base, x2: W - pad, y2: base, class: "qq-axis" },
+        g);
+
+      var captured = 0;
+      for (i = 0; i < N; i++) if (chosen[i]) captured += p[i];
+      var head = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, g);
+      head.textContent = st.rows + " of " + N + " rows sampled  —  they carry "
+        + (100 * captured).toFixed(1) + "% of the matrix's total weight";
+      var t2 = s("text", { x: pad, y: base + 22, class: "qq-t qq-muted qq-sm" },
+        g);
+      t2.textContent = "bar height = row norm.  Highlighted = drawn by " +
+        "length-squared sampling.";
+      var t3 = s("text", { x: pad, y: base + 46, class: "qq-t qq-hot" }, g);
+      t3.setAttribute("font-size", "13");
+      t3.textContent = captured > 0.9
+        ? "→ the sketch already sees almost all the weight: the quantum "
+          + "advantage was the access model"
+        : "→ still missing weight: add rows, or the sketch will be wrong";
+      var t4 = s("text", { x: pad, y: base + 68,
+        class: "qq-t qq-muted qq-sm" }, g);
+      t4.textContent = "Note what this does NOT do: if the weight is spread " +
+        "evenly over all rows — a high-rank matrix — no small sample " +
+        "captures it, and the classical shortcut disappears.";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr, "rows sampled", 1, 40, st.rows, function (v) {
+      st.rows = v; draw();
+    });
+    btn(ctr, "different matrix", function () {
+      st.seedShift += 1; draw();
+    }, "qq-btn-ghost");
+    draw();
+  }
+
+  /* ---- AP · the access-model symmetry rule ------------------------- */
+
+  function animAccessRule(root) {
+    var f = frame(root, "The rule this autopsy leaves behind",
+      "Whatever preparation power a quantum algorithm is granted, the " +
+      "classical baseline gets its sampling analogue — and then the " +
+      "comparison is fair. Run a claim through it. The point is not that " +
+      "quantum always loses; it is that the answer is decided by where the " +
+      "input comes from, and that is a question you can settle before " +
+      "reading the algorithm.");
+
+    var CASES = [
+      ["Recommendation systems (2016 claim)",
+        "a classical user-item matrix, loaded into QRAM",
+        "ℓ²-sampling access to the same matrix", false,
+        "Tang 2018: the classical algorithm matches it. Low-rank data, " +
+        "classical input — the speedup was the access assumption."],
+      ["Quantum PCA on classical data",
+        "QRAM-loaded covariance matrix",
+        "ℓ²-sampling of the same rows", false,
+        "same story, same year — low rank is what sampling is good at"],
+      ["Linear systems, sparse and high-rank",
+        "an efficiently-computable sparse matrix",
+        "sampling gives you nothing: no small sketch reproduces it", true,
+        "survives — this is the BQP-complete regime HHL actually owns"],
+      ["Hamiltonian simulation",
+        "a Hamiltonian, given as a description",
+        "there is no data set to sample", true,
+        "the access-model attack cannot even be posed: the input is " +
+        "quantum-native (autopsy 09)"],
+      ["Gibbs state properties",
+        "a state produced by a quantum process",
+        "no classical sampling access exists", true,
+        "hunting ground C's structural immunity — and the reason it is a " +
+        "hunting ground"]
+    ];
+    var st = { i: 0 };
+    var W = 660, Hh = 250;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+
+    function wrap(text, x, y, width, cls, size) {
+      var words = text.split(" "), line = "", out = [], i;
+      for (i = 0; i < words.length; i++) {
+        if ((line + words[i]).length * size * 0.52 > width) {
+          out.push(line); line = "";
+        }
+        line += words[i] + " ";
+      }
+      out.push(line);
+      out.forEach(function (ln, k) {
+        var t = s("text", { x: x, y: y + k * (size + 3), class: cls }, g);
+        t.setAttribute("font-size", String(size));
+        t.textContent = ln;
+      });
+      return out.length;
+    }
+
+    function draw() {
+      clear(g);
+      var c = CASES[st.i];
+      var head = s("text", { x: 28, y: 26, class: "qq-t qq-ink" }, g);
+      head.setAttribute("font-size", "15");
+      head.textContent = c[0];
+
+      var t1 = s("text", { x: 28, y: 56, class: "qq-t qq-muted qq-sm" }, g);
+      t1.textContent = "what the quantum side is given:";
+      wrap(c[1], 28, 74, 290, "qq-t qq-ink", 12);
+      var t2 = s("text", { x: 350, y: 56, class: "qq-t qq-muted qq-sm" }, g);
+      t2.textContent = "what the classical side then gets:";
+      wrap(c[2], 350, 74, 290, "qq-t qq-ink", 12);
+
+      s("rect", { x: 28, y: 128, width: W - 56, height: 40, rx: 8,
+        class: c[3] ? "qq-tile-pos" : "qq-tile-neg", opacity: 0.9 }, g);
+      var v = s("text", { x: W / 2, y: 154, class: "qq-t-mid" }, g);
+      v.setAttribute("fill", "#fff");
+      v.setAttribute("font-weight", "700");
+      v.setAttribute("font-size", "14");
+      v.textContent = c[3] ? "SURVIVES the symmetry test"
+                           : "DIES under the symmetry test";
+      wrap(c[4], 28, 190, W - 56, "qq-t qq-muted qq-sm", 11.5);
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    ["recommendations", "quantum PCA", "sparse systems", "simulation",
+     "Gibbs"].forEach(function (label, i) {
+      btn(ctr, label, function () { st.i = i; draw(); }, "qq-btn-ghost");
+    });
+    draw();
+  }
+
   /* ---- registry + hydration --------------------------------------- */
 
   var ANIMS = {
@@ -4124,7 +4384,10 @@
     simcost: animSimCost,
     qspdial: animQspDial,
     degreecost: animDegreeCost,
-    twofactor: animTwoFactor
+    twofactor: animTwoFactor,
+    readout: animReadout,
+    sqsample: animSqSample,
+    accessrule: animAccessRule
   };
 
   function hydrate(scope) {
