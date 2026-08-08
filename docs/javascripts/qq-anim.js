@@ -3809,6 +3809,280 @@
     draw();
   }
 
+  /* =================================================================
+   * AUTOPSY 10 · QSP / qubitization / QSVT
+   *
+   *   qspdial    turn the phases, watch the polynomial change
+   *   degreecost every algorithm's parameter, as a polynomial degree
+   *   twofactor  the encoding test and the degree test, side by side
+   * ================================================================= */
+
+  /* ---- AK · choosing phases is choosing a polynomial --------------- */
+
+  function animQspDial(root) {
+    var f = frame(root, "Turn the phases, change the algorithm",
+      "This is the whole of quantum signal processing. Between each " +
+      "application of the block-encoding you insert one single-qubit " +
+      "rotation; the top-left entry of the product is then a bounded " +
+      "polynomial of the encoded eigenvalue, of degree equal to the number " +
+      "of applications and of parity equal to that degree. Set every phase " +
+      "to zero and you get the Chebyshev polynomial — the walk-operator " +
+      "picture. Turn them and you sweep out (essentially) every other " +
+      "reachable polynomial. Choosing the phases IS choosing your " +
+      "algorithm.");
+
+    var st = { phases: [0, 0, 0, 0, 0, 0] };
+    var W = 660, Hh = 268, pad = 44, base = 148, mid = 148, amp = 92;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+    var head = s("text", { x: pad, y: 24, class: "qq-t qq-ink" }, svg);
+    var note = s("text", { x: pad, y: Hh - 10, class: "qq-t qq-muted qq-sm" },
+      svg);
+
+    /* Re<0|U(x)|0> for the QSP product, evaluated with 2x2 complex maths
+       written out by hand — same construction as qsp_phases.py. */
+    function response(x) {
+      var ph = st.phases;
+      var sq = Math.sqrt(Math.max(0, 1 - x * x));
+      // U as [[a, b], [c, d]] with complex entries stored as pairs
+      var ar = Math.cos(ph[0]), ai = Math.sin(ph[0]);
+      var br = 0, bi = 0, cr = 0, ci = 0;
+      var dr = Math.cos(ph[0]), di = -Math.sin(ph[0]);
+      for (var k = 1; k < ph.length; k++) {
+        // multiply by W(x) = [[x, i s], [i s, x]]
+        var nar = ar * x - bi * sq, nai = ai * x + br * sq;
+        var nbr = br * x - ai * sq, nbi = bi * x + ar * sq;
+        var ncr = cr * x - di * sq, nci = ci * x + dr * sq;
+        var ndr = dr * x - ci * sq, ndi = di * x + cr * sq;
+        ar = nar; ai = nai; br = nbr; bi = nbi;
+        cr = ncr; ci = nci; dr = ndr; di = ndi;
+        // multiply by diag(e^{i phi}, e^{-i phi})
+        var cp = Math.cos(ph[k]), sp = Math.sin(ph[k]);
+        var tr = ar * cp - ai * sp; ai = ar * sp + ai * cp; ar = tr;
+        var tr2 = br * cp + bi * sp; bi = -br * sp + bi * cp; br = tr2;
+        var tr3 = cr * cp - ci * sp; ci = cr * sp + ci * cp; cr = tr3;
+        var tr4 = dr * cp + di * sp; di = -dr * sp + di * cp; dr = tr4;
+      }
+      return ar;
+    }
+
+    function draw() {
+      clear(g);
+      var i, M = 260, d = st.phases.length - 1;
+      s("line", { x1: pad, y1: mid, x2: W - pad, y2: mid, class: "qq-axis" },
+        g);
+      s("line", { x1: (pad + W - pad) / 2, y1: mid - amp - 8,
+        x2: (pad + W - pad) / 2, y2: mid + amp + 8, class: "qq-axis" }, g);
+      // the +-1 guides: every reachable response is bounded by one
+      [1, -1].forEach(function (v) {
+        s("line", { x1: pad, y1: mid - amp * v, x2: W - pad, y2: mid - amp * v,
+          class: "qq-mark" }, g);
+      });
+      var dd = "", ddc = "";
+      for (i = 0; i <= M; i++) {
+        var x = -1 + 2 * i / M;
+        var px = pad + (i / M) * (W - 2 * pad);
+        dd += (i ? "L" : "M") + px.toFixed(1) + "," +
+          (mid - amp * response(x)).toFixed(1);
+        ddc += (i ? "L" : "M") + px.toFixed(1) + "," +
+          (mid - amp * Math.cos(d * Math.acos(Math.max(-1,
+            Math.min(1, x))))).toFixed(1);
+      }
+      s("path", { d: ddc, fill: "none", style: "stroke: var(--qq-line)",
+        "stroke-width": 1.4, "stroke-dasharray": "5 4" }, g);
+      s("path", { d: dd, fill: "none", style: "stroke: var(--qq-hot)",
+        "stroke-width": 2.4 }, g);
+
+      var allzero = st.phases.every(function (p) { return Math.abs(p) < 1e-9; });
+      head.textContent = "degree d = " + d + ",  parity " +
+        (d % 2 ? "odd" : "even") +
+        (allzero ? "   ·   every phase zero: this is T" + d : "");
+      note.textContent = "dashed: the Chebyshev polynomial T" + d +
+        " for comparison.   The curve never leaves ±1 — it is an entry of a " +
+        "unitary, so that is a theorem, not a choice.";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    h("span", "qq-bits-l", ctr, "phases");
+    st.phases.forEach(function (_, k) {
+      var r = h("input", "qq-range", ctr);
+      r.type = "range"; r.min = -157; r.max = 157; r.step = 1; r.value = 0;
+      r.style.flex = "0 1 5.2rem";
+      r.addEventListener("input", function () {
+        st.phases[k] = (+r.value) / 100; draw();
+      });
+    });
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    btn(ctr2, "all zero (Chebyshev)", function () {
+      st.phases = st.phases.map(function () { return 0; });
+      Array.prototype.forEach.call(
+        f.body.querySelectorAll("input.qq-range"), function (r) {
+          r.value = 0;
+        });
+      draw();
+    }, "qq-btn-ghost");
+    btn(ctr2, "randomise", function () {
+      var inputs = f.body.querySelectorAll("input.qq-range");
+      st.phases = st.phases.map(function () {
+        return (Math.random() * 2 - 1) * 1.4;
+      });
+      Array.prototype.forEach.call(inputs, function (r, k) {
+        r.value = Math.round(st.phases[k] * 100);
+      });
+      draw();
+    }, "qq-btn-ghost");
+    draw();
+  }
+
+  /* ---- AL · every parameter is a degree ---------------------------- */
+
+  function animDegreeCost(root) {
+    var f = frame(root, "Every algorithm's parameter is a polynomial degree",
+      "Grover's √N, HHL's condition number κ and Hamiltonian simulation's " +
+      "evolution time t look like three different resources. Under QSVT " +
+      "they are one: the degree of the polynomial you have to build. Move " +
+      "the sliders and watch which one explodes when you demand more " +
+      "precision — that difference, additive against multiplicative in " +
+      "log(1/ε), is why simulation is the healthiest application in this " +
+      "curriculum.");
+
+    var st = { param: 8, epsExp: 3 };
+    var W = 660, Hh = 236, pad = 46;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+
+    /* Calibrated against polynomial_cost.py, which measures these by
+       actually building the approximations. e = -log10(eps):
+         sign  ~ p * (0.5 + 2.2 e)     multiplicative in the precision
+         1/x   ~ p * (0.9 + 2.5 e)     multiplicative
+         cos   ~ 1.06 p + 2 e          ADDITIVE — the whole point
+       Checked against the module to within about 10%. */
+    function degSign(p, e) { return Math.round(p * (0.5 + 2.2 * e)); }
+    function degInv(p, e) { return Math.round(p * (0.9 + 2.5 * e)); }
+    function degSim(p, e) { return Math.round(1.06 * p + 2 * e); }
+
+    function draw() {
+      clear(g);
+      var e = st.epsExp, p = st.param, i;
+      var rows = [
+        ["search — sign(x), parameter √N", degSign(p, e), "qq-pos"],
+        ["linear systems — 1/x, parameter κ", degInv(p, e), "qq-neg"],
+        ["simulation — cos(tx), parameter t", degSim(p, e), "qq-hotbar"]
+      ];
+      var mx = Math.max(rows[0][1], rows[1][1], rows[2][1]) * 1.15;
+      for (i = 0; i < rows.length; i++) {
+        var y = 56 + i * 46;
+        var wpx = (W - pad - 250) * rows[i][1] / mx;
+        s("rect", { x: 250, y: y, width: Math.max(wpx, 2), height: 26,
+          class: "qq-bar " + rows[i][2] }, g);
+        var lab = s("text", { x: 242, y: y + 18,
+          class: "qq-t-end qq-muted qq-sm" }, g);
+        lab.textContent = rows[i][0];
+        var val = s("text", { x: 258 + Math.max(wpx, 2), y: y + 18,
+          class: "qq-t qq-ink" }, g);
+        val.setAttribute("font-size", "12.5");
+        val.setAttribute("font-family", "ui-monospace, monospace");
+        val.textContent = "degree " + rows[i][1];
+      }
+      var head = s("text", { x: pad, y: 26, class: "qq-t qq-ink" }, g);
+      head.textContent = "parameter = " + p + "   ·   target error ε = 1e-" +
+        e + "   ·   degree = number of block-encoding applications";
+      var v = s("text", { x: pad, y: 208, class: "qq-t qq-muted qq-sm" }, g);
+      v.textContent = "Raise the precision slider: the first two bars grow " +
+        "with it, the third barely moves. Additive versus multiplicative in " +
+        "log(1/ε) is the whole difference.";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr, "parameter (√N, κ or t)", 2, 40, st.param, function (v) {
+      st.param = v; draw();
+    });
+    var ctr2 = h("div", "qq-ctrl", f.body);
+    rangeCtl(ctr2, "precision 1e−", 1, 10, st.epsExp, function (v) {
+      st.epsExp = v; draw();
+    });
+    draw();
+  }
+
+  /* ---- AM · the two-factor test ------------------------------------ */
+
+  function animTwoFactor(root) {
+    var f = frame(root, "The two-factor test for any QSVT claim",
+      "QSVT is a compiler, not an advantage. An advantage needs two things " +
+      "at once: a block-encoding that classical sampling cannot imitate, " +
+      "AND a polynomial degree classical computers cannot afford. Pick a " +
+      "candidate and see which box it fails. Almost every dequantised " +
+      "result in this curriculum failed the first; almost every " +
+      "disappointing speedup failed the second.");
+
+    var CASES = [
+      ["Grover / unstructured search", true, false,
+        "the oracle is not imitable, but √N is only a quadratic saving — " +
+        "autopsy 06 prices it"],
+      ["HHL on low-rank data", false, true,
+        "κ is a real cost, but a rank-k sketch reproduces the encoding — " +
+        "this is exactly what Tang attacked"],
+      ["HHL on sparse, well-conditioned systems", true, false,
+        "not imitable, but a small κ means a small degree: nothing to win"],
+      ["Hamiltonian simulation", true, true,
+        "sparse encoding no sketch reproduces, and degree αt — the one that " +
+        "survived"],
+      ["Gibbs sampling at low temperature", true, true,
+        "same shape as simulation; the degree is set by β and the spectral " +
+        "gap (hunting ground C)"]
+    ];
+    var st = { i: 3 };
+    var W = 660, Hh = 232;
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + Hh, class: "qq-svg" },
+      f.body);
+    var g = s("g", {}, svg);
+
+    function box(x, y, ok, label) {
+      s("rect", { x: x, y: y, width: 250, height: 62, rx: 8,
+        class: ok ? "qq-tile-pos" : "qq-tile-neg", opacity: 0.9 }, g);
+      var t1 = s("text", { x: x + 125, y: y + 26, class: "qq-t-mid" }, g);
+      t1.setAttribute("fill", "#fff");
+      t1.setAttribute("font-weight", "700");
+      t1.setAttribute("font-size", "13");
+      t1.textContent = ok ? "PASSES" : "FAILS";
+      var t2 = s("text", { x: x + 125, y: y + 46, class: "qq-t-mid" }, g);
+      t2.setAttribute("fill", "#fff");
+      t2.setAttribute("font-size", "11");
+      t2.textContent = label;
+    }
+
+    function draw() {
+      clear(g);
+      var c = CASES[st.i];
+      var head = s("text", { x: 30, y: 26, class: "qq-t qq-ink" }, g);
+      head.setAttribute("font-size", "15");
+      head.textContent = c[0];
+      box(30, 46, c[1], "encoding not imitable");
+      box(320, 46, c[2], "degree unaffordable");
+      var mark = s("text", { x: 30, y: 140, class: "qq-t qq-hot" }, g);
+      mark.setAttribute("font-size", "14");
+      mark.textContent = (c[1] && c[2])
+        ? "→ both boxes pass: a real advantage claim"
+        : "→ one box fails, so the advantage does not survive";
+      var why = s("text", { x: 30, y: 166, class: "qq-t qq-muted qq-sm" }, g);
+      why.textContent = c[3];
+      var w2 = s("text", { x: 30, y: 200, class: "qq-t qq-muted qq-sm" }, g);
+      w2.textContent = "The two factors are attacked by different people: " +
+        "dequantisation goes after the left box, complexity lower bounds " +
+        "after the right.";
+    }
+
+    var ctr = h("div", "qq-ctrl", f.body);
+    CASES.forEach(function (c, i) {
+      btn(ctr, c[0].split(" ")[0] + (i === 2 ? " (sparse)" : ""), function () {
+        st.i = i; draw();
+      }, "qq-btn-ghost");
+    });
+    draw();
+  }
+
   /* ---- registry + hydration --------------------------------------- */
 
   var ANIMS = {
@@ -3847,7 +4121,10 @@
     szegedygap: animSzegedyGap,
     trotterslice: animTrotterSlice,
     entwall: animEntWall,
-    simcost: animSimCost
+    simcost: animSimCost,
+    qspdial: animQspDial,
+    degreecost: animDegreeCost,
+    twofactor: animTwoFactor
   };
 
   function hydrate(scope) {
