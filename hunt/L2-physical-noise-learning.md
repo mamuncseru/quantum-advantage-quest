@@ -1,7 +1,7 @@
 # L2 — Does quantum memory ever help learn *physical* noise?
 
 **Pre-registered 2026-07-11**, ground L, second candidate. Sibling of
-[[L1|L1-memory-vs-mixing.md]] one level up the stack: L1 asks the
+[L1](L1-memory-vs-mixing.md) one level up the stack: L1 asks the
 question for states nature hands you; L2 asks it for the *channels* a
 device applies — the theory of noise profiling, HilbertBench's home turf.
 
