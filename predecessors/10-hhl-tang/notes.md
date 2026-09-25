@@ -53,7 +53,7 @@ argued about the least.
 | what you want | cost | verdict |
 |---|---|---|
 | one amplitude $x_i$ | $O(1/\varepsilon^2)$ | cheap — dimension-free |
-| an expectation $\langle x|M|x\rangle$ | $O(1/\varepsilon^2)$ | cheap, if $M$ is simple |
+| an expectation $\langle x\vert M\vert x\rangle$ | $O(1/\varepsilon^2)$ | cheap, if $M$ is simple |
 | the whole vector $x$ | $O(\dim/\varepsilon^2)$ | **the toll** |
 
 At $\dim = 10^6$ and $\varepsilon = 10^{-2}$: one amplitude costs about
