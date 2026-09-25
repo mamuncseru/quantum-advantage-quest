@@ -1,7 +1,7 @@
 # L8 — The purification dividend: entropy tasks and the access hierarchy
 
 **Pre-registered 2026-07-11**, ground L. The converse sandwich to
-[[L1|L1-memory-vs-mixing.md]]: L1 says *slow* mixing makes nature's
+[L1](L1-memory-vs-mixing.md): L1 says *slow* mixing makes nature's
 copies precious (memory advantage); L8 says *fast* mixing makes the
 **preparer** strictly stronger than any copy-consumer — because
 preparation upgrades the access class.
