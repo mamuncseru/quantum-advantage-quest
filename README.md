@@ -67,9 +67,12 @@ the [self-study guide](curriculum/self-study-guide.md).
 
 ## Status
 
-Phase 1 (ARM) in progress — curriculum complete, gate review due early
-August 2026. The hunt directives for Phase 2 live at the bottom of the
-[Problem-Shape Catalog](frontier/problem-shapes.md).
+As of 2026-08-07: the Phase 1 curriculum is written (13 autopsies, two deep
+dives). Phase 2 has opened 23 candidates on four grounds, and every decision
+is in the [kill/keep ledger](hunt/ledger.md). Phase 3 (Strike) is running on
+the lead candidate, [CRT-DQI](strike/crt-dqi-theorem.md): the construction is
+complete and has survived one adversarial pass; human verification of the
+proofs is pending.
 
 ## License
 
