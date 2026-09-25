@@ -103,7 +103,7 @@ need $k \ge n$.
 
 !!! success "Why this wall does not crumble the way DJ's did"
 
-    In [Deutsch–Jozsa](../01-deutsch-jozsa/notes.md#8-the-classical-wall-and-the-crack-in-it),
+    In [Deutsch–Jozsa](../01-deutsch-jozsa/notes.md#8-the-classical-wall--and-the-crack-in-it),
     the answer was **one bit** ("constant or balanced?") hiding in a
     statistical property — the mean. Random sampling estimates a mean
     cheaply, so a randomized classical algorithm got there in $O(1)$
