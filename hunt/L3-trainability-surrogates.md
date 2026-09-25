@@ -1,7 +1,7 @@
 # L3 — Trainability vs surrogatability on quantum data
 
 **Pre-registered 2026-07-11**, ground L, third candidate. The
-barren-plateau question, access-model-symmetrized — the user's home
+barren-plateau question, access-model-symmetrized — the author's home
 field (HilbertBench diagnoses exactly these landscapes).
 
 ## The frontier as published
