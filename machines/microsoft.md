@@ -1,8 +1,8 @@
 # Microsoft Majorana — the contested qubit
 
 *Machine autopsy. Specs as of 2026-07, sourced in
-[`data.yml`](https://github.com/mamuncseru/quantum-advantage-quest/blob/main/machines/data.yml).
-**Status: contested** — the only entry in this catalog whose central claims
+[`data.yml`](https://github.com/mamuncseru/quantum-advantage-quest/blob/main/machines/data.yml).*
+**Status: contested** — *the only entry in this catalog whose central claims
 are disputed in the peer-reviewed literature.*
 
 ## 1 · Who & the bet
