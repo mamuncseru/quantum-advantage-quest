@@ -48,6 +48,9 @@ theme:
     - toc.follow
     - content.code.copy
 
+hooks:
+  - scripts/mkdocs_hooks.py
+
 extra_css:
   - katex/katex.min.css          # vendored locally (was unpkg CDN) — offline-safe
   - stylesheets/extra.css
@@ -64,6 +67,15 @@ markdown_extensions:
   - md_in_html
   - footnotes
   - tables
+  # GitHub-compatible heading ids, so the same #anchor links work on the
+  # site and when the .md files are read on GitHub
+  - toc:
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+          percent_encode: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
   - pymdownx.details
   - pymdownx.highlight
   - pymdownx.inlinehilite
