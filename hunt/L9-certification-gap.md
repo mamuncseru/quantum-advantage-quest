@@ -15,7 +15,7 @@ max-entropy fit — outputs the same model for both and reports *zero
 misfit*, while the true trace distance is a macroscopic **0.03**. The
 model class is right, the fit converges, and the certificate lies.
 
-The frame anatomy (shared with [[L6|L6-topological-shield.md]]): if the
+The frame anatomy (shared with [L6](L6-topological-shield.md)): if the
 auditor *knows* the deviation direction, $\langle Y^{\otimes n}\rangle$
 is a cheap product measurement. Unknown frame: a single-copy auditor
 searches $\sim 4^n$ global Paulis; a two-copy auditor Bell-difference
