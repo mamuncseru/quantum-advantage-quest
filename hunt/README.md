@@ -1,8 +1,10 @@
 # The Hunt — Phase 2
 
 *Opened 2026-07-06. Candidate generation on ground A (optimization-as-decoding)
-and ground C (quantum Gibbs sampling). Phase 1 study continues in parallel —
-the phases were deliberately overlapped to front-load AI-assisted groundwork.*
+and ground C (quantum Gibbs sampling); ground L (learning with quantum data)
+was added on 2026-07-11 and ground T (trainable circuits) on 2026-07-17.
+Phase 1 study continued in parallel — the phases were deliberately overlapped
+to front-load AI-assisted groundwork.*
 
 ## Quality gates (every candidate, no exceptions)
 
@@ -21,12 +23,61 @@ the phases were deliberately overlapped to front-load AI-assisted groundwork.*
 
 ## The candidate board
 
-| ID | Candidate | Ground | Status |
+Every candidate opened so far, with its latest decision. The dated reasons
+are in the [kill/keep ledger](ledger.md); this table only summarizes them.
+
+### Ground A — optimization as decoding
+
+A2 is the program's lead candidate and moved to Phase 3
+([Strike](../strike/crt-dqi-theorem.md)) on 2026-07-11.
+
+| ID | Candidate | Standing | Last decision |
 |---|---|---|---|
-| [A1](A1-beyond-hamming.md) | DQI beyond Hamming: the covering-radius obstruction | A | active |
-| [A2](A2-objective-code-reductions.md) | New objective→code reductions (flagship: CRT-OPI) | A | **active · primary** |
-| [C1](C1-fields-and-mixers.md) | Field-induced hardness with rapid quantum mixing | C | active |
-| [A∩C](AC-hdqi-boundary.md) | The HDQI vs classical-dynamics boundary | A∩C | watch |
+| [A2](A2-objective-code-reductions.md) | New objective→code reductions (CRT-OPI) | **In Strike.** Construction complete; survived adversarial pass 1 with two repairs; human proof check owed | 2026-07-12 |
+| [A1](A1-beyond-hamming.md) | DQI beyond Hamming: the covering-radius obstruction | Narrowed to H1′ (the obstruction theorem); the Lee-metric circumvention is closed | 2026-07-08 |
+| [A3](A3-p-polynomial-schemes.md) | Which P-polynomial schemes carry a hard objective? | **Closed (theorem):** among coordinate-decomposable metrics, Hamming is the only home for a DQI advantage | 2026-07-08 |
+| A1∩A2 | The Lee-metric spine | **Killed:** the Lee metric is not an association scheme for $q\ge5$ ([note](notes/AC-lee-metric-KILLED.md)) | 2026-07-08 |
+
+### Ground C — quantum Gibbs sampling
+
+| ID | Candidate | Standing | Last decision |
+|---|---|---|---|
+| [C1](C1-fields-and-mixers.md) | Field-induced hardness with rapid quantum mixing | Active. The mixer gap stays open in the strong disordered-field regime ($n\le5$); the atlas doubles as L1's map | 2026-07-08 |
+| [A∩C](AC-hdqi-boundary.md) | The HDQI vs classical-dynamics boundary | Watch, not active | 2026-07-06 |
+
+### Ground L — learning with quantum data
+
+Standings are from the first ground-L review (2026-07-11), updated where a
+later entry exists.
+
+| ID | Candidate | Standing | Last decision |
+|---|---|---|---|
+| [L1](L1-memory-vs-mixing.md) | Memory vs mixing | Keep (anchor). The (⇒) direction is proved | 2026-07-11 |
+| [L2](L2-physical-noise-learning.md) | Physical noise learning | Keep, narrowed to static structured noise; the temporal suspect moved to L10 | 2026-07-11 |
+| [L3](L3-trainability-surrogates.md) | Trainability vs surrogates | Keep, compute-gated. After ground T, its nonlinear-loss window is the last door standing | 2026-07-11 |
+| [L4](L4-magic-transition.md) | The magic transition | Keep | 2026-07-11 |
+| [L5](L5-noise-threshold.md) | Noise threshold of memory advantages | Kill 2 partially fired; now L1's NISQ-feasibility boundary | 2026-07-11 |
+| [L6](L6-topological-shield.md) | Topological shield | Keep; absorbs L9 | 2026-07-11 |
+| [L7](L7-symmetry-class-learning.md) | Symmetry-class learning | Probation | 2026-07-11 |
+| [L8](L8-purification-dividend.md) | Purification dividend | Probation | 2026-07-11 |
+| [L9](L9-certification-gap.md) | Certification gap | Merged into L6 | 2026-07-11 |
+| [L10](L10-qualm-gap.md) | QUALM gap | Keep; absorbs L2's temporal suspect | 2026-07-11 |
+
+### Ground T — trainable circuits
+
+Every trainability mechanism tested carried its own classical surrogate
+(T1–T5) or collapsed into the non-variational oracle underneath it (T6).
+For linear losses, no specifically-variational advantage was found.
+
+| ID | Candidate | Standing | Last decision |
+|---|---|---|---|
+| [T1](T1-module-dichotomy.md) | Module dichotomy | **Closed (K4):** barren plateaus and surrogatability share one cause | 2026-07-17 |
+| [T2](T2-dichotomy-theorem.md) | The dichotomy theorem | Theorem at AI rigor; novelty pass and human verification owed | 2026-07-17 |
+| [T3](T3-warmstart-face.md) | The warm-start face | **Closed (K3)** | 2026-07-17 |
+| [T4](T4-adaptive-face.md) | The adaptive face | **Closed (K1)** | 2026-07-17 |
+| [T5](T5-noise-face.md) | The noise face | **Closed (K1)** | 2026-07-17 |
+| [T6](T6-control-window.md) | The control window | **Closed (K6);** the window claimed earlier that day was retracted | 2026-07-18 |
+| [T10](T10-dqi-reachability.md) | DQI reachability | Resolved: K1 at toy scale; the open question passes to A2's write-up | 2026-07-18 |
 
 ## Tooling
 
@@ -44,7 +95,7 @@ the phases were deliberately overlapped to front-load AI-assisted groundwork.*
   slice they plot.</figcaption>
 </figure>
 
-## Why these candidates (one paragraph each, honest priors)
+## Why the first four candidates (2026-07-06, honest priors)
 
 **A2 is primary** because it follows the strongest meta-pattern in our catalog
 — *the classical toolbox is a quantum resource* — into territory the DQI team
