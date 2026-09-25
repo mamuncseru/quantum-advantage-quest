@@ -227,7 +227,7 @@ Count what each algorithm demands of its output:
 | | output demanded | what one error does |
 |---|---|---|
 | Deutsch–Jozsa | **1 bit**, read as a statistic over shots | washes out |
-| Bernstein–Vazirani | **$n$ bits**, independent | majority-vote each bit ([02 §6](../02-bernstein-vazirani/notes.md#6-on-real-hardware-n-bits-out-is-a-different-demand)) |
+| Bernstein–Vazirani | **$n$ bits**, independent | majority-vote each bit ([02 §6](../02-bernstein-vazirani/notes.md#6-on-real-hardware--n-bits-out-is-a-different-demand)) |
 | **Simon** | **$n-1$ equations of $n$ bits — all correct *and* independent** | **one bad equation ⇒ wrong nullspace ⇒ wrong secret** |
 
 Simon needs roughly $n^2$ bits of *structured* output, and — this is the
