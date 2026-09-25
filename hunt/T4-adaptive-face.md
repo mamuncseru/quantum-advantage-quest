@@ -41,7 +41,7 @@ statevector to $3\times10^{-15}$ before any experiment ran). Code:
 
 ## Resolution: K1 fired at its maximum
 
-| | exact-ADAPT gap closed | audit $N^*$ | selection match (N=512) | $|\Delta E|$ |
+| | exact-ADAPT gap closed | audit $N^*$ | selection match (N=512) | $\lvert\Delta E\rvert$ |
 |---|---:|---:|---:|---:|
 | $H_A$, n=6/8/10 | 100/99/99% | 128–512 | **1.00** | ≤ 0.0005 |
 | $H_B$, n=6/8/10 | 100/98/99% | 128 | **1.00** | 0.0000 |
