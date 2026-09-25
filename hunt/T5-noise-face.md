@@ -44,7 +44,7 @@ predicted direction —
 
 **$n=8$ (the pre-registered protocol size):**
 
-| $p$ | progress (t=60) | $|\nabla|$ (t=60) | $N^*$ (t=30/60) |
+| $p$ | progress (t=60) | $\lvert\nabla\rvert$ (t=60) | $N^*$ (t=30/60) |
 |---:|---:|---:|---:|
 | 0 | 0.99 | 0.12 | 512 |
 | $10^{-3}$ | 0.97 | 0.12 | 512 |
