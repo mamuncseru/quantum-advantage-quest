@@ -57,8 +57,8 @@ lives at high $T$ (fast mixing, no L1 advantage); L1's advantage regime
 noise-fragile.** The windows are disjoint. This **partially fires kill 2**:
 at these sizes physical structure does *not* shield L1's advantage — L5's
 honest role becomes **L1's NISQ-feasibility boundary**, a negative but
-publishable delimiter (and consistent with the [[L1 frame
-lemma|notes/L1-frame-lemma.md]], which independently found the same
+publishable delimiter (and consistent with the [L1 frame
+lemma](notes/L1-frame-lemma.md), which independently found the same
 regime is where the (⇒) collapse degrades). Caveat: $n = 5$, and this
 small chain mixes fast at all these $\beta$ ($1/\text{gap} \le 0.94$) —
 genuinely slow-mixing (glassy/2D) families at larger $n$ are the only
