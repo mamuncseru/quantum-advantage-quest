@@ -12,6 +12,7 @@ a from-scratch numpy implementation, and a distilled "problem-shape" lesson.
 Concurrently: fresh literature sweep of grounds A & C (post-Jan-2026).
 
 **Gate (end of week 5) — hard stop, no extension:**
+
 - [ ] ≥ 10 completed autopsies in `predecessors/`
 - [ ] Hand-built statevector simulator + Shor + quantum walk + Tang dequantization, all passing tests
 - [ ] ≥ 3 attack exercises survived (human drafts proof, AI attacks)
