@@ -48,7 +48,7 @@ profile has made it classical. Ordering: random > quasiperiodic > uniform.
 
 ## Finding 3 — Bakshi–Tan's regime is invisible at n = 5
 
-At β = 0.25 (inside their β < 1 hardness regime, crossover h* ≈ 5.5),
+At β = 0.25 (inside their β < 1 hardness regime, crossover h\* ≈ 5.5),
 negativity is ≈ 0 everywhere, with only whispers (~10⁻³) at h = 8. Their
 entanglement-induction mechanism is asymptotic; small systems don't show it.
 The region where *our* numerics show maximal structure — **β ∈ [1, 2],
