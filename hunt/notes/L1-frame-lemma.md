@@ -81,7 +81,7 @@ transition:
   family where preparation is *provably* hard (Rajakumar–Watson tier)
   AND the functional is memory-estimable but single-copy-hard — and the
   caveat says to look at the low-temperature side of a mixing transition,
-  which is exactly [[L5|L5-noise-threshold.md]]'s tension regime. **L1
+  which is exactly [L5](../L5-noise-threshold.md)'s tension regime. **L1
   and L5 now point at the same regime from opposite motivations** —
   strong evidence it is the right place to dig.
 
