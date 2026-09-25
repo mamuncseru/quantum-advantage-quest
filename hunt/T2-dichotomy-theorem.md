@@ -143,7 +143,7 @@ Code: [`code/t2_dichotomy_su2.py`](code/t2_dichotomy_su2.py), 5 pinning
 - **The Haar idealization** is the standard deep-circuit regime; finite
   shallow circuits obey the law approximately (measured: 5% at 4
   layers). Warm starts and adaptive ansätze live outside it — that
-  boundary is [T3-territory](T1-module-dichotomy.md#ground-t--the-provisional-map-doors-open-doors).
+  boundary is [T3-territory](T1-module-dichotomy.md#ground-t--the-provisional-map-doors-open-doors-this-list-will-change).
 - **supp(O) assumption:** an $O$ with exponentially many small-dim
   components (possible for abelian DLAs) evades clause 1's cost bound —
   but diagonal observables under diagonal DLAs sit in trivial modules
