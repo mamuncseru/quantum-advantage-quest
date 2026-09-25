@@ -1,87 +1,42 @@
 /* ---------- landing page ---------- */
 
-.qq-hero {
-  text-align: center;
-  margin: 2.2rem auto 2.6rem;
-  max-width: 46rem;
-}
-
-.qq-hero h1 {
-  font-size: 2.7rem;
-  font-weight: 700;
-  line-height: 1.15;
-  margin-bottom: 0.4rem;
-  background: linear-gradient(92deg, #6a3de8 0%, #9d6bff 55%, #e8a13d 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-[data-md-color-scheme="slate"] .qq-hero h1 {
-  background: linear-gradient(92deg, #a586ff 0%, #c9b3ff 55%, #ffc46b 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.qq-tag {
-  font-size: 1.06rem;
+.md-typeset .qq-meta {
+  font-size: 0.72rem;
   color: var(--md-default-fg-color--light);
-  margin-bottom: 1.2rem;
+  margin-top: -0.4rem;
 }
 
-.qq-quote {
-  font-size: 1.18rem;
-  font-style: italic;
-  line-height: 1.55;
-  border: none;
+/* ---------- readability ---------- */
+
+/* Material's default h1/h2 are weight 300 in a light grey; on long
+   research pages they read as washed out. */
+.md-typeset h1 {
+  font-weight: 500;
   color: var(--md-default-fg-color);
-  margin: 1.4rem auto;
 }
 
-.qq-quote .attrib {
-  display: block;
-  font-size: 0.78rem;
-  font-style: normal;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--md-default-fg-color--light);
-  margin-top: 0.5rem;
+.md-typeset h2 {
+  font-weight: 500;
 }
 
-.qq-stats {
-  display: flex;
-  gap: 0.9rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin: 2.2rem 0 2.6rem;
+/* Blockquotes carry the dated status updates (roadmap, curriculum); the
+   default light grey made the most time-sensitive text the faintest. */
+.md-typeset blockquote {
+  color: var(--md-default-fg-color);
 }
 
-.qq-stat {
-  text-align: center;
-  padding: 0.9rem 1.5rem;
-  border-radius: 0.7rem;
-  border: 1px solid var(--md-default-fg-color--lightest);
-  background: var(--md-code-bg-color);
-  min-width: 8.4rem;
+/* Material sets table text at 0.64rem (12.8px); most tables here carry
+   sentences, not numbers. */
+.md-typeset table:not([class]) {
+  font-size: 0.7rem;
+  line-height: 1.55;
 }
 
-.qq-stat .num {
-  display: block;
-  font-size: 1.65rem;
-  font-weight: 700;
-  color: var(--md-primary-fg-color);
-}
-
-[data-md-color-scheme="slate"] .qq-stat .num {
-  color: #b39ddb;
-}
-
-.qq-stat .lbl {
-  font-size: 0.68rem;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--md-default-fg-color--light);
+/* ...and pads every cell by 1.25em a side, which alone pushes the 6-9
+   column tables past the content width. */
+.md-typeset table:not([class]) th,
+.md-typeset table:not([class]) td {
+  padding: 0.75em 0.8em;
 }
 
 /* ---------- content polish ---------- */
