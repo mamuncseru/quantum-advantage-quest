@@ -39,6 +39,7 @@ The 6-month clock and the ROADMAP gates are unchanged.
 
 The DQI and Gibbs autopsies cite 2026 papers found by a search agent —
 sound methodology, but per our rules nothing enters the hunt unverified:
+
 - [ ] Confirm the arXiv IDs and claims in `frontier/lit-sweep-2026H1.md`
       for every paper you'll build on (especially the items flagged
       "snippet-level").
