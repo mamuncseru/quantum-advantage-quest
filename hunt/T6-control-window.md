@@ -64,7 +64,7 @@ objectives steer toward classically-visible dynamics — face-consistent.
 **Objective B — heating (maximize $\langle H\rangle$ from the ground
 state): survives.**
 
-| t | $\langle H\rangle$ | $|\nabla|$ | $N^*$ | $S_{\rm op}$ |
+| t | $\langle H\rangle$ | $\lvert\nabla\rvert$ | $N^*$ | $S_{\rm op}$ |
 |---:|---:|---:|---:|---:|
 | 0 | −11.63 | 0.77 | 128 | 1.36 |
 | 10 | +3.56 | 1.52 | 2048 | 2.84 |
@@ -137,7 +137,7 @@ the P-sandwich uses only single-site multiplications; gate: exact at
 [`code/t6_2d_scan.py`](code/t6_2d_scan.py), 4
 [tests](code/test_t6_2d_scan.py).
 
-| t | $\langle H\rangle$ (frac of span) | $|\nabla|$ | Pauli $N^*$ | MPO err @ χ=32 / 64 / **128** |
+| t | $\langle H\rangle$ (frac of span) | $\lvert\nabla\rvert$ | Pauli $N^*$ | MPO err @ χ=32 / 64 / **128** |
 |---:|---:|---:|---:|---|
 | 0 | −47.5 (0.03) | 4.8 | 2048 | 0.77 / 0.47 / 0.58 |
 | 10 | +8.9 (0.59) | 5.4 | **saturated** | 0.28 / 0.30 / 0.33 |
@@ -159,6 +159,10 @@ shape of T6: **the evaluation oracle is dynamics-intrinsically hard
 structure contributes what no other T-candidate had — a few-parameter,
 BP-free, non-concentrated, steep landscape sitting on top of that hard
 oracle.**
+
+*(Superseded the same day: this window was retracted by the K6 attack —
+see [K6-t6](#k6-t6-delivered-2026-07-18-same-day-the-variational-identity-dissolves).
+The status below is kept as it was recorded.)*
 
 **Status: T6-2D stands — the first live window of ground T.** Owed
 before the word "advantage" is ever used: the width scan (4×5, 4×6 —
