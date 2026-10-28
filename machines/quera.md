@@ -84,10 +84,12 @@ orders of magnitude of suppression to cash out.
 
 !!! danger "⚔ The skeptic's box"
 
-    - **Aquila's analog results keep getting matched.** The 2023 quantum
-      speedup claim for maximum independent set on unit-disk graphs was
-      answered by better classical heuristics within months; phase-diagram
-      results at 256 atoms sit within tensor-network reach. Analog
+    - **Aquila's analog results keep getting matched.** The 2022 quantum
+      speedup claim for maximum independent set on unit-disk graphs
+      ([Ebadi et al., Science 2022](https://doi.org/10.1126/science.abo6587))
+      was answered by better classical solvers within about a year
+      ([Andrist et al., PRR 2023](https://doi.org/10.1103/PhysRevResearch.5.043277));
+      phase-diagram results at 256 atoms sit within tensor-network reach. Analog
       "advantage" on graph problems has not survived contact with motivated
       classical baselines — a pattern this repo's
       [kill/keep ledger](../hunt/ledger.md) would recognize.
@@ -108,6 +110,8 @@ Watch for: a logical-qubit *algorithm* demo (not memory), published loss
 and cycle-rate budgets, and the declared 10,000-atom-class machine.
 
 - [96 logical qubits coverage (Jan 2026)](https://www.businesswire.com/news/home/20260112950379/en/)
+- [Ebadi et al., MIS on Rydberg arrays (Science 2022)](https://doi.org/10.1126/science.abo6587)
+- [Andrist et al., MIS hardness on unit-disk graphs (PRR 2023)](https://doi.org/10.1103/PhysRevResearch.5.043277)
 - [Evered et al., 99.5% Rydberg CZ (Nature 2023)](https://www.nature.com/articles/s41586-023-06481-y)
 - [Bluvstein et al., 48 logical qubits (Nature 2024)](https://www.nature.com/articles/s41586-023-06927-3)
 - [Aquila on AWS Braket](https://aws.amazon.com/braket/quantum-computers/quera/)
